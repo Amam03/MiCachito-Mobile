@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage 
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MiCachito.Mobile.Views.HomePage"
+    Title="Inicio">
+
+    <VerticalStackLayout
+        Padding="30"
+        Spacing="20"
+        VerticalOptions="Center">
+
+        <Label
+            Text="Mi Cachito"
+            FontSize="32"
+            HorizontalOptions="Center"/>
+
+        <Label
+            Text="Bienvenido"
+            FontSize="18"
+            HorizontalOptions="Center"/>
+
+        <Label
+            Text="{Binding Username}"
+            FontSize="24"
+            FontAttributes="Bold"
+            HorizontalOptions="Center"/>
+
+        <Label
+            Text="{Binding TipoUsuario}"
+            FontSize="16"
+            HorizontalOptions="Center"/>
+
+        <Label
+            Text="{Binding Sede}"
+            FontSize="16"
+            HorizontalOptions="Center"/>
+
+        <Button
+            Text="Cerrar sesión"
+            Command="{Binding CerrarSesionCommand}"
+            Margin="0,20,0,0"/>
+
+    </VerticalStackLayout>
+
+</ContentPage>
