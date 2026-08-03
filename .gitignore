@@ -4,6 +4,3 @@ obj/
 
 *.user
 *.suo
-
-*.db
-*.cache
