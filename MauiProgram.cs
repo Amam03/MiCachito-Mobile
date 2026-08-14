@@ -43,6 +43,9 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Views.LoginPage>();
             builder.Services.AddTransient<ViewModels.HomeViewModel>();
             builder.Services.AddTransient<Views.HomePage>();
+            builder.Services.AddTransient<Views.GestionPage>();
+            builder.Services.AddTransient<Views.ExpendiosPage>();
+            builder.Services.AddTransient<Views.CuentaPage>();
             builder.Services.AddTransient<Views.SplashPage>();
             builder.Services.AddTransient<AppShell>();
 

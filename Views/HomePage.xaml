@@ -1,46 +1,98 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage 
+<ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="MiCachito.Mobile.Views.HomePage"
-    Title="Inicio">
+    Title="Mi Cachito"
+    BackgroundColor="{StaticResource White}">
 
-    <VerticalStackLayout
-        Padding="30"
-        Spacing="20"
-        VerticalOptions="Center">
+    <Grid RowDefinitions="*,Auto" Padding="20">
 
-        <Label
-            Text="Mi Cachito"
-            FontSize="32"
-            HorizontalOptions="Center"/>
+        <!-- === Botones Vender === -->
+        <VerticalStackLayout
+            Grid.Row="0"
+            Spacing="14"
+            VerticalOptions="Start"
+            Margin="0,10,0,0">
 
-        <Label
-            Text="Bienvenido"
-            FontSize="18"
-            HorizontalOptions="Center"/>
+            <!-- Sr.B. LOTENAL -->
+            <Border
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 12"
+                BackgroundColor="{StaticResource McLotenal}"
+                HeightRequest="64"
+                Padding="20,0">
+                <Grid RowDefinitions="Auto,Auto" RowSpacing="0">
+                    <Label Grid.Row="0"
+                           Text="Sr.B."
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource White}"
+                           HorizontalOptions="Center" />
+                    <Label Grid.Row="1"
+                           Text="LOTENAL"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource White}"
+                           HorizontalOptions="Center" />
+                </Grid>
+            </Border>
 
-        <Label
-            Text="{Binding Username}"
-            FontSize="24"
-            FontAttributes="Bold"
-            HorizontalOptions="Center"/>
+            <!-- Sorteos Tec -->
+            <Border
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 12"
+                BackgroundColor="{StaticResource McSorteosTec}"
+                HeightRequest="64"
+                Padding="20,0">
+                <Grid RowDefinitions="Auto,Auto" RowSpacing="0">
+                    <Label Grid.Row="0"
+                           Text="Sorteos"
+                           FontSize="20"
+                           FontAttributes="Bold"
+                           FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource White}"
+                           HorizontalOptions="Center" />
+                    <Label Grid.Row="1"
+                           Text="Tec"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           TextColor="{StaticResource White}"
+                           HorizontalOptions="Center" />
+                </Grid>
+            </Border>
 
-        <Label
-            Text="{Binding TipoUsuario}"
-            FontSize="16"
-            HorizontalOptions="Center"/>
+            <!-- Tiempo Aire -->
+            <Border
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 12"
+                BackgroundColor="{StaticResource McTiempoAire}"
+                HeightRequest="64"
+                Padding="20,0">
+                <Label
+                    Text="Tiempo Aire"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+            </Border>
 
-        <Label
-            Text="{Binding Sede}"
-            FontSize="16"
-            HorizontalOptions="Center"/>
+        </VerticalStackLayout>
 
+        <!-- === Cerrar sesion (preservado) === -->
         <Button
-            Text="Cerrar sesión"
+            Grid.Row="1"
+            Text="Cerrar sesion"
             Command="{Binding CerrarSesionCommand}"
-            Margin="0,20,0,0"/>
+            BackgroundColor="Transparent"
+            TextColor="{StaticResource McPlaceholder}"
+            FontSize="14"
+            BorderWidth="0"
+            Margin="0,0,0,5" />
 
-    </VerticalStackLayout>
+    </Grid>
 
 </ContentPage>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Logo MiCachito: Billete de loteria estilizado en verde -->
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="120"
+     height="120"
+     viewBox="0 0 120 120">
+
+    <!-- Billete: cuerpo principal con esquinas redondeadas -->
+    <rect x="18"
+          y="32"
+          width="84"
+          height="56"
+          rx="10"
+          ry="10"
+          fill="#00C851"
+          stroke="#00A040"
+          stroke-width="2" />
+
+    <!-- Linea de perforacion vertical (separacion de cupon) -->
+    <line x1="78"
+          y1="38"
+          x2="78"
+          y2="82"
+          stroke="#FFFFFF"
+          stroke-width="1.5"
+          stroke-dasharray="3,3"
+          opacity="0.7" />
+
+    <!-- Circulos decorativos en la perforacion (efecto ticket) -->
+    <circle cx="78" cy="32" r="4.5" fill="#FFFFFF" />
+    <circle cx="78" cy="88" r="4.5" fill="#FFFFFF" />
+
+    <!-- Seccion izquierda: estrella central -->
+    <path d="M 42,46 L 44.5,53 L 52,53 L 46.2,57.5 L 48.5,64 L 42,60 L 35.5,64 L 37.8,57.5 L 32,53 L 39.5,53 Z"
+          fill="#FFFFFF"
+          opacity="0.95" />
+
+    <!-- Lineas decorativas inferiores (texto del billete) -->
+    <rect x="30" y="70" width="34" height="3" rx="1.5" fill="#FFFFFF" opacity="0.6" />
+    <rect x="30" y="76" width="26" height="3" rx="1.5" fill="#FFFFFF" opacity="0.4" />
+
+    <!-- Seccion derecha: numero de suerte -->
+    <text x="89"
+          y="60"
+          font-family="Arial, sans-serif"
+          font-size="16"
+          font-weight="bold"
+          fill="#FFFFFF"
+          text-anchor="middle">7</text>
+
+    <text x="89"
+          y="72"
+          font-family="Arial, sans-serif"
+          font-size="8"
+          fill="#FFFFFF"
+          text-anchor="middle"
+          opacity="0.7">SUERTE</text>
+
+</svg>

@@ -10,7 +10,7 @@ public static class AppSettings
     /// URL base del backend (Yii2 REST API).
     /// Cambiar aquí al desplegar a QA o Producción.
     /// </summary>
-    public const string BaseUrl = "http://192.168.100.56:8080/";
+    public const string BaseUrl = "http://10.0.2.2:8080/";
 
     /// <summary>
     /// Timeout por defecto de las peticiones HTTP.
