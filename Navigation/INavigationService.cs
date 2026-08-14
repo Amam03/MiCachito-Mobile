@@ -15,4 +15,9 @@ public interface INavigationService
     /// Navega al Login. Reemplaza la raíz actual.
     /// </summary>
     Task NavigateToLoginAsync();
+
+    /// <summary>
+    /// Navega a la pantalla de Tiempo Aire dentro del Shell actual.
+    /// </summary>
+    Task NavigateToTiempoAireAsync();
 }

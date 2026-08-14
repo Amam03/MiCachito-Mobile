@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Logo weex Macropay (version blanca para fondo indigo) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="90" height="34" viewBox="0 0 90 34">
+  <text x="45" y="15" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="bold" fill="#FFFFFF" text-anchor="middle">weex</text>
+  <text x="45" y="29" font-family="Arial, Helvetica, sans-serif" font-size="10" font-weight="normal" fill="#C9C5E0" text-anchor="middle">Macropay</text>
+</svg>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Logo Flash Mobile FreedomPop (version blanca para fondo cyan) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="40" viewBox="0 0 120 40">
+  <text x="60" y="16" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Flash Mobile</text>
+  <text x="60" y="32" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="normal" fill="#E0F8FF" text-anchor="middle">FreedomPop</text>
+</svg>

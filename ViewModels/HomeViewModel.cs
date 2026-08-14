@@ -84,6 +84,26 @@ public partial class HomeViewModel : BaseViewModel
         }
     }
 
+    [RelayCommand]
+    private async Task TiempoAireAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+
+        try
+        {
+            await _navigationService.NavigateToTiempoAireAsync();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private static string BuildSede(Usuario usuario)
     {
         if (usuario.Cedis is not null)

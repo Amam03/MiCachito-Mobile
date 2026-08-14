@@ -63,22 +63,26 @@
                 </Grid>
             </Border>
 
-            <!-- Tiempo Aire -->
-            <Border
-                StrokeThickness="0"
-                StrokeShape="RoundRectangle 12"
-                BackgroundColor="{StaticResource McTiempoAire}"
-                HeightRequest="64"
-                Padding="20,0">
-                <Label
-                    Text="Tiempo Aire"
-                    FontSize="20"
-                    FontAttributes="Bold"
-                    FontFamily="OpenSansSemibold"
-                    TextColor="{StaticResource White}"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center" />
-            </Border>
+<!-- Tiempo Aire -->
+        <Border
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 12"
+            BackgroundColor="{StaticResource McTiempoAire}"
+            HeightRequest="64"
+            Padding="20,0">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer
+                    Command="{Binding TiempoAireCommand}" />
+            </Border.GestureRecognizers>
+            <Label
+                Text="Tiempo Aire"
+                FontSize="20"
+                FontAttributes="Bold"
+                FontFamily="OpenSansSemibold"
+                TextColor="{StaticResource White}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+        </Border>
 
         </VerticalStackLayout>
 

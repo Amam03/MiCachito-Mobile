@@ -29,6 +29,18 @@ public class NavigationService : INavigationService
         return Task.CompletedTask;
     }
 
+    public Task NavigateToTiempoAireAsync()
+    {
+        // Navega dentro del Shell actual usando el sistema de rutas de MAUI.
+        // La ruta se registra en AppShell.xaml.cs.
+        if (Shell.Current is not null)
+        {
+            return Shell.Current.GoToAsync(nameof(Views.TiempoAirePage));
+        }
+
+        return Task.CompletedTask;
+    }
+
     private static Window GetWindow()
     {
         var current = Application.Current

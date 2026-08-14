@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
+    x:Class="MiCachito.Mobile.Views.TiempoAirePage"
+    Title="Tiempo Aire"
+    BackgroundColor="{StaticResource McFieldBg}">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="20,16,20,24"
+            Spacing="12">
+
+            <!-- Encabezado de seccion -->
+            <Label
+                Text="Selecciona un proveedor"
+                FontSize="16"
+                FontAttributes="Bold"
+                TextColor="{StaticResource McTextDark}"
+                Margin="0,0,0,8" />
+
+            <!-- Lista de tarjetas de proveedores -->
+            <CollectionView
+                ItemsSource="{Binding Proveedores}"
+                SelectionMode="None">
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="entities:ProveedorTiempoAire">
+
+                        <Border
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 14"
+                            BackgroundColor="{Binding ColorTarjeta}"
+                            HeightRequest="72"
+                            Padding="16,0"
+                            Margin="0,0,0,4">
+
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SeleccionarProveedorCommand}"
+                                    CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+
+                            <Grid
+                                ColumnDefinitions="Auto,*"
+                                VerticalOptions="Center">
+
+                                <Image
+                                    Grid.Column="0"
+                                    Source="{Binding LogoIcon}"
+                                    WidthRequest="{Binding LogoWidth}"
+                                    HeightRequest="{Binding LogoHeight}"
+                                    VerticalOptions="Center" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    Text="{Binding DisplayText}"
+                                    FontSize="18"
+                                    FontAttributes="Bold"
+                                    FontFamily="OpenSansSemibold"
+                                    TextColor="{Binding TextColor}"
+                                    VerticalOptions="Center"
+                                    Margin="16,0,0,0" />
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
