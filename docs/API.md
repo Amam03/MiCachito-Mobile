@@ -28,11 +28,11 @@ La URL base del backend se define en `Helpers/AppSettings.cs`:
 
 | Parámetro | Valor |
 |---|---|
-| `BaseUrl` | `http://192.168.100.56:8080/` (entorno de desarrollo) |
+| `BaseUrl` | `http://10.0.2.2:8080/` (alias del emulador Android al host; configurable con `API_BASE_URL`) |
 | `TimeoutSeconds` | `30` |
 | `AppName` | `Mi Cachito` |
 
-> La URL base es el **único punto de configuración** del endpoint. Cambia según el ambiente (QA, producción). No se incluyen aquí credenciales ni información sensible.
+> La URL base es el **único punto de configuración** del endpoint. Por defecto usa `10.0.2.2:8080` (alias universal del emulador de Android para alcanzar el `localhost` de la máquina host). Se sobreescribe con la variable de entorno `API_BASE_URL` para apuntar a un servidor remoto, otra máquina o un puerto distinto. No se incluyen aquí credenciales ni información sensible.
 
 ### 2.2 Cliente HTTP
 
