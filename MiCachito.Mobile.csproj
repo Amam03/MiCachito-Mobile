@@ -71,22 +71,33 @@
         <MauiImage Update="Resources\Images\logo_movistar.svg" BaseSize="90,28" />
         <MauiImage Update="Resources\Images\logo_bait.svg" BaseSize="60,28" />
 
-        <!-- Provider logos — image 3.2 (CFE, Soriana, Unefon, Cierto) -->
-        <MauiImage Update="Resources\Images\logo_cfe_bienestar.svg" BaseSize="90,40" />
+        <!-- Provider logos — image 3.2 -->
+        <MauiImage Update="Resources\Images\logo_internet_bienestar.svg" BaseSize="110,40" />
+        <MauiImage Update="Resources\Images\logo_cfe_internet.svg" BaseSize="90,32" />
+        <MauiImage Update="Resources\Images\logo_virquin_mobile.svg" BaseSize="100,32" />
         <MauiImage Update="Resources\Images\logo_soriana.svg" BaseSize="80,32" />
-        <MauiImage Update="Resources\Images\logo_unefon.svg" BaseSize="70,32" />
-        <MauiImage Update="Resources\Images\logo_cierto.svg" BaseSize="60,32" />
+        <MauiImage Update="Resources\Images\logo_diry_movil.svg" BaseSize="90,32" />
+        <MauiImage Update="Resources\Images\logo_oui.svg" BaseSize="60,32" />
+        <MauiImage Update="Resources\Images\logo_pillo_fon.svg" BaseSize="90,32" />
+        <MauiImage Update="Resources\Images\logo_cierto.svg" BaseSize="70,32" />
+        <MauiImage Update="Resources\Images\logo_compart_fon.svg" BaseSize="90,32" />
 
-        <!-- Provider logos — image 3.3 (Flash, Netwey, Yobicel, Ultracel) -->
+        <!-- Provider logos — image 3.3 -->
         <MauiImage Update="Resources\Images\logo_flash.svg" BaseSize="110,32" />
+        <MauiImage Update="Resources\Images\logo_freedompop.svg" BaseSize="100,32" />
+        <MauiImage Update="Resources\Images\logo_mi_movil.svg" BaseSize="80,32" />
         <MauiImage Update="Resources\Images\logo_netwey.svg" BaseSize="80,28" />
-        <MauiImage Update="Resources\Images\logo_yobicel.svg" BaseSize="80,32" />
-        <MauiImage Update="Resources\Images\logo_ultracel.svg" BaseSize="100,40" />
-
-        <!-- Provider logos — image 3.4 (Valor, weex, rediCoppel) -->
+        <MauiImage Update="Resources\Images\logo_yobi.svg" BaseSize="70,32" />
+        <MauiImage Update="Resources\Images\logo_rin_cel.svg" BaseSize="80,32" />
+        <MauiImage Update="Resources\Images\logo_ultracel.svg" BaseSize="100,32" />
+        <MauiImage Update="Resources\Images\logo_valor_telecom.svg" BaseSize="95,32" />
         <MauiImage Update="Resources\Images\logo_valor_casa.svg" BaseSize="80,32" />
-        <MauiImage Update="Resources\Images\logo_valor_paquetes.svg" BaseSize="80,32" />
-        <MauiImage Update="Resources\Images\logo_weex.svg" BaseSize="60,28" />
+        <MauiImage Update="Resources\Images\logo_valor_paquetes.svg" BaseSize="90,32" />
+
+        <!-- Provider logos — image 3.4 -->
+        <MauiImage Update="Resources\Images\logo_wimo_telecom.svg" BaseSize="100,32" />
+        <MauiImage Update="Resources\Images\logo_weex.svg" BaseSize="70,28" />
+        <MauiImage Update="Resources\Images\logo_chip_macropay.svg" BaseSize="100,32" />
         <MauiImage Update="Resources\Images\logo_redicoppel.svg" BaseSize="90,28" />
 		
 		<!-- Custom Fonts -->

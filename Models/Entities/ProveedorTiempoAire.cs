@@ -22,9 +22,15 @@ public class ProveedorTiempoAire
     public string? Subproducto { get; set; }
 
     /// <summary>
-    /// Texto a mostrar en la tarjeta (Subproducto o NombreProveedor si no hay subproducto).
+    /// Texto a mostrar en la tarjeta.
+    /// Si hay subproducto, muestra "NombreProveedor Subproducto"
+    /// (ej. "Telcel RECARGA", "Bait Internet en Casa", "VALOR TELECOM CASA").
+    /// Si no hay subproducto, muestra solo NombreProveedor (ej. "AT&T", "Movistar").
     /// </summary>
-    public string DisplayText => Subproducto ?? NombreProveedor;
+    public string DisplayText =>
+        string.IsNullOrWhiteSpace(Subproducto)
+            ? NombreProveedor
+            : $"{NombreProveedor} {Subproducto}";
 
     /// <summary>
     /// Color de fondo de la tarjeta (color de marca del proveedor).
