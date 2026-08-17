@@ -42,28 +42,14 @@
                                     CommandParameter="{Binding .}" />
                             </Border.GestureRecognizers>
 
-                            <Grid
-                                ColumnDefinitions="Auto,*"
-                                VerticalOptions="Center">
-
-                                <Image
-                                    Grid.Column="0"
-                                    Source="{Binding LogoIcon}"
-                                    WidthRequest="{Binding LogoWidth}"
-                                    HeightRequest="{Binding LogoHeight}"
-                                    VerticalOptions="Center" />
-
-                                <Label
-                                    Grid.Column="1"
-                                    Text="{Binding DisplayText}"
-                                    FontSize="18"
-                                    FontAttributes="Bold"
-                                    FontFamily="OpenSansSemibold"
-                                    TextColor="{Binding TextColor}"
-                                    VerticalOptions="Center"
-                                    Margin="16,0,0,0" />
-
-                            </Grid>
+                            <Label
+                                Text="{Binding DisplayText}"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                FontFamily="OpenSansSemibold"
+                                TextColor="{Binding TextColor}"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
 
                         </Border>
 
