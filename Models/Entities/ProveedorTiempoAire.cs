@@ -25,7 +25,7 @@ public class ProveedorTiempoAire
     /// Texto a mostrar en la tarjeta.
     /// Si hay subproducto, muestra "NombreProveedor Subproducto"
     /// (ej. "Telcel RECARGA", "Bait Internet en Casa", "VALOR TELECOM CASA").
-    /// Si no hay subproducto, muestra solo NombreProveedor (ej. "AT&T", "Movistar").
+    /// Si no hay subproducto, muestra solo NombreProveedor (ej. "AT&amp;T", "Movistar").
     /// </summary>
     public string DisplayText =>
         string.IsNullOrWhiteSpace(Subproducto)
@@ -56,4 +56,10 @@ public class ProveedorTiempoAire
     /// Alto del logo en la tarjeta.
     /// </summary>
     public double LogoHeight { get; set; } = 32;
+
+    /// <summary>
+    /// Lista de montos disponibles para este proveedor/subproducto.
+    /// Se llena desde Data/TiempoAireData.cs (estático, UI-only).
+    /// </summary>
+    public IReadOnlyList<decimal> Montos { get; set; } = Array.Empty<decimal>();
 }

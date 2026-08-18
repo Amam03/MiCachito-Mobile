@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
+    x:Class="MiCachito.Mobile.Views.MontosTiempoAirePage"
+    BackgroundColor="{StaticResource McFieldBg}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ==================== HEADER ==================== -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{Binding ColorHeader}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <!-- Botón retroceso -->
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{Binding TextColorHeader}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <!-- Nombre del proveedor -->
+                <Label
+                    Grid.Column="1"
+                    Text="{Binding NombreProveedor}"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{Binding TextColorHeader}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    LineBreakMode="TailTruncation"
+                    MaxLines="2"
+                    HorizontalTextAlignment="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- ==================== GRID DE MONTOS (2 columnas + scroll) ==================== -->
+        <CollectionView
+            Grid.Row="1"
+            ItemsSource="{Binding Montos}"
+            SelectionMode="None"
+            BackgroundColor="{StaticResource McFieldBg}"
+            Margin="16,20,16,24">
+
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout
+                    Orientation="Vertical"
+                    Span="2"
+                    HorizontalItemSpacing="12"
+                    VerticalItemSpacing="12" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="entities:MontoTiempoAire">
+
+                    <Border
+                        StrokeThickness="2"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="{StaticResource White}"
+                        Stroke="{StaticResource McTaButtonBorder}"
+                        HeightRequest="56"
+                        HorizontalOptions="Fill"
+                        Padding="0">
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SeleccionarMontoCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+
+                        <Border.Triggers>
+                            <DataTrigger
+                                TargetType="Border"
+                                Binding="{Binding IsSelected}"
+                                Value="True">
+                                <Setter Property="Stroke" Value="{StaticResource McTaButtonSelectedBg}" />
+                                <Setter Property="BackgroundColor" Value="{StaticResource McTaButtonSelectedBg}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+
+                        <Label
+                            Text="{Binding DisplayText}"
+                            FontSize="18"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource McTaButtonText}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger
+                                    TargetType="Label"
+                                    Binding="{Binding IsSelected}"
+                                    Value="True">
+                                    <Setter Property="TextColor" Value="{StaticResource McTaButtonSelectedText}" />
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+
+                    </Border>
+
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>

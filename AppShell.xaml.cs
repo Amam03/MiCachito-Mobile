@@ -9,5 +9,7 @@ public partial class AppShell : Shell
         InitializeComponent();
         // Registrar rutas adicionales dentro del Shell.
         Routing.RegisterRoute(nameof(TiempoAirePage), typeof(TiempoAirePage));
+        Routing.RegisterRoute(nameof(MontosTiempoAirePage), typeof(MontosTiempoAirePage));
+        Routing.RegisterRoute(nameof(NumeroTelefonoTiempoAirePage), typeof(NumeroTelefonoTiempoAirePage));
     }
 }

@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MiCachito.Mobile.Views.NumeroTelefonoTiempoAirePage"
+    BackgroundColor="{StaticResource McFieldBg}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- ==================== HEADER ==================== -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{Binding ColorHeader}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <!-- Botón retroceso -->
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{Binding TextColorHeader}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <!-- Nombre del proveedor -->
+                <Label
+                    Grid.Column="1"
+                    Text="{Binding NombreProveedor}"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{Binding TextColorHeader}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    LineBreakMode="TailTruncation"
+                    MaxLines="2"
+                    HorizontalTextAlignment="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- ==================== TARJETA DE MONTO SELECCIONADO ==================== -->
+        <Border
+            Grid.Row="1"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{Binding ColorHeader}"
+            Padding="16,20,16,24">
+
+            <VerticalStackLayout
+                HorizontalOptions="Center"
+                Spacing="4">
+
+                <Label
+                    Text="Monto seleccionado"
+                    FontSize="13"
+                    FontFamily="OpenSansRegular"
+                    TextColor="{Binding TextColorHeader}"
+                    Opacity="0.85"
+                    HorizontalOptions="Center" />
+
+                <Label
+                    Text="{Binding MontoDisplay}"
+                    FontSize="36"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{Binding TextColorHeader}"
+                    HorizontalOptions="Center" />
+
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ==================== CAMPOS NÚMERO DE TELÉFONO ==================== -->
+        <ScrollView
+            Grid.Row="2"
+            Padding="24,28,24,0">
+
+            <VerticalStackLayout Spacing="16">
+
+                <!-- Campo 1: Número de Teléfono -->
+                <VerticalStackLayout Spacing="8">
+
+                    <Label
+                        Text="Número de Teléfono"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        FontFamily="OpenSansSemibold"
+                        TextColor="#333333"
+                        HorizontalOptions="Start" />
+
+                    <Border
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="#DCDCDC"
+                        BackgroundColor="White"
+                        Padding="16,14,16,14">
+
+                        <Entry
+                            Text="{Binding NumeroTelefono}"
+                            Placeholder="Ingresa el número a recargar"
+                            PlaceholderColor="#AAAAAA"
+                            Keyboard="Telephone"
+                            MaxLength="10"
+                            FontSize="20"
+                            FontFamily="OpenSansRegular"
+                            TextColor="#000000"
+                            HorizontalTextAlignment="Center"
+                            ClearButtonVisibility="WhileEditing" />
+
+                    </Border>
+
+                </VerticalStackLayout>
+
+                <!-- Campo 2: Confirmar Número de Teléfono -->
+                <VerticalStackLayout Spacing="8">
+
+                    <Label
+                        Text="Confirmar Número de Teléfono"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        FontFamily="OpenSansSemibold"
+                        TextColor="#333333"
+                        HorizontalOptions="Start" />
+
+                    <Border
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 12"
+                        Stroke="#DCDCDC"
+                        BackgroundColor="White"
+                        Padding="16,14,16,14">
+
+                        <Entry
+                            Text="{Binding ConfirmarNumeroTelefono}"
+                            Placeholder="Confirma el número a recargar"
+                            PlaceholderColor="#AAAAAA"
+                            Keyboard="Telephone"
+                            MaxLength="10"
+                            FontSize="20"
+                            FontFamily="OpenSansRegular"
+                            TextColor="#000000"
+                            HorizontalTextAlignment="Center"
+                            ClearButtonVisibility="WhileEditing" />
+
+                    </Border>
+
+                </VerticalStackLayout>
+
+                <!-- ==================== INDICADOR DE VALIDACIÓN ==================== -->
+                <!-- Palomita verde: los números coinciden -->
+                <HorizontalStackLayout
+                    IsVisible="{Binding NumerosCoinciden}"
+                    Spacing="8"
+                    HorizontalOptions="Center"
+                    Margin="0,4,0,0">
+
+                    <Label
+                        Text="&#x2713;"
+                        FontSize="22"
+                        FontAttributes="Bold"
+                        TextColor="#01C852"
+                        VerticalOptions="Center" />
+
+                    <Label
+                        Text="Los números coinciden"
+                        FontSize="15"
+                        FontFamily="OpenSansRegular"
+                        TextColor="#01C852"
+                        VerticalOptions="Center" />
+
+                </HorizontalStackLayout>
+
+                <!-- Mensaje de error: los números no coinciden -->
+                <VerticalStackLayout
+                    IsVisible="{Binding NumerosNoCoinciden}"
+                    Spacing="4"
+                    HorizontalOptions="Center"
+                    Margin="0,4,0,0">
+
+                    <Label
+                        Text="Números no coinciden"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        FontFamily="OpenSansSemibold"
+                        TextColor="#E53935"
+                        HorizontalOptions="Center" />
+
+                    <Label
+                        Text="Verifica que ambos números sean iguales"
+                        FontSize="12"
+                        FontFamily="OpenSansRegular"
+                        TextColor="#E53935"
+                        Opacity="0.8"
+                        HorizontalOptions="Center" />
+
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+
+        </ScrollView>
+
+        <!-- ==================== BOTÓN FINALIZAR ==================== -->
+        <Border
+            Grid.Row="3"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="White"
+            Padding="24,16,24,24">
+
+            <Button
+                Text="Finalizar"
+                Command="{Binding FinalizarCommand}"
+                BackgroundColor="#1A1A1A"
+                TextColor="White"
+                FontSize="18"
+                FontAttributes="Bold"
+                FontFamily="OpenSansSemibold"
+                CornerRadius="12"
+                HeightRequest="56"
+                HorizontalOptions="Fill" />
+
+        </Border>
+
+    </Grid>
+
+</ContentPage>

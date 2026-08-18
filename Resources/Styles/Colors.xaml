@@ -21,6 +21,13 @@
     <Color x:Key="McHeaderBg">#00A040</Color>
     <Color x:Key="McTabUnselected">#999999</Color>
 
+    <!-- Pantalla Montos Tiempo Aire (imágenes 4.1-4.10) -->
+    <Color x:Key="McTaHeaderBg">#3A21DC</Color>
+    <Color x:Key="McTaButtonBorder">#CFD2E4</Color>
+    <Color x:Key="McTaButtonText">#2348F1</Color>
+    <Color x:Key="McTaButtonSelectedBg">#3A21DC</Color>
+    <Color x:Key="McTaButtonSelectedText">#FFFFFF</Color>
+
     <Color x:Key="Primary">#00C851</Color>
     <Color x:Key="PrimaryDark">#00A040</Color>
     <Color x:Key="PrimaryDarkText">#242424</Color>

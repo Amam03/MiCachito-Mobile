@@ -20,4 +20,15 @@ public interface INavigationService
     /// Navega a la pantalla de Tiempo Aire dentro del Shell actual.
     /// </summary>
     Task NavigateToTiempoAireAsync();
+
+    /// <summary>
+    /// Navega a la pantalla de montos del proveedor de Tiempo Aire seleccionado.
+    /// </summary>
+    /// <param name="proveedorId">Id del proveedor (ver TiempoAireData).</param>
+    Task NavigateToMontosTiempoAireAsync(int proveedorId);
+
+    /// <summary>
+    /// Navega a la pantalla de número telefónico pasando el proveedor y monto.
+    /// </summary>
+    Task NavigateToNumeroTelefonoTiempoAireAsync(int proveedorId, decimal monto);
 }
