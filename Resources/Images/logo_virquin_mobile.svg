@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Logo Virquin Mobile (version blanca para fondo rojo) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="110" height="36" viewBox="0 0 110 36">
+  <text x="55" y="15" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" fill="#FFFFFF" text-anchor="middle">Virquin</text>
+  <text x="55" y="30" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="normal" fill="#FFBBBB" text-anchor="middle">Mobile</text>
+</svg>

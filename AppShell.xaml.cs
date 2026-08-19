@@ -1,18 +1,15 @@
-﻿using MiCachito.Mobile.Views;
+using MiCachito.Mobile.Views;
 
 namespace MiCachito.Mobile;
 
 public partial class AppShell : Shell
 {
-    public AppShell(HomePage homePage)
+    public AppShell()
     {
         InitializeComponent();
-
-        Items.Add(new ShellContent
-        {
-            Title = "Inicio",
-            Route = "HomePage",
-            Content = homePage,
-        });
+        // Registrar rutas adicionales dentro del Shell.
+        Routing.RegisterRoute(nameof(TiempoAirePage), typeof(TiempoAirePage));
+        Routing.RegisterRoute(nameof(MontosTiempoAirePage), typeof(MontosTiempoAirePage));
+        Routing.RegisterRoute(nameof(NumeroTelefonoTiempoAirePage), typeof(NumeroTelefonoTiempoAirePage));
     }
 }

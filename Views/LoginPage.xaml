@@ -3,35 +3,93 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="MiCachito.Mobile.Views.LoginPage"
-    Title="Login">
+    Title="Mi Cachito"
+    BackgroundColor="White">
 
-    <VerticalStackLayout
-        Padding="30"
-        Spacing="20">
+    <Grid
+        RowDefinitions="*, Auto"
+        RowSpacing="0">
 
-        <Label
-            Text="Mi Cachito"
-            FontSize="32"
-            HorizontalOptions="Center"/>
+        <!-- Contenido principal del login -->
+        <VerticalStackLayout
+            Grid.Row="0"
+            Padding="30,60,30,0"
+            Spacing="0"
+            HorizontalOptions="Center"
+            VerticalOptions="Start">
 
-        <Entry
-            Placeholder="Usuario"
-            Text="{Binding Usuario}" />
+            <!-- Logo: billete de lotería -->
+            <Image
+                Source="logo_micachito.svg"
+                Style="{StaticResource LoginLogo}" />
 
-        <Entry
-            Placeholder="Contraseña"
-            IsPassword="True"
-            Text="{Binding Password}" />
+            <!-- Nombre de la app -->
+            <Label
+                Text="Mi Cachito"
+                Style="{StaticResource LoginTitle}"
+                Margin="0,18,0,0" />
 
-        <Button
-            Text="Ingresar"
-            Command="{Binding IngresarCommand}" />
+            <!-- Campos de formulario -->
+            <VerticalStackLayout
+                Margin="0,50,0,0"
+                Spacing="18">
 
-        <Label
-            Text="{Binding Mensaje}"
-            FontSize="16"
-            HorizontalOptions="Center"/>
+                <!-- Campo: Usuario -->
+                <VerticalStackLayout Spacing="0">
+                    <Label
+                        Text="Usuario"
+                        Style="{StaticResource LoginFieldLabel}" />
+                    <Entry
+                        Placeholder="Ingrese su usuario"
+                        Text="{Binding Usuario}"
+                        Style="{StaticResource LoginEntry}" />
+                </VerticalStackLayout>
 
-    </VerticalStackLayout>
+                <!-- Campo: Contraseña -->
+                <VerticalStackLayout Spacing="0">
+                    <Label
+                        Text="Contraseña"
+                        Style="{StaticResource LoginFieldLabel}" />
+                    <Entry
+                        Placeholder="Ingrese su contraseña"
+                        IsPassword="True"
+                        Text="{Binding Password}"
+                        Style="{StaticResource LoginEntry}" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
+            <!-- Divisoria -->
+            <BoxView
+                Style="{StaticResource LoginDivider}" />
+
+            <!-- Enlace: ¿Olvidó su contraseña? -->
+            <Label
+                Text="¿Olvidó su contraseña?"
+                Style="{StaticResource LoginForgotPassword}" />
+
+            <!-- Botón: Ingresar -->
+            <Button
+                Text="Ingresar"
+                Command="{Binding IngresarCommand}"
+                Style="{StaticResource LoginButton}"
+                Margin="0,30,0,0" />
+
+            <!-- Mensaje de error/validación -->
+            <Label
+                Text="{Binding Mensaje}"
+                Style="{StaticResource LoginMensaje}"
+                Margin="0,16,0,0" />
+
+        </VerticalStackLayout>
+
+        <!-- Indicador de actividad (IsBusy) -->
+        <ActivityIndicator
+            Grid.Row="1"
+            IsRunning="{Binding IsBusy}"
+            IsVisible="{Binding IsBusy}"
+            HorizontalOptions="Center"
+            Margin="0,0,0,30" />
+
+    </Grid>
 
 </ContentPage>

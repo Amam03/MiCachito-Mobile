@@ -29,6 +29,47 @@ public class NavigationService : INavigationService
         return Task.CompletedTask;
     }
 
+    public Task NavigateToTiempoAireAsync()
+    {
+        // Navega dentro del Shell actual usando el sistema de rutas de MAUI.
+        // La ruta se registra en AppShell.xaml.cs.
+        if (Shell.Current is not null)
+        {
+            return Shell.Current.GoToAsync(nameof(Views.TiempoAirePage));
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Navega a MontosTiempoAirePage pasando el Id del proveedor como parámetro.
+    /// MontosTiempoAireViewModel lo recibe vía [QueryProperty("proveedorId")].
+    /// </summary>
+    public Task NavigateToMontosTiempoAireAsync(int proveedorId)
+    {
+        if (Shell.Current is not null)
+        {
+            return Shell.Current.GoToAsync(
+                $"{nameof(Views.MontosTiempoAirePage)}?proveedorId={proveedorId}");
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Navega a NumeroTelefonoTiempoAirePage pasando el Id del proveedor y el monto.
+    /// </summary>
+    public Task NavigateToNumeroTelefonoTiempoAireAsync(int proveedorId, decimal monto)
+    {
+        if (Shell.Current is not null)
+        {
+            return Shell.Current.GoToAsync(
+                $"{nameof(Views.NumeroTelefonoTiempoAirePage)}?proveedorId={proveedorId}&monto={monto}");
+        }
+
+        return Task.CompletedTask;
+    }
+
     private static Window GetWindow()
     {
         var current = Application.Current
