@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
+    x:Class="MiCachito.Mobile.Views.SeleccionCiudadPage"
+    Title="Seleccionar Ciudad"
+    BackgroundColor="{StaticResource White}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ==================== HEADER morado ==================== -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <!-- Botón retroceso -->
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <!-- Título "Seleccionar Ciudad" -->
+                <Label
+                    Grid.Column="1"
+                    Text="Seleccionar Ciudad"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    HorizontalTextAlignment="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- ==================== LISTA DE CIUDADES/CEDIS ==================== -->
+        <!-- Regla: "CUALQUIER CIUDAD" siempre es el primer elemento. -->
+        <CollectionView
+            Grid.Row="1"
+            ItemsSource="{Binding Ciudades}"
+            SelectionMode="None"
+            BackgroundColor="{StaticResource White}"
+            Margin="20,16,20,0">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="entities:CiudadCedis">
+
+                    <!-- Botón blanco con borde sutil, texto oscuro centrado -->
+                    <Border
+                        StrokeThickness="1"
+                        Stroke="{StaticResource McDivider}"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="{StaticResource White}"
+                        HeightRequest="52"
+                        Margin="0,0,0,10">
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SeleccionarCiudadCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+
+                        <Label
+                            Text="{Binding DisplayName}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource McTextDark}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+
+                    </Border>
+
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>

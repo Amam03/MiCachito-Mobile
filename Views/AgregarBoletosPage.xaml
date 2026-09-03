@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
+    x:Class="MiCachito.Mobile.Views.AgregarBoletosPage"
+    Title="Agregar Boletos"
+    BackgroundColor="{StaticResource White}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ==================== HEADER morado ==================== -->
+        <!-- Flecha ← a la izquierda, título al centro, carrito blanco
+             en la esquina superior derecha (mockups 9.1 / 9.2). -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <!-- Botón retroceso -->
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <!-- Título "Agregar Boletos" -->
+                <Label
+                    Grid.Column="1"
+                    Text="Agregar Boletos"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    HorizontalTextAlignment="Center" />
+
+                <!-- Carrito del header (blanco, esquina superior derecha).
+                     UI-only: función en la pantalla del carrito (futuro). -->
+                <Border
+                    Grid.Column="2"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="End"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CarritoHeaderCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x1F6D2;"
+                        FontSize="22"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+            </Grid>
+        </Border>
+
+        <!-- ==================== CONTENIDO ==================== -->
+        <Grid Grid.Row="1">
+
+            <VerticalStackLayout>
+
+                <!-- Fila filtro de signo (SOLO zodiaco / zodiaco especial):
+                     muestra el filtro activo y despliega el selector. -->
+                <Border
+                    IsVisible="{Binding EsZodiaco}"
+                    StrokeThickness="1"
+                    Stroke="{StaticResource McDivider}"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource White}"
+                    HeightRequest="46"
+                    Margin="20,16,20,0"
+                    Padding="16,0">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ToggleSelectorSignoCommand}" />
+                    </Border.GestureRecognizers>
+                    <!-- Grupo texto + flecha pegada, alineado a la izquierda
+                         (mockup 9.2: "Signo Aleatorio ▼" con la flecha
+                         inmediatamente después del texto). -->
+                    <HorizontalStackLayout
+                        Spacing="8"
+                        VerticalOptions="Center">
+                        <Label
+                            Text="{Binding SignoFiltroTexto}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource McTextDark}"
+                            VerticalOptions="Center" />
+                        <Label
+                            Text="&#x25BC;"
+                            FontSize="12"
+                            TextColor="{StaticResource McTextDark}"
+                            VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
+
+                <!-- ============ LISTA DE TIENDAS / BOLETOS ============ -->
+                <!-- Normal (9.1): número + fracciones / ciudad, estado.
+                     Zodiaco (9.2): añade la línea de SIGNO entre ambas.
+                     Botón carrito oscuro a la derecha de cada fila. -->
+                <CollectionView
+                    ItemsSource="{Binding Tiendas}"
+                    SelectionMode="None"
+                    BackgroundColor="{StaticResource White}"
+                    Margin="20,16,20,0">
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="entities:TiendaDisponible">
+
+                            <Border
+                                StrokeThickness="1"
+                                Stroke="{StaticResource McDivider}"
+                                StrokeShape="RoundRectangle 12"
+                                BackgroundColor="{StaticResource White}"
+                                Margin="0,0,0,10"
+                                Padding="16,10,10,10">
+
+                                <Grid ColumnDefinitions="*,Auto">
+
+                                    <!-- Info del boleto -->
+                                    <VerticalStackLayout
+                                        Grid.Column="0"
+                                        VerticalOptions="Center"
+                                        Spacing="2">
+
+                                        <!-- Línea 1: número + fracciones -->
+                                        <HorizontalStackLayout Spacing="12">
+                                            <Label
+                                                Text="{Binding Numero}"
+                                                FontSize="18"
+                                                FontAttributes="Bold"
+                                                FontFamily="OpenSansSemibold"
+                                                TextColor="{StaticResource McTextDark}"
+                                                VerticalOptions="Center" />
+                                            <Label
+                                                Text="{Binding FraccionesTexto}"
+                                                FontSize="13"
+                                                TextColor="{StaticResource McTextDark}"
+                                                Opacity="0.65"
+                                                VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
+
+                                        <!-- Línea 2 (solo zodiaco): SIGNO -->
+                                        <Label
+                                            Text="{Binding Signo}"
+                                            IsVisible="{Binding MostrarSigno}"
+                                            FontSize="15"
+                                            FontAttributes="Bold"
+                                            FontFamily="OpenSansSemibold"
+                                            TextColor="{StaticResource McTextDark}"
+                                            HorizontalOptions="Start" />
+
+                                        <!-- Línea final: ciudad, estado -->
+                                        <Label
+                                            Text="{Binding DisplayName}"
+                                            FontSize="13"
+                                            TextColor="{StaticResource McTextDark}"
+                                            Opacity="0.8"
+                                            HorizontalOptions="Start"
+                                            LineBreakMode="WordWrap" />
+
+                                    </VerticalStackLayout>
+
+                                    <!-- Botón carrito por fila (oscuro).
+                                         UI-only: navegará a la pantalla 10.x
+                                         (cantidad de boletos) en el futuro. -->
+                                    <Border
+                                        Grid.Column="1"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 8"
+                                        BackgroundColor="Transparent"
+                                        WidthRequest="44"
+                                        HeightRequest="44"
+                                        VerticalOptions="Center">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.CarritoTiendaCommand}"
+                                                CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <Label
+                                            Text="&#x1F6D2;"
+                                            FontSize="22"
+                                            TextColor="{StaticResource McTextDark}"
+                                            HorizontalOptions="Center"
+                                            VerticalOptions="Center" />
+                                    </Border>
+
+                                </Grid>
+
+                            </Border>
+
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+
+                </CollectionView>
+
+            </VerticalStackLayout>
+
+            <!-- ============ SELECTOR DE SIGNOS (overlay, solo zodiaco) ============ -->
+            <!-- Cubre el contenido bajo el header (mockup 9.2 panel central):
+                 13 filas de texto centrado, "Signo Aleatorio" primero
+                 (mismo estilo que la pantalla 8). -->
+            <Grid
+                IsVisible="{Binding SelectorSignoVisible}"
+                BackgroundColor="{StaticResource White}"
+                Padding="0,12,0,0">
+
+                <!-- Tocar fuera de las opciones cierra el selector sin
+                     cambiar el filtro (los Border de las opciones capturan
+                     su propio tap y este gesture no se dispara). -->
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding CerrarSelectorSignoCommand}" />
+                </Grid.GestureRecognizers>
+
+                <CollectionView
+                    ItemsSource="{Binding Signos}"
+                    SelectionMode="None"
+                    BackgroundColor="{StaticResource White}"
+                    Margin="20,0,20,0">
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="entities:SignoZodiaco">
+
+                            <Border
+                                StrokeThickness="1"
+                                Stroke="{StaticResource McDivider}"
+                                StrokeShape="RoundRectangle 12"
+                                BackgroundColor="{StaticResource White}"
+                                HeightRequest="52"
+                                Margin="0,0,0,10">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SeleccionarSignoCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <Label
+                                    Text="{Binding Nombre}"
+                                    FontSize="16"
+                                    FontAttributes="Bold"
+                                    FontFamily="OpenSansSemibold"
+                                    TextColor="{StaticResource McTextDark}"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center" />
+                            </Border>
+
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+
+                </CollectionView>
+
+            </Grid>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

@@ -139,9 +139,21 @@
 	  <Compile Update="Views\CuentaPage.xaml.cs">
 	    <DependentUpon>CuentaPage.xaml</DependentUpon>
 	  </Compile>
-	  <Compile Update="Views\TiempoAirePage.xaml.cs">
-	    <DependentUpon>TiempoAirePage.xaml</DependentUpon>
-	  </Compile>
+  <Compile Update="Views\TiempoAirePage.xaml.cs">
+    <DependentUpon>TiempoAirePage.xaml</DependentUpon>
+  </Compile>
+  <Compile Update="Views\SorteosLotenalPage.xaml.cs">
+    <DependentUpon>SorteosLotenalPage.xaml</DependentUpon>
+  </Compile>
+  <Compile Update="Views\SorteosActivosPage.xaml.cs">
+    <DependentUpon>SorteosActivosPage.xaml</DependentUpon>
+  </Compile>
+  <Compile Update="Views\SeleccionCiudadPage.xaml.cs">
+    <DependentUpon>SeleccionCiudadPage.xaml</DependentUpon>
+  </Compile>
+  <Compile Update="Views\AgregarBoletosPage.xaml.cs">
+    <DependentUpon>AgregarBoletosPage.xaml</DependentUpon>
+  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -160,9 +172,21 @@
 	  <MauiXaml Update="Views\CuentaPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\TiempoAirePage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
+  <MauiXaml Update="Views\TiempoAirePage.xaml">
+    <Generator>MSBuild:Compile</Generator>
+  </MauiXaml>
+  <MauiXaml Update="Views\SorteosLotenalPage.xaml">
+    <Generator>MSBuild:Compile</Generator>
+  </MauiXaml>
+  <MauiXaml Update="Views\SorteosActivosPage.xaml">
+    <Generator>MSBuild:Compile</Generator>
+  </MauiXaml>
+  <MauiXaml Update="Views\SeleccionCiudadPage.xaml">
+    <Generator>MSBuild:Compile</Generator>
+  </MauiXaml>
+  <MauiXaml Update="Views\AgregarBoletosPage.xaml">
+    <Generator>MSBuild:Compile</Generator>
+  </MauiXaml>
 	</ItemGroup>
 
 </Project>
