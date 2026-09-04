@@ -70,6 +70,67 @@ public class NavigationService : INavigationService
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Navega a SorteosLotenalPage dentro del Shell actual.
+    /// </summary>
+    public Task NavigateToSorteosLotenalAsync()
+    {
+        if (Shell.Current is not null)
+        {
+            return Shell.Current.GoToAsync(nameof(Views.SorteosLotenalPage));
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Navega a SorteosActivosPage pasando el Id del tipo de sorteo.
+    /// SorteosActivosViewModel lo recibe vía [QueryProperty("tipoSorteoId")].
+    /// </summary>
+    public Task NavigateToSorteosActivosAsync(int tipoSorteoId)
+    {
+        if (Shell.Current is not null)
+        {
+            return Shell.Current.GoToAsync(
+                $"{nameof(Views.SorteosActivosPage)}?tipoSorteoId={tipoSorteoId}");
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Navega a SeleccionCiudadPage pasando el Id del sorteo activo y el Id
+    /// del tipo de sorteo. SeleccionCiudadViewModel los recibe vía
+    /// [QueryProperty("sorteoId")] y [QueryProperty("tipoSorteoId")].
+    /// </summary>
+    public Task NavigateToSeleccionCiudadAsync(int sorteoId, int tipoSorteoId)
+    {
+        if (Shell.Current is not null)
+        {
+            return Shell.Current.GoToAsync(
+                $"{nameof(Views.SeleccionCiudadPage)}?sorteoId={sorteoId}&tipoSorteoId={tipoSorteoId}");
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Navega a AgregarBoletosPage pasando el Id del sorteo activo, el Id
+    /// del tipo de sorteo y el Id de la ciudad (0 = "Cualquier ciudad").
+    /// AgregarBoletosViewModel los recibe vía [QueryProperty("sorteoId")],
+    /// [QueryProperty("tipoSorteoId")] y [QueryProperty("ciudadId")].
+    /// </summary>
+    public Task NavigateToAgregarBoletosAsync(int sorteoId, int tipoSorteoId, int ciudadId)
+    {
+        if (Shell.Current is not null)
+        {
+            return Shell.Current.GoToAsync(
+                $"{nameof(Views.AgregarBoletosPage)}?sorteoId={sorteoId}&tipoSorteoId={tipoSorteoId}&ciudadId={ciudadId}");
+        }
+
+        return Task.CompletedTask;
+    }
+
     private static Window GetWindow()
     {
         var current = Application.Current

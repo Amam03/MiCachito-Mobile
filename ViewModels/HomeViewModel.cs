@@ -104,6 +104,26 @@ public partial class HomeViewModel : BaseViewModel
         }
     }
 
+    [RelayCommand]
+    private async Task LotenalAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+
+        try
+        {
+            await _navigationService.NavigateToSorteosLotenalAsync();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private static string BuildSede(Usuario usuario)
     {
         if (usuario.Cedis is not null)

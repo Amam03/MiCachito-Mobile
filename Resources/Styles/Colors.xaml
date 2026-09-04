@@ -23,6 +23,9 @@
 
     <!-- Pantalla Montos Tiempo Aire (imágenes 4.1-4.10) -->
     <Color x:Key="McTaHeaderBg">#3A21DC</Color>
+
+    <!-- Pantalla Sr.B. LOTENAL (mockup 6_SrB_LOTENAL.png) -->
+    <Color x:Key="McLotenalHeader">#4125F4</Color>
     <Color x:Key="McTaButtonBorder">#CFD2E4</Color>
     <Color x:Key="McTaButtonText">#2348F1</Color>
     <Color x:Key="McTaButtonSelectedBg">#3A21DC</Color>

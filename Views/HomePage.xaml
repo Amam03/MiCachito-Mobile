@@ -15,28 +15,25 @@
             VerticalOptions="Start"
             Margin="0,10,0,0">
 
-            <!-- Sr.B. LOTENAL -->
+            <!-- LOTENAL -->
             <Border
                 StrokeThickness="0"
                 StrokeShape="RoundRectangle 12"
                 BackgroundColor="{StaticResource McLotenal}"
                 HeightRequest="64"
                 Padding="20,0">
-                <Grid RowDefinitions="Auto,Auto" RowSpacing="0">
-                    <Label Grid.Row="0"
-                           Text="Sr.B."
-                           FontSize="13"
-                           FontAttributes="Bold"
-                           TextColor="{StaticResource White}"
-                           HorizontalOptions="Center" />
-                    <Label Grid.Row="1"
-                           Text="LOTENAL"
-                           FontSize="20"
-                           FontAttributes="Bold"
-                           FontFamily="OpenSansSemibold"
-                           TextColor="{StaticResource White}"
-                           HorizontalOptions="Center" />
-                </Grid>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Command="{Binding LotenalCommand}" />
+                </Border.GestureRecognizers>
+                <Label
+                    Text="LOTENAL"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
             </Border>
 
             <!-- Sorteos Tec -->

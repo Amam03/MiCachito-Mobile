@@ -49,6 +49,14 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Views.MontosTiempoAirePage>();
             builder.Services.AddTransient<ViewModels.NumeroTelefonoTiempoAireViewModel>();
             builder.Services.AddTransient<Views.NumeroTelefonoTiempoAirePage>();
+            builder.Services.AddTransient<ViewModels.SorteosLotenalViewModel>();
+            builder.Services.AddTransient<Views.SorteosLotenalPage>();
+            builder.Services.AddTransient<ViewModels.SorteosActivosViewModel>();
+            builder.Services.AddTransient<Views.SorteosActivosPage>();
+            builder.Services.AddTransient<ViewModels.SeleccionCiudadViewModel>();
+            builder.Services.AddTransient<Views.SeleccionCiudadPage>();
+            builder.Services.AddTransient<ViewModels.AgregarBoletosViewModel>();
+            builder.Services.AddTransient<Views.AgregarBoletosPage>();
             builder.Services.AddTransient<Views.GestionPage>();
             builder.Services.AddTransient<Views.ExpendiosPage>();
             builder.Services.AddTransient<Views.CuentaPage>();
