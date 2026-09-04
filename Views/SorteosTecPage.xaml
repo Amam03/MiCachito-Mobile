@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
+    x:Class="MiCachito.Mobile.Views.SorteosTecPage"
+    Title="Seleccionar Sorteo"
+    BackgroundColor="{StaticResource White}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ==================== HEADER morado ==================== -->
+        <!-- Mismo patrón LOTENAL: flecha ← y título "Seleccionar Sorteo". -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <!-- Botón retroceso (volver al Home) -->
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <!-- Título "Seleccionar Sorteo" -->
+                <Label
+                    Grid.Column="1"
+                    Text="Seleccionar Sorteo"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    HorizontalTextAlignment="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- ==================== TARJETAS DE SORTEOS ==================== -->
+        <!-- Mockup 12: tarjeta de color con "Sorteos Tec" (línea pequeña),
+             nombre del sorteo (línea grande) y precio a la derecha.
+             Por decisión del usuario: SOLO nombre + precio (sin No. ni
+             fecha). -->
+        <CollectionView
+            Grid.Row="1"
+            ItemsSource="{Binding Sorteos}"
+            SelectionMode="None"
+            BackgroundColor="{StaticResource White}"
+            Margin="20,16,20,16">
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="entities:SorteoTec">
+
+                    <Border
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12"
+                        BackgroundColor="{Binding ColorHex}"
+                        HeightRequest="80"
+                        Padding="20,0"
+                        Margin="0,0,0,10">
+
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SeleccionarSorteoCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+
+                        <Grid RowDefinitions="Auto,Auto" RowSpacing="2" VerticalOptions="Center">
+
+                            <!-- Línea 1: "Sorteos Tec" -->
+                            <Label
+                                Grid.Row="0"
+                                Text="{Binding Linea1}"
+                                FontSize="13"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource White}"
+                                HorizontalOptions="Start" />
+
+                            <!-- Línea 2: nombre del sorteo (izq) + precio (der) -->
+                            <Grid Grid.Row="1" ColumnDefinitions="*,Auto">
+                                <Label
+                                    Grid.Column="0"
+                                    Text="{Binding Linea2}"
+                                    FontSize="18"
+                                    FontAttributes="Bold"
+                                    FontFamily="OpenSansSemibold"
+                                    TextColor="{StaticResource White}"
+                                    HorizontalOptions="Start"
+                                    LineBreakMode="TailTruncation" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    Text="{Binding DisplayPrecio}"
+                                    FontSize="22"
+                                    FontAttributes="Bold"
+                                    FontFamily="OpenSansSemibold"
+                                    TextColor="{StaticResource White}"
+                                    VerticalOptions="Center" />
+                            </Grid>
+
+                        </Grid>
+
+                    </Border>
+
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+        </CollectionView>
+
+        <!-- ==================== CARRITO FLOTANTE ==================== -->
+        <!-- Mockup 12: carrito con badge en la zona inferior derecha
+             sobre el fondo blanco, encima de la tab bar. -->
+        <Grid Grid.Row="1">
+            <Grid
+                WidthRequest="56"
+                HeightRequest="56"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                Margin="0,0,20,16">
+
+                <Border
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 14"
+                    BackgroundColor="{StaticResource McLotenalHeader}"
+                    WidthRequest="56"
+                    HeightRequest="56">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding AbrirCarritoCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x1F6D2;"
+                        FontSize="24"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <!-- Badge: billetes agregados -->
+                <Border
+                    IsVisible="{Binding HayEnCarrito}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 6"
+                    BackgroundColor="{StaticResource McGreenAccept}"
+                    Padding="6,1"
+                    HorizontalOptions="End"
+                    VerticalOptions="Start"
+                    TranslationX="-2"
+                    TranslationY="2">
+                    <Label
+                        Text="{Binding BadgeTexto}"
+                        FontSize="11"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+            </Grid>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

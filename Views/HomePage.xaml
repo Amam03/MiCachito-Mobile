@@ -43,6 +43,10 @@
                 BackgroundColor="{StaticResource McSorteosTec}"
                 HeightRequest="64"
                 Padding="20,0">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer
+                        Command="{Binding SorteosTecCommand}" />
+                </Border.GestureRecognizers>
                 <Grid RowDefinitions="Auto,Auto" RowSpacing="0">
                     <Label Grid.Row="0"
                            Text="Sorteos"

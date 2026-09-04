@@ -26,10 +26,27 @@
 
     <!-- Pantalla Sr.B. LOTENAL (mockup 6_SrB_LOTENAL.png) -->
     <Color x:Key="McLotenalHeader">#4125F4</Color>
+
+    <!-- Pantalla 10.x: Cantidad de Cachitos (teclado numérico) -->
+    <Color x:Key="McKeyboardBg">#E3E3D9</Color>
+    <Color x:Key="McKeypadKey">#FCFCFA</Color>
+    <Color x:Key="McKeypadBeige">#C8C7B3</Color>
+    <Color x:Key="McStripBg">#EFF0EA</Color>
+    <Color x:Key="McStripDot">#E4E4DC</Color>
+    <Color x:Key="McDialogFieldLine">#EBE8F7</Color>
+    <Color x:Key="McDialogHint">#BFC5DF</Color>
+    <Color x:Key="McGreenAccept">#4CB050</Color>
+    <Color x:Key="McRedCancel">#D9534F</Color>
+    <Color x:Key="McGrayText">#757575</Color>
+    <Color x:Key="McScrimBlack55">#8C000000</Color>
+    <Color x:Key="McHeaderDimmed">#1C116F</Color>
     <Color x:Key="McTaButtonBorder">#CFD2E4</Color>
     <Color x:Key="McTaButtonText">#2348F1</Color>
     <Color x:Key="McTaButtonSelectedBg">#3A21DC</Color>
     <Color x:Key="McTaButtonSelectedText">#FFFFFF</Color>
+
+    <!-- Pantalla 13: pleca verde de billete agregado (medida en mockup 13) -->
+    <Color x:Key="McPlecaVerde">#64B56B</Color>
 
     <Color x:Key="Primary">#00C851</Color>
     <Color x:Key="PrimaryDark">#00A040</Color>

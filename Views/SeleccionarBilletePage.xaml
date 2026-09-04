@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
+    x:Class="MiCachito.Mobile.Views.SeleccionarBilletePage"
+    Title="Seleccionar Billete"
+    BackgroundColor="{StaticResource White}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ==================== HEADER morado ==================== -->
+        <!-- Mockup 13: flecha ←, título "Sorteo {nombre}" y carrito con
+             badge a la derecha. -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <!-- Botón retroceso (volver a Seleccionar Sorteo) -->
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <!-- Título dinámico: "Sorteo Mi Sueño" -->
+                <Label
+                    Grid.Column="1"
+                    Text="{Binding NombrePantalla}"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    HorizontalTextAlignment="Center"
+                    LineBreakMode="TailTruncation" />
+
+                <!-- Carrito + badge -->
+                <Grid Grid.Column="2">
+                    <Border
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 8"
+                        BackgroundColor="Transparent"
+                        WidthRequest="44"
+                        HeightRequest="44"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding AbrirCarritoCommand}" />
+                        </Border.GestureRecognizers>
+                        <Label
+                            Text="&#x1F6D2;"
+                            FontSize="22"
+                            TextColor="{StaticResource White}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+
+                    <!-- Badge: billetes agregados -->
+                    <Border
+                        IsVisible="{Binding HayEnCarrito}"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 6"
+                        BackgroundColor="{StaticResource McLotenalHeader}"
+                        Padding="6,1"
+                        HorizontalOptions="End"
+                        VerticalOptions="Start"
+                        TranslationX="-2"
+                        TranslationY="2">
+                        <Label
+                            Text="{Binding BadgeTexto}"
+                            FontSize="11"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource White}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+                </Grid>
+
+            </Grid>
+        </Border>
+
+        <!-- ==================== LISTA DE BILLETES ==================== -->
+        <!-- Mockup 13: filas con el número del billete a la izquierda,
+             botón de carrito a la derecha y una PLECA VERDE junto al
+             carrito cuando el billete fue agregado. Divisores grises
+             finos entre filas. -->
+        <Grid Grid.Row="1">
+
+            <CollectionView
+                ItemsSource="{Binding Billetes}"
+                SelectionMode="None"
+                BackgroundColor="{StaticResource White}"
+                Margin="20,8,20,0">
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="entities:BilleteTec">
+
+                        <Grid RowDefinitions="*,Auto" RowSpacing="0">
+
+                            <!-- Fila del billete -->
+                            <Grid
+                                Grid.Row="0"
+                                ColumnDefinitions="*,Auto,Auto,Auto"
+                                ColumnSpacing="12"
+                                HeightRequest="52">
+
+                                <!-- Número del billete -->
+                                <Label
+                                    Grid.Column="0"
+                                    Text="{Binding Numero}"
+                                    FontSize="17"
+                                    FontAttributes="Bold"
+                                    FontFamily="OpenSansSemibold"
+                                    TextColor="{StaticResource McTextDark}"
+                                    HorizontalOptions="Start"
+                                    VerticalOptions="Center" />
+
+                                <!-- Círculo verde: billete agregado -->
+                                <Border
+                                    Grid.Column="1"
+                                    IsVisible="{Binding Agregado}"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 7"
+                                    BackgroundColor="{StaticResource McPlecaVerde}"
+                                    WidthRequest="14"
+                                    HeightRequest="14"
+                                    VerticalOptions="Center" />
+
+                                <!-- Botón carrito de la fila -->
+                                <Border
+                                    Grid.Column="2"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="Transparent"
+                                    WidthRequest="44"
+                                    HeightRequest="44"
+                                    VerticalOptions="Center">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.AgregarBilleteCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label
+                                        Text="&#x1F6D2;"
+                                        FontSize="20"
+                                        TextColor="{StaticResource McTextDark}"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center" />
+                                </Border>
+
+                            </Grid>
+
+                            <!-- Divisor gris fino -->
+                            <BoxView
+                                Grid.Row="1"
+                                HeightRequest="1"
+                                BackgroundColor="{StaticResource Gray300}" />
+
+                        </Grid>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+            <!-- Estado vacío -->
+            <Label
+                IsVisible="{Binding SinBilletes}"
+                Text="Sin billetes disponibles"
+                FontSize="15"
+                TextColor="{StaticResource McTextDark}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

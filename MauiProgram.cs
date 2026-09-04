@@ -57,6 +57,18 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Views.SeleccionCiudadPage>();
             builder.Services.AddTransient<ViewModels.AgregarBoletosViewModel>();
             builder.Services.AddTransient<Views.AgregarBoletosPage>();
+            builder.Services.AddTransient<ViewModels.CarritoComprasViewModel>();
+            builder.Services.AddTransient<Views.CarritoComprasPage>();
+            builder.Services.AddTransient<ViewModels.SorteosTecViewModel>();
+            builder.Services.AddTransient<Views.SorteosTecPage>();
+            builder.Services.AddTransient<ViewModels.SeleccionarBilleteViewModel>();
+            builder.Services.AddTransient<Views.SeleccionarBilletePage>();
+            builder.Services.AddTransient<ViewModels.CarritoTecViewModel>();
+            builder.Services.AddTransient<Views.CarritoTecPage>();
+            builder.Services.AddTransient<ViewModels.DatosClienteTecViewModel>();
+            builder.Services.AddTransient<Views.DatosClienteTecPage>();
+            builder.Services.AddTransient<ViewModels.VentaExitosaTecViewModel>();
+            builder.Services.AddTransient<Views.VentaExitosaTecPage>();
             builder.Services.AddTransient<Views.GestionPage>();
             builder.Services.AddTransient<Views.ExpendiosPage>();
             builder.Services.AddTransient<Views.CuentaPage>();

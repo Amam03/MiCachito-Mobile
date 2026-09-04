@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MiCachito.Mobile.Views.DatosClienteTecPage"
+    Title="Datos del Cliente"
+    BackgroundColor="{StaticResource White}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ==================== HEADER morado ==================== -->
+        <!-- Mockup 15: flecha ←, título "Datos del Cliente", sub-label
+             "Tec" bajo el título y badge del carrito a la derecha. -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <!-- Botón retroceso (volver al carrito Tec) -->
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <!-- Título + sub-label "Tec" -->
+                <VerticalStackLayout
+                    Grid.Column="1"
+                    Spacing="0"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center">
+                    <Label
+                        Text="Datos del Cliente"
+                        FontSize="20"
+                        FontAttributes="Bold"
+                        FontFamily="OpenSansSemibold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        HorizontalTextAlignment="Center" />
+                    <Label
+                        Text="Tec"
+                        FontSize="12"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        Opacity="0.85" />
+                </VerticalStackLayout>
+
+            </Grid>
+        </Border>
+
+        <!-- ==================== FORMULARIO ==================== -->
+        <ScrollView Grid.Row="1">
+
+            <VerticalStackLayout
+                Margin="20,16,20,16"
+                Spacing="18">
+
+                <!-- Campo: Nombre -->
+                <VerticalStackLayout Spacing="6">
+                    <Label
+                        Text="Nombre"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource McTextDark}" />
+                    <Entry
+                        Text="{Binding Nombre}"
+                        Placeholder="Nombre"
+                        BackgroundColor="{StaticResource McFieldBg}"
+                        TextColor="{StaticResource McTextDark}"
+                        PlaceholderColor="{StaticResource McPlaceholder}"
+                        FontSize="16"
+                        ReturnType="Next" />
+                </VerticalStackLayout>
+
+                <!-- Campo: Apellido Paterno -->
+                <VerticalStackLayout Spacing="6">
+                    <Label
+                        Text="Apellido Paterno"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource McTextDark}" />
+                    <Entry
+                        Text="{Binding ApellidoPaterno}"
+                        Placeholder="Apellido Paterno"
+                        BackgroundColor="{StaticResource McFieldBg}"
+                        TextColor="{StaticResource McTextDark}"
+                        PlaceholderColor="{StaticResource McPlaceholder}"
+                        FontSize="16"
+                        ReturnType="Next" />
+                </VerticalStackLayout>
+
+                <!-- Campo: Apellido Materno -->
+                <VerticalStackLayout Spacing="6">
+                    <Label
+                        Text="Apellido Materno"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource McTextDark}" />
+                    <Entry
+                        Text="{Binding ApellidoMaterno}"
+                        Placeholder="Apellido Materno"
+                        BackgroundColor="{StaticResource McFieldBg}"
+                        TextColor="{StaticResource McTextDark}"
+                        PlaceholderColor="{StaticResource McPlaceholder}"
+                        FontSize="16"
+                        ReturnType="Next" />
+                </VerticalStackLayout>
+
+                <!-- Campo: Teléfono -->
+                <VerticalStackLayout Spacing="6">
+                    <Label
+                        Text="Teléfono"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource McTextDark}" />
+                    <Entry
+                        Text="{Binding Telefono}"
+                        Placeholder="Teléfono"
+                        Keyboard="Telephone"
+                        BackgroundColor="{StaticResource McFieldBg}"
+                        TextColor="{StaticResource McTextDark}"
+                        PlaceholderColor="{StaticResource McPlaceholder}"
+                        FontSize="16"
+                        ReturnType="Next" />
+                </VerticalStackLayout>
+
+                <!-- Campo: Correo Electrónico -->
+                <VerticalStackLayout Spacing="6">
+                    <Label
+                        Text="Correo Electrónico"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource McTextDark}" />
+                    <Entry
+                        Text="{Binding CorreoElectronico}"
+                        Placeholder="Correo Electrónico"
+                        Keyboard="Email"
+                        BackgroundColor="{StaticResource McFieldBg}"
+                        TextColor="{StaticResource McTextDark}"
+                        PlaceholderColor="{StaticResource McPlaceholder}"
+                        FontSize="16"
+                        ReturnType="Next" />
+                </VerticalStackLayout>
+
+                <!-- Campo: Seleccionar Estado (picker 32 entidades) -->
+                <VerticalStackLayout Spacing="6">
+                    <Label
+                        Text="Seleccionar Estado"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource McTextDark}" />
+                    <Picker
+                        Title="Seleccionar Estado"
+                        ItemsSource="{Binding Estados}"
+                        SelectedItem="{Binding EstadoSeleccionado}"
+                        BackgroundColor="{StaticResource McFieldBg}"
+                        TextColor="{StaticResource McTextDark}"
+                        TitleColor="{StaticResource McPlaceholder}"
+                        FontSize="16" />
+                </VerticalStackLayout>
+
+                <!-- Botón Confirmar Venta (verde #01C853 medido) -->
+                <Border
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="{StaticResource McGreen}"
+                    HeightRequest="50"
+                    Margin="0,8,0,0"
+                    HorizontalOptions="Fill">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ConfirmarVentaCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="Confirmar Venta"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        FontFamily="OpenSansSemibold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+            </VerticalStackLayout>
+
+        </ScrollView>
+
+    </Grid>
+
+</ContentPage>

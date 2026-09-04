@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
+    x:Class="MiCachito.Mobile.Views.CarritoComprasPage"
+    Title="Carrito de Compras"
+    BackgroundColor="{StaticResource White}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- ==================== HEADER morado ==================== -->
+        <!-- Mismo patrón que Agregar Boletos (mockup 11): flecha ←,
+             título "Carrito de Compras" centrado y carrito con badge
+             de registros a la derecha. -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <!-- Botón retroceso (volver a Agregar Boletos) -->
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <!-- Título -->
+                <Label
+                    Grid.Column="1"
+                    Text="Carrito de Compras"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    HorizontalTextAlignment="Center" />
+
+                <!-- Carrito + badge (informativo: ya estás en el carrito) -->
+                <Grid Grid.Column="2">
+                    <Border
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 8"
+                        BackgroundColor="Transparent"
+                        WidthRequest="44"
+                        HeightRequest="44"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center">
+                        <Label
+                            Text="&#x1F6D2;"
+                            FontSize="22"
+                            TextColor="{StaticResource White}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+
+                    <!-- Badge: número de registros -->
+                    <Border
+                        IsVisible="{Binding HayRegistros}"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 6"
+                        BackgroundColor="{StaticResource McLotenalHeader}"
+                        Padding="6,1"
+                        HorizontalOptions="End"
+                        VerticalOptions="Start"
+                        TranslationX="-2"
+                        TranslationY="2">
+                        <Label
+                            Text="{Binding BadgeTexto}"
+                            FontSize="11"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource White}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+                </Grid>
+
+            </Grid>
+        </Border>
+
+        <!-- ==================== REGISTROS DEL CARRITO ==================== -->
+        <!-- Mockup 11: tarjetas blancas con círculo del color del sorteo,
+             nombre del sorteo, tienda de origen, cantidad, precio
+             individual y total; botón "Eliminar" DEBAJO de cada
+             registro (borde rojo). -->
+        <Grid Grid.Row="1">
+
+            <CollectionView
+                ItemsSource="{Binding Registros}"
+                SelectionMode="None"
+                BackgroundColor="{StaticResource White}"
+                Margin="20,16,20,0">
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="entities:RegistroCarrito">
+
+                        <Border
+                            StrokeThickness="1"
+                            Stroke="{StaticResource McDivider}"
+                            StrokeShape="RoundRectangle 12"
+                            BackgroundColor="{StaticResource White}"
+                            Margin="0,0,0,10"
+                            Padding="16,12,16,12">
+
+                            <VerticalStackLayout Spacing="6">
+
+                                <!-- Línea 1: círculo del color del sorteo +
+                                     sorteo + precio individual a la derecha.
+                                     Mismo patrón de binding de ColorHex que
+                                     las pantallas 7.x (BackgroundColor). -->
+                                <Grid
+                                    ColumnDefinitions="Auto,*,Auto"
+                                    ColumnSpacing="10">
+                                    <Border
+                                        Grid.Column="0"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 9"
+                                        BackgroundColor="{Binding ColorHex}"
+                                        WidthRequest="18"
+                                        HeightRequest="18"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Column="1"
+                                        Text="{Binding SorteoTexto}"
+                                        FontSize="16"
+                                        FontAttributes="Bold"
+                                        FontFamily="OpenSansSemibold"
+                                        TextColor="{StaticResource McTextDark}"
+                                        VerticalOptions="Center"
+                                        LineBreakMode="TailTruncation" />
+                                    <Label
+                                        Grid.Column="2"
+                                        Text="{Binding PrecioIndividualTexto}"
+                                        FontSize="13"
+                                        FontAttributes="Bold"
+                                        FontFamily="OpenSansSemibold"
+                                        TextColor="{StaticResource McTextDark}"
+                                        VerticalOptions="Center" />
+                                </Grid>
+
+                                <!-- Línea 2: tienda de origen (ciudad, estado) -->
+                                <Label
+                                    Text="{Binding TiendaTexto}"
+                                    FontSize="12"
+                                    TextColor="{StaticResource McTextDark}"
+                                    HorizontalOptions="Start" />
+
+                                <!-- Línea 3: cantidad a la izquierda,
+                                     total a la derecha -->
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label
+                                        Text="{Binding CantidadTexto}"
+                                        FontSize="14"
+                                        TextColor="{StaticResource McTextDark}"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Grid.Column="1"
+                                        Text="{Binding TotalTexto}"
+                                        FontSize="16"
+                                        FontAttributes="Bold"
+                                        FontFamily="OpenSansSemibold"
+                                        TextColor="{StaticResource McTextDark}"
+                                        VerticalOptions="Center" />
+                                </Grid>
+
+                                <!-- Botón Eliminar (debajo del registro) -->
+                                <Border
+                                    StrokeThickness="1"
+                                    Stroke="{StaticResource McRedCancel}"
+                                    StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="{StaticResource White}"
+                                    HeightRequest="38"
+                                    Margin="0,4,0,0"
+                                    HorizontalOptions="Fill">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EliminarRegistroCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label
+                                        Text="Eliminar"
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        FontFamily="OpenSansSemibold"
+                                        TextColor="{StaticResource McRedCancel}"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center" />
+                                </Border>
+
+                            </VerticalStackLayout>
+
+                        </Border>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+            <!-- Estado vacío -->
+            <Label
+                IsVisible="{Binding SinRegistros}"
+                Text="Sin boletos en el carrito"
+                FontSize="15"
+                TextColor="{StaticResource McTextDark}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+
+        </Grid>
+
+        <!-- ==================== BARRA INFERIOR ==================== -->
+        <!-- Estilo pulido (spec usuario): fondo BLANCO, textos NEGROS,
+             botón Vender VERDE. Cantidad y Total a la izquierda,
+             Vender a la derecha. -->
+        <Grid
+            Grid.Row="2"
+            BackgroundColor="{StaticResource White}"
+            Padding="16,12,16,12"
+            ColumnDefinitions="*,Auto"
+            ColumnSpacing="16">
+
+            <VerticalStackLayout VerticalOptions="Center" Spacing="2">
+                <Label
+                    Text="{Binding CantidadTotalTexto}"
+                    FontSize="13"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource McTextDark}" />
+                <Label
+                    Text="{Binding TotalTexto}"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource McTextDark}" />
+            </VerticalStackLayout>
+
+            <Border
+                Grid.Column="1"
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 10"
+                BackgroundColor="{StaticResource McGreenAccept}"
+                HeightRequest="46"
+                WidthRequest="120"
+                VerticalOptions="Center"
+                Padding="16,0">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding VenderCommand}" />
+                </Border.GestureRecognizers>
+                <Label
+                    Text="Vender"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+            </Border>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

@@ -124,6 +124,29 @@ public partial class HomeViewModel : BaseViewModel
         }
     }
 
+    [RelayCommand]
+    private async Task SorteosTecAsync()
+    {
+        if (IsBusy)
+        {
+            return;
+        }
+
+        IsBusy = true;
+
+        try
+        {
+            if (Shell.Current is not null)
+            {
+                await Shell.Current.GoToAsync(nameof(Views.SorteosTecPage));
+            }
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private static string BuildSede(Usuario usuario)
     {
         if (usuario.Cedis is not null)

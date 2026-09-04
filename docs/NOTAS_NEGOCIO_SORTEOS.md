@@ -314,3 +314,108 @@ consulta la alimenta.
   evaluar añadirlo en el backend o componer la consulta desde el app
   (billetes del `id_sorteo` con `estatus='disponible'`, uniendo
   `tiendas_sucursales` por `id_tienda_actual` para ciudad/estado).
+
+## Pantalla 11 — Carrito de Compras (reglas)
+
+Se abre desde el carrito del header de Agregar Boletos (badge = número
+de REGISTROS, un registro por tienda con selección). Un registro por
+tienda: sorteo ("{tipo} {número}", ej. "SUPERIOR 2894"), tienda
+(ciudad, estado), cantidad, precio individual (precio del sorteo /
+fracciones del billete) y total (cantidad × precio). Botón Eliminar
+debajo de cada registro.
+
+### Reglas (implementadas, solo estado local)
+
+0. **Estilo (pulido sep-2026)**: fondo blanco, textos negros y botón
+   Vender VERDE (#4CB050). El precio por cachito es el precio del
+   sorteo de la fuente existente (SorteosActivosLotenalData, alineada
+   al backend): MAYOR $30, SUPERIOR $40, ZODIACO $20, ZODIACO
+   ESPECIAL $35, ESPECIAL $60, GRAN ESPECIAL $250, MAGNO $120 y
+   GORDITO NAVIDEÑO $120. No se duplica la fuente: el registro toma
+   _sorteo.Precio tal cual (antes se dividía entre fracciones, lo que
+   daba precios incorrectos). Nombre corto del sorteo en la tarjeta:
+   NombreSorteo sin el prefijo "SORTEO " (ej. "GRAN ESPECIAL 208").
+
+1. **Eliminar**: quita el registro, descuenta de Cantidad/Total de la
+   barra inferior y la tienda de origen vuelve a "0/{total}" (limpia
+   Seleccionadas; el total disponible NO cambia).
+2. **Vender** (sin backend por ahora): por cada registro, la tienda de
+   origen descuenta los boletos vendidos de su total disponible
+   (20 → 19 con una venta de 1), limpia la selección, vacía el carrito
+   y regresa a Agregar Boletos. "Los boletos pasan al inventario de la
+   sucursal" aún no tiene representación visual.
+3. **Barra inferior** (#303030): "Cantidad: {suma de boletos}" y
+   "Total: ${suma de importes}" a la izquierda; botón "Vender" (verde
+   muy oscuro #0F2212) a la derecha.
+4. **Estado vacío**: "Sin boletos en el carrito" centrado.
+
+### Detalles del mockup 11 OCR (baja resolución, campos no legibles)
+
+- Header morado #4125F4, título "Carrito de Compras", carrito con badge.
+- Tarjeta: círculo verde (color del tipo de sorteo Superior), texto
+  "Superior 2894", valores "20.00" / "40.0" y "Eliminar" (OCR parcial:
+  "Ellminar"); layout tomado del spec del usuario (Sorteo, Cantidad,
+  Precio individual, Total, Eliminar debajo).
+- Barra inferior #303030 con "$0.0"-izquierda y botón oscuro derecha;
+  OCR ruidoso ("Ondor" ≈ "Vender"); label "Vender" del spec del usuario.
+
+## Pantalla 10.1/10.2 — Cantidad de Cachitos (reglas)
+
+Aparece al tocar el carrito de una fila en 9.1/9.2. Es un OVERLAY sobre
+la misma pantalla AgregarBoletos (la lista queda atenuada detrás,
+header morado oscurecido a #1C116F, badge "00" junto al carrito del
+header). El mismo overlay cubre ambos mockups (10.1 = estado inicial,
+10.2 = tras pulsar "Realiz.").
+
+### Reglas UI (implementadas)
+
+1. **Diálogo "Cantidad de / Cachitos"**: tarjeta blanca centrada,
+   título negro en 2 líneas; campo subrayado (#EBE8F7) con valor
+   inicial "1"; a la derecha del campo el número de DISPONIBLES en
+   gris claro (#BFC5DF) — se DERIVA de las fracciones de la fila
+   seleccionada (FraccionesTotal, ej. "0/20" → 20): NO hay datos
+   hardcoded. Botones Cancelar (blanco, texto rojo #D9534F) y
+   Aceptar (verde #4CB050, texto blanco).
+
+2. **Teclado numérico (formato teléfono, 4 filas)**: teclas #FCFCFA
+   sobre fondo #E3E3D9; filas [1][2][3] / [4][5][6] / [7][8][9] /
+   [Borrar][0][Realizado]. Borrar y Realizado beige #C8C7B3. El campo
+   inicia VACÍO y las teclas agregan dígitos (máx. 2). "Realizado"
+   OCULTA el teclado (el diálogo queda con Aceptar a la vista) y
+   muestra el toast "AQUÍ ELEGIRÁS {n} DE {disp} / DISPONIBLES"
+   (mockup 10.2). NO aplica la cantidad: Aceptar la aplica.
+
+3. **Toast** (solo tras "Realiz."): banner blanco inferior 2 líneas:
+   "AQUÍ ELEGIRÁS {n} DE {disp}" / "DISPONIBLES", con n = cantidad
+   confirmada y disp = disponibles de la fila.
+
+4. **Aceptar** aplica la cantidad a la fila: el registro pasa de
+   "0/20" a "n/20" (Seleccionadas de la tienda; mockup: "El registro
+   cambia de 0/20 a 1/20"). Si el campo quedó vacío tras "Realizado",
+   usa la cantidad confirmada. **Cancelar** o tocar el scrim cierran
+   sin aplicar. Defensa anti tap-fantasma al cerrar: los primeros
+   600 ms tras abrir se ignora el toque del scrim (mismo patrón que
+   el selector de signos).
+
+5. **Teclas máx 2 dígitos**; el campo inicia VACÍO (captura desde 0;
+   un "0" inicial se reemplaza por el siguiente dígito).
+
+### Pendientes de OCR (ilegibles en los mockups, NO inventados)
+
+- ~~Los 4 botones beige del teclado~~ RESUELTO por spec del usuario
+  (sep-2026): la fila inferior es [Borrar][0][Realizado] en formato
+  teléfono; "Realizado" oculta el teclado. Los 2 botones beige
+  superiores del mockup se eliminaron al rediseñar el teclado.
+- La franja de 5 círculos beige entre diálogo y teclado: contenido
+  interior ilegible (posiblemente fracciones seleccionables o un
+  resumen). Se muestran como círculos vacíos.
+- El glifo pequeño junto a "Realiz." (parte inferior del botón, muy
+  tenue en ambos mockups) no se pudo transcribir.
+
+### Interpretación de flujo (10.1 → 10.2)
+
+10.1 muestra el estado inicial (campo "1", "20" disponibles, sin
+toast). 10.2 muestra el estado tras "Realiz." con cantidad 5: campo
+vacío, "16" disponibles, toast "AQUÍ ELEGIRÁS 5 DE 16 / DISPONIBLES".
+La lectura del flujo: el teclado captura → "Realiz." confirma y
+muestra toast → Aceptar acumula y cierra / Cancelar descarta.

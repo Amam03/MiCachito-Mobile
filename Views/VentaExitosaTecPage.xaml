@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MiCachito.Mobile.Views.VentaExitosaTecPage"
+    Title="Venta Exitosa"
+    BackgroundColor="{StaticResource White}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <!-- Propuesta sin mockup (aprobada por el usuario): círculo verde
+         con check, "Venta Exitosa", botón Continuar que regresa al
+         Home. El usuario la ajustará al inspeccionarla. -->
+    <VerticalStackLayout
+        Padding="30,0,30,0"
+        Spacing="24"
+        HorizontalOptions="Center"
+        VerticalOptions="Center">
+
+        <!-- Círculo verde con check -->
+        <Border
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 48"
+            BackgroundColor="{StaticResource McGreenAccept}"
+            WidthRequest="96"
+            HeightRequest="96"
+            HorizontalOptions="Center">
+            <Label
+                Text="&#x2713;"
+                FontSize="44"
+                FontAttributes="Bold"
+                TextColor="{StaticResource White}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+        </Border>
+
+        <!-- Título -->
+        <Label
+            Text="Venta Exitosa"
+            FontSize="24"
+            FontAttributes="Bold"
+            FontFamily="OpenSansSemibold"
+            TextColor="{StaticResource McTextDark}"
+            HorizontalOptions="Center" />
+
+        <!-- Botón Continuar -->
+        <Border
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 10"
+            BackgroundColor="{StaticResource McGreen}"
+            HeightRequest="50"
+            WidthRequest="200"
+            HorizontalOptions="Center">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ContinuarCommand}" />
+            </Border.GestureRecognizers>
+            <Label
+                Text="Continuar"
+                FontSize="16"
+                FontAttributes="Bold"
+                FontFamily="OpenSansSemibold"
+                TextColor="{StaticResource White}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+        </Border>
+
+    </VerticalStackLayout>
+
+</ContentPage>

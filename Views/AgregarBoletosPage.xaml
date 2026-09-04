@@ -21,6 +21,15 @@
             BackgroundColor="{StaticResource McLotenalHeader}"
             Padding="16,14,16,14">
 
+            <!-- Con el overlay 10.x abierto el header se oscurece
+                 (mockups 10.1/10.2: #1C116F = morado atenuado por el
+                 scrim; el resto de la pantalla queda bajo el scrim). -->
+            <Border.Triggers>
+                <DataTrigger TargetType="Border" Binding="{Binding CantidadDialogoVisible}" Value="True">
+                    <Setter Property="BackgroundColor" Value="{StaticResource McHeaderDimmed}" />
+                </DataTrigger>
+            </Border.Triggers>
+
             <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
 
                 <!-- Botón retroceso -->
@@ -58,26 +67,49 @@
                     HorizontalTextAlignment="Center" />
 
                 <!-- Carrito del header (blanco, esquina superior derecha).
-                     UI-only: función en la pantalla del carrito (futuro). -->
-                <Border
-                    Grid.Column="2"
-                    StrokeThickness="0"
-                    StrokeShape="RoundRectangle 8"
-                    BackgroundColor="Transparent"
-                    WidthRequest="44"
-                    HeightRequest="44"
-                    HorizontalOptions="End"
-                    VerticalOptions="Center">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding CarritoHeaderCommand}" />
-                    </Border.GestureRecognizers>
-                    <Label
-                        Text="&#x1F6D2;"
-                        FontSize="22"
-                        TextColor="{StaticResource White}"
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center" />
-                </Border>
+                     UI-only: función en la pantalla del carrito (futuro).
+                     Badge "00" visible con el overlay 10.x abierto
+                     (mockups 10.1/10.2) o con cantidades acumuladas. -->
+                <Grid Grid.Column="2">
+                    <Border
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 8"
+                        BackgroundColor="Transparent"
+                        WidthRequest="44"
+                        HeightRequest="44"
+                        HorizontalOptions="End"
+                        VerticalOptions="Center">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding CarritoHeaderCommand}" />
+                        </Border.GestureRecognizers>
+                        <Label
+                            Text="&#x1F6D2;"
+                            FontSize="22"
+                            TextColor="{StaticResource White}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+
+                    <!-- Badge de cantidad (dos dígitos, "00" en 10.x) -->
+                    <Border
+                        IsVisible="{Binding MostrarBadgeCarrito}"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 6"
+                        BackgroundColor="{StaticResource McLotenalHeader}"
+                        Padding="6,1"
+                        HorizontalOptions="End"
+                        VerticalOptions="Start"
+                        TranslationX="-2"
+                        TranslationY="2">
+                        <Label
+                            Text="{Binding CarritoBadgeTexto}"
+                            FontSize="11"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource White}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+                </Grid>
 
             </Grid>
         </Border>
@@ -151,7 +183,8 @@
                                         VerticalOptions="Center"
                                         Spacing="2">
 
-                                        <!-- Línea 1: número + fracciones -->
+                                        <!-- Línea 1: número + fracciones vivas
+                                             (0/20 → 1/20 al aceptar) -->
                                         <HorizontalStackLayout Spacing="12">
                                             <Label
                                                 Text="{Binding Numero}"
@@ -161,7 +194,7 @@
                                                 TextColor="{StaticResource McTextDark}"
                                                 VerticalOptions="Center" />
                                             <Label
-                                                Text="{Binding FraccionesTexto}"
+                                                Text="{Binding FraccionesDisplay}"
                                                 FontSize="13"
                                                 TextColor="{StaticResource McTextDark}"
                                                 Opacity="0.65"
@@ -277,6 +310,408 @@
                 </CollectionView>
 
             </Grid>
+
+            <!-- ============ OVERLAY 10.x: CANTIDAD DE CACHITOS ============ -->
+            <!-- Mockups 10.1/10.2: scrim oscuro sobre TODO el contenido,
+                 diálogo blanco centrado ("Cantidad de / Cachitos",
+                 campo subrayado + disponibles a la derecha, Cancelar /
+                 Aceptar), franja de círculos, y teclado numérico con
+                 "Realiz." abajo. El badge "00" aparece junto al carrito
+                 del header. Toast inferior solo tras "Realiz."
+                 (10.2: "AQUÍ ELEGIRÁS 5 DE 16 / DISPONIBLES"). -->
+            <Grid
+                IsVisible="{Binding CantidadDialogoVisible}"
+                BackgroundColor="{StaticResource McScrimBlack55}">
+
+                <!-- Tocar el scrim cierra el overlay (mismo patrón del
+                     selector de signos: salida alternativa de cierre). -->
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding CancelarCantidadCommand}" />
+                </Grid.GestureRecognizers>
+
+                <VerticalStackLayout
+                    VerticalOptions="Center"
+                    Margin="24,0"
+                    InputTransparent="False">
+
+                    <!-- ============ Diálogo Cantidad de Cachitos ============ -->
+                    <Border
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="{StaticResource White}"
+                        Padding="0,20,0,16"
+                        HorizontalOptions="Fill">
+                        <VerticalStackLayout Spacing="0">
+
+                            <!-- Título 2 líneas, negro, centrado -->
+                            <Label
+                                Text="Cantidad de"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                FontFamily="OpenSansSemibold"
+                                TextColor="{StaticResource McTextDark}"
+                                HorizontalOptions="Center" />
+                            <Label
+                                Text="Cachitos"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                FontFamily="OpenSansSemibold"
+                                TextColor="{StaticResource McTextDark}"
+                                HorizontalOptions="Center" />
+
+                            <!-- Campo subrayado + disponibles a la derecha
+                                 (mockups: "20"/"16" en gris claro).
+                                 Placeholder "1" gris claro cuando está
+                                 vacío (10.2 tras Realiz.). -->
+                            <Grid
+                                ColumnDefinitions="80,*"
+                                Margin="16,24,16,0"
+                                HorizontalOptions="Fill">
+                                <Grid Grid.Column="0"
+                                      ColumnDefinitions="*,Auto">
+                                    <Label
+                                        Grid.Column="0"
+                                        Text="{Binding CantidadTexto}"
+                                        FontSize="22"
+                                        FontAttributes="Bold"
+                                        FontFamily="OpenSansSemibold"
+                                        TextColor="{StaticResource McTextDark}"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center" />
+                                    <!-- Subrayado del campo -->
+                                    <BoxView
+                                        Grid.Column="0"
+                                        Grid.ColumnSpan="2"
+                                        HeightRequest="2"
+                                        BackgroundColor="{StaticResource McDialogFieldLine}"
+                                        VerticalOptions="End"
+                                        HorizontalOptions="Fill" />
+                                </Grid>
+
+                                <!-- Disponibles de la fila (derivado de
+                                     fracciones, NO hardcoded) -->
+                                <Label
+                                    Grid.Column="1"
+                                    Text="{Binding DisponiblesTexto}"
+                                    FontSize="18"
+                                    TextColor="{StaticResource McDialogHint}"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="Start"
+                                    Margin="12,0,0,0" />
+                            </Grid>
+
+                            <!-- Cancelar (borde blanco, texto rojo) /
+                                 Aceptar (verde, texto blanco) -->
+                            <Grid
+                                ColumnDefinitions="*,*"
+                                ColumnSpacing="12"
+                                Margin="16,24,16,0"
+                                HorizontalOptions="Fill">
+
+                                <Border
+                                    Grid.Column="0"
+                                    StrokeThickness="1"
+                                    Stroke="{StaticResource McRedCancel}"
+                                    StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="{StaticResource White}"
+                                    HeightRequest="40"
+                                    HorizontalOptions="Fill">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding CancelarCantidadCommand}" />
+                                    </Border.GestureRecognizers>
+                                    <Label
+                                        Text="Cancelar"
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        FontFamily="OpenSansSemibold"
+                                        TextColor="{StaticResource McRedCancel}"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center" />
+                                </Border>
+
+                                <Border
+                                    Grid.Column="1"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="{StaticResource McGreenAccept}"
+                                    HeightRequest="40"
+                                    HorizontalOptions="Fill">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding AceptarCantidadCommand}" />
+                                    </Border.GestureRecognizers>
+                                    <Label
+                                        Text="Aceptar"
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        FontFamily="OpenSansSemibold"
+                                        TextColor="{StaticResource White}"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center" />
+                                </Border>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- ============ Franja de círculos (chips) ============ -->
+                    <!-- Mockup: 5 círculos beige sobre franja #EFF0EA
+                         entre diálogo y teclado. Contenido ilegible en
+                         OCR (¿números de fracciones?): se dejan como
+                         círculos vacíos, documentado en NOTAS. Solo
+                         visible con el teclado desplegado. -->
+                    <Border
+                        IsVisible="{Binding TecladoVisible}"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 0"
+                        BackgroundColor="{StaticResource McStripBg}"
+                        Margin="0,12,0,0"
+                        Padding="12,10"
+                        HorizontalOptions="Fill">
+                        <HorizontalStackLayout Spacing="12" HorizontalOptions="Center">
+                            <Ellipse
+                                StrokeThickness="0"
+                                Fill="{StaticResource McStripDot}"
+                                WidthRequest="26" HeightRequest="26" />
+                            <Ellipse
+                                StrokeThickness="0"
+                                Fill="{StaticResource McStripDot}"
+                                WidthRequest="26" HeightRequest="26" />
+                            <Ellipse
+                                StrokeThickness="0"
+                                Fill="{StaticResource McStripDot}"
+                                WidthRequest="26" HeightRequest="26" />
+                            <Ellipse
+                                StrokeThickness="0"
+                                Fill="{StaticResource McStripDot}"
+                                WidthRequest="26" HeightRequest="26" />
+                            <Ellipse
+                                StrokeThickness="0"
+                                Fill="{StaticResource McStripDot}"
+                                WidthRequest="18" HeightRequest="18"
+                                VerticalOptions="Center" />
+                        </HorizontalStackLayout>
+                    </Border>
+
+                    <!-- ============ Teclado numérico (formato teléfono, 4 filas) ============ -->
+                    <!-- Teclas #FCFCFA sobre fondo #E3E3D9. Fila 4: Borrar
+                         (beige), 0, Realizado (beige). "Realizado" OCULTA
+                         el teclado (el diálogo queda a la vista con
+                         Aceptar junto a la fila). -->
+                    <Border
+                        IsVisible="{Binding TecladoVisible}"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 0"
+                        BackgroundColor="{StaticResource McKeyboardBg}"
+                        Margin="0,12,0,0"
+                        Padding="10,10,10,12"
+                        HorizontalOptions="Fill">
+
+                        <Grid
+                            RowDefinitions="*,*,*,*"
+                            ColumnDefinitions="*,*,*"
+                            ColumnSpacing="10"
+                            RowSpacing="10"
+                            HeightRequest="248">
+
+                            <!-- Fila 1: 1 2 3 -->
+                            <Border Grid.Row="0" Grid.Column="0"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    BackgroundColor="{StaticResource McKeypadKey}"
+                                    HeightRequest="52">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding TeclaCommand}" CommandParameter="1" />
+                                </Border.GestureRecognizers>
+                                <Label Text="1" FontSize="20" FontAttributes="Bold"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource McTextDark}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="1"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    BackgroundColor="{StaticResource McKeypadKey}"
+                                    HeightRequest="52">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding TeclaCommand}" CommandParameter="2" />
+                                </Border.GestureRecognizers>
+                                <Label Text="2" FontSize="20" FontAttributes="Bold"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource McTextDark}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Border Grid.Row="0" Grid.Column="2"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    BackgroundColor="{StaticResource McKeypadKey}"
+                                    HeightRequest="52">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding TeclaCommand}" CommandParameter="3" />
+                                </Border.GestureRecognizers>
+                                <Label Text="3" FontSize="20" FontAttributes="Bold"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource McTextDark}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+
+                            <!-- Fila 2: 4 5 6 -->
+                            <Border Grid.Row="1" Grid.Column="0"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    BackgroundColor="{StaticResource McKeypadKey}"
+                                    HeightRequest="52">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding TeclaCommand}" CommandParameter="4" />
+                                </Border.GestureRecognizers>
+                                <Label Text="4" FontSize="20" FontAttributes="Bold"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource McTextDark}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="1"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    BackgroundColor="{StaticResource McKeypadKey}"
+                                    HeightRequest="52">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding TeclaCommand}" CommandParameter="5" />
+                                </Border.GestureRecognizers>
+                                <Label Text="5" FontSize="20" FontAttributes="Bold"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource McTextDark}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Border Grid.Row="1" Grid.Column="2"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    BackgroundColor="{StaticResource McKeypadKey}"
+                                    HeightRequest="52">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding TeclaCommand}" CommandParameter="6" />
+                                </Border.GestureRecognizers>
+                                <Label Text="6" FontSize="20" FontAttributes="Bold"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource McTextDark}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+
+                            <!-- Fila 3: 7 8 9 -->
+                            <Border Grid.Row="2" Grid.Column="0"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    BackgroundColor="{StaticResource McKeypadKey}"
+                                    HeightRequest="52">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding TeclaCommand}" CommandParameter="7" />
+                                </Border.GestureRecognizers>
+                                <Label Text="7" FontSize="20" FontAttributes="Bold"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource McTextDark}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="1"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    BackgroundColor="{StaticResource McKeypadKey}"
+                                    HeightRequest="52">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding TeclaCommand}" CommandParameter="8" />
+                                </Border.GestureRecognizers>
+                                <Label Text="8" FontSize="20" FontAttributes="Bold"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource McTextDark}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Border Grid.Row="2" Grid.Column="2"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    BackgroundColor="{StaticResource McKeypadKey}"
+                                    HeightRequest="52">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding TeclaCommand}" CommandParameter="9" />
+                                </Border.GestureRecognizers>
+                                <Label Text="9" FontSize="20" FontAttributes="Bold"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource McTextDark}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+
+                            <!-- Fila 4: Borrar 0 Realizado -->
+                            <Border Grid.Row="3" Grid.Column="0"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    BackgroundColor="{StaticResource McKeypadBeige}"
+                                    HeightRequest="52">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding BorrarDigitoCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Borrar" FontSize="14" FontAttributes="Bold"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource McTextDark}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Border Grid.Row="3" Grid.Column="1"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    BackgroundColor="{StaticResource McKeypadKey}"
+                                    HeightRequest="52">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding TeclaCommand}" CommandParameter="0" />
+                                </Border.GestureRecognizers>
+                                <Label Text="0" FontSize="20" FontAttributes="Bold"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource McTextDark}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Border Grid.Row="3" Grid.Column="2"
+                                    StrokeShape="RoundRectangle 8"
+                                    StrokeThickness="0"
+                                    BackgroundColor="{StaticResource McKeypadBeige}"
+                                    HeightRequest="52">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding RealizadoCommand}" />
+                                </Border.GestureRecognizers>
+                                <Label Text="Realizado" FontSize="13" FontAttributes="Bold"
+                                       FontFamily="OpenSansSemibold"
+                                       TextColor="{StaticResource McTextDark}"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- ============ TOAST 10.2 (tras "Realiz.") ============ -->
+            <!-- Banner blanco de 2 líneas sobre la parte inferior
+                 (mockup 10.2): "AQUÍ ELEGIRÁS 5 DE 16 / DISPONIBLES".
+                 Visible solo mientras el overlay está abierto y la
+                 cantidad fue confirmada. -->
+            <Border
+                IsVisible="{Binding ToastCantidadVisible}"
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 0"
+                BackgroundColor="{StaticResource White}"
+                VerticalOptions="End"
+                HorizontalOptions="Fill"
+                Padding="16,10,16,10"
+                InputTransparent="True">
+                <VerticalStackLayout>
+                    <Label
+                        Text="{Binding ToastLinea1}"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        FontFamily="OpenSansSemibold"
+                        TextColor="{StaticResource McTextDark}"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="DISPONIBLES"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        FontFamily="OpenSansSemibold"
+                        TextColor="{StaticResource McTextDark}"
+                        HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
 
         </Grid>
 
