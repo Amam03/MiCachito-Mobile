@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
+    x:Class="MiCachito.Mobile.Views.DetalleVentaPage"
+    x:DataType="vm:DetalleVentaViewModel"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="0">
+
+        <!-- ============ Header morado "Detalle de Venta" ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="12,16"
+            StrokeShape="RoundRectangle 0,0,12,12">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    BackgroundColor="Transparent"
+                    StrokeShape="RoundRectangle 18"
+                    WidthRequest="36" HeightRequest="36">
+                    <Grid>
+                        <Label
+                            Text="&#x2190;"
+                            TextColor="White"
+                            FontSize="20"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                        <Button
+                            BackgroundColor="Transparent"
+                            Padding="0"
+                            Command="{Binding GoBackCommand}" />
+                    </Grid>
+                </Border>
+
+                <Label
+                    Grid.Column="1"
+                    Text="Detalle de Venta"
+                    TextColor="White"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    VerticalOptions="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- ============ Contenido ============ -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="12" Padding="14,16,14,8">
+
+                <!-- Tarjeta cliente + importe (mockup 5.1) -->
+                <Border
+                    StrokeThickness="0"
+                    BackgroundColor="White"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="16,14">
+                    <Grid RowDefinitions="Auto,Auto" RowSpacing="6">
+                        <Label
+                            Text="{Binding Cliente}"
+                            TextColor="{StaticResource McTextDark}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            HorizontalOptions="Center"
+                            HorizontalTextAlignment="Center" />
+                        <Label
+                            Grid.Row="1"
+                            Text="{Binding ImporteText}"
+                            TextColor="{StaticResource McLotenalHeader}"
+                            FontSize="26"
+                            FontAttributes="Bold"
+                            HorizontalOptions="Center" />
+                    </Grid>
+                </Border>
+
+                <!-- Sección Detalles -->
+                <Label
+                    Text="Detalles"
+                    TextColor="{StaticResource McGrayText}"
+                    FontSize="13"
+                    FontAttributes="Bold" />
+
+                <!-- Campos comunes + por tipo -->
+                <Border
+                    StrokeThickness="0"
+                    BackgroundColor="White"
+                    StrokeShape="RoundRectangle 12"
+                    Padding="16,4">
+                    <VerticalStackLayout>
+
+                        <!-- Producto (Lotenal/Tec) o Compañía (TA) -->
+                        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" Padding="0,10">
+                            <Grid RowDefinitions="Auto,Auto" RowSpacing="2">
+                                <Label
+                                    Text="{Binding ProductoOCompania}"
+                                    TextColor="{StaticResource McTextDark}"
+                                    FontSize="15"
+                                    FontAttributes="Bold" />
+                                <Label
+                                    Grid.Row="1"
+                                    Text="{Binding EtiquetaProducto}"
+                                    TextColor="{StaticResource McGrayText}"
+                                    FontSize="11" />
+                            </Grid>
+
+                            <!-- Boleto / Teléfono -->
+                            <Grid Grid.Row="1" RowDefinitions="Auto,Auto" RowSpacing="2" Padding="0,10">
+                                <Label
+                                    Text="{Binding DatoPrincipal}"
+                                    TextColor="{StaticResource McTextDark}"
+                                    FontSize="15"
+                                    FontAttributes="Bold" />
+                                <Label
+                                    Grid.Row="1"
+                                    Text="{Binding EtiquetaDatoPrincipal}"
+                                    TextColor="{StaticResource McGrayText}"
+                                    FontSize="11" />
+                            </Grid>
+
+                            <!-- Valor / Monto-paquete -->
+                            <Grid Grid.Row="2" RowDefinitions="Auto,Auto" RowSpacing="2" Padding="0,10">
+                                <Label
+                                    Text="{Binding ValorOMonto}"
+                                    TextColor="{StaticResource McTextDark}"
+                                    FontSize="15"
+                                    FontAttributes="Bold" />
+                                <Label
+                                    Grid.Row="1"
+                                    Text="{Binding EtiquetaValor}"
+                                    TextColor="{StaticResource McGrayText}"
+                                    FontSize="11" />
+                            </Grid>
+
+                            <!-- Fecha -->
+                            <Grid Grid.Row="3" RowDefinitions="Auto,Auto" RowSpacing="2" Padding="0,10">
+                                <Label
+                                    Text="{Binding FechaText}"
+                                    TextColor="{StaticResource McTextDark}"
+                                    FontSize="15"
+                                    FontAttributes="Bold" />
+                                <Label
+                                    Grid.Row="1"
+                                    Text="Fecha"
+                                    TextColor="{StaticResource McGrayText}"
+                                    FontSize="11" />
+                            </Grid>
+
+                            <!-- Folio -->
+                            <Grid Grid.Row="4" RowDefinitions="Auto,Auto" RowSpacing="2" Padding="0,10">
+                                <Label
+                                    Text="{Binding FolioText}"
+                                    TextColor="{StaticResource McTextDark}"
+                                    FontSize="15"
+                                    FontAttributes="Bold" />
+                                <Label
+                                    Grid.Row="1"
+                                    Text="Folio"
+                                    TextColor="{StaticResource McGrayText}"
+                                    FontSize="11" />
+                            </Grid>
+
+                            <!-- Importe total -->
+                            <Grid Grid.Row="5" RowDefinitions="Auto,Auto" RowSpacing="2" Padding="0,10,0,14">
+                                <Label
+                                    Text="{Binding ImporteText}"
+                                    TextColor="{StaticResource McTextDark}"
+                                    FontSize="15"
+                                    FontAttributes="Bold" />
+                                <Label
+                                    Grid.Row="1"
+                                    Text="Importe total"
+                                    TextColor="{StaticResource McGrayText}"
+                                    FontSize="11" />
+                            </Grid>
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ============ Botones Imprimir / Compartir (mockup 5.1) ============ -->
+        <Grid
+            Grid.Row="2"
+            ColumnDefinitions="*,*"
+            ColumnSpacing="16"
+            Padding="24,12,24,20">
+
+            <!-- Imprimir -->
+            <VerticalStackLayout Spacing="4">
+                <Border
+                    StrokeThickness="0"
+                    BackgroundColor="{StaticResource McLotenalHeader}"
+                    StrokeShape="RoundRectangle 28"
+                    WidthRequest="56" HeightRequest="56"
+                    HorizontalOptions="Center">
+                    <Grid>
+                        <Image
+                            Source="icon_impresora_blanco.svg"
+                            WidthRequest="26" HeightRequest="26"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                        <Button
+                            BackgroundColor="Transparent"
+                            Padding="0"
+                            Command="{Binding ImprimirCommand}" />
+                    </Grid>
+                </Border>
+                <Label
+                    Text="Imprimir"
+                    TextColor="{StaticResource McTextDark}"
+                    FontSize="12"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- Compartir -->
+            <VerticalStackLayout Grid.Column="1" Spacing="4">
+                <Border
+                    StrokeThickness="0"
+                    BackgroundColor="{StaticResource McLotenalHeader}"
+                    StrokeShape="RoundRectangle 28"
+                    WidthRequest="56" HeightRequest="56"
+                    HorizontalOptions="Center">
+                    <Grid>
+                        <Image
+                            Source="icon_compartir_blanco.svg"
+                            WidthRequest="26" HeightRequest="26"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                        <Button
+                            BackgroundColor="Transparent"
+                            Padding="0"
+                            Command="{Binding CompartirCommand}" />
+                    </Grid>
+                </Border>
+                <Label
+                    Text="Compartir"
+                    TextColor="{StaticResource McTextDark}"
+                    FontSize="12"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

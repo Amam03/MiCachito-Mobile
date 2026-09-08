@@ -28,5 +28,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(CapturaPremiosReintegrosPage), typeof(CapturaPremiosReintegrosPage));
         Routing.RegisterRoute(nameof(EscanearBoletosPage), typeof(EscanearBoletosPage));
         Routing.RegisterRoute(nameof(SorteosPage), typeof(SorteosPage));
+        Routing.RegisterRoute(nameof(TicketsVentaPage), typeof(TicketsVentaPage));
+        Routing.RegisterRoute(nameof(DetalleVentaPage), typeof(DetalleVentaPage));
     }
 }

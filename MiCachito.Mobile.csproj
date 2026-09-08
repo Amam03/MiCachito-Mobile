@@ -77,6 +77,10 @@
         <MauiImage Update="Resources\Images\icon_carrito_oscuro.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_check_blanco.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_check_verde.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_filtro_blanco.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_impresora_blanco.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_compartir_blanco.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\logo_ticket_pdf.png" Resize="True" BaseSize="117,96" />
 
         <!-- Provider logos (Tiempo Aire) — image 3.1 -->
         <MauiImage Update="Resources\Images\logo_telcel.svg" BaseSize="80,32" />

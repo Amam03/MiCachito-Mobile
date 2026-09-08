@@ -89,6 +89,14 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Services.SorteosService>();
             builder.Services.AddTransient<ViewModels.SorteosViewModel>();
             builder.Services.AddTransient<Views.SorteosPage>();
+            builder.Services.AddSingleton<Services.TicketsVentaService>();
+            builder.Services.AddSingleton<Services.TicketPdfService>();
+            builder.Services.AddSingleton<Services.IImpresoraService>(
+                new Platforms.Android.Services.ImpresoraService());
+            builder.Services.AddTransient<ViewModels.TicketsVentaViewModel>();
+            builder.Services.AddTransient<Views.TicketsVentaPage>();
+            builder.Services.AddTransient<ViewModels.DetalleVentaViewModel>();
+            builder.Services.AddTransient<Views.DetalleVentaPage>();
             builder.Services.AddTransient<Views.ExpendiosPage>();
 
 #if ANDROID
