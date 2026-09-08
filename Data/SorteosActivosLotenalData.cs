@@ -27,6 +27,14 @@ public static class SorteosActivosLotenalData
             : [];
     }
 
+    /// <summary>
+    /// Devuelve TODOS los sorteos de TODOS los tipos del catálogo
+    /// (usado por la pantalla Sorteos de Gestión para el listado de
+    /// celebrados; el llamador filtra y ordena).
+    /// </summary>
+    public static IReadOnlyList<SorteoActivoLotenal> ObtenerTodos() =>
+        _sorteos.Values.SelectMany(s => s).ToList();
+
     // ── Datos comunes por tipo ─────────────────────────────────────────
     private const string L1_Mayor  = "SORTEO";
     private const string L2_Mayor  = "MAYOR";
