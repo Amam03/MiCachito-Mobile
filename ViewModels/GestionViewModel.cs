@@ -55,6 +55,7 @@ public partial class GestionViewModel : BaseViewModel
             "premiosReintegros" => Shell.Current.GoToAsync(nameof(Views.PremiosReintegrosPage)),
             "sorteos" => Shell.Current.GoToAsync(nameof(Views.SorteosPage)),
             "ticketsVenta" => Shell.Current.GoToAsync(nameof(Views.TicketsVentaPage)),
+            "devolucion" => Shell.Current.GoToAsync(nameof(Views.DevolucionesPage)),
             _ => Task.CompletedTask,
         };
     }

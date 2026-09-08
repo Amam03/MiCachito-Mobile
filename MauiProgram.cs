@@ -97,6 +97,17 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Views.TicketsVentaPage>();
             builder.Services.AddTransient<ViewModels.DetalleVentaViewModel>();
             builder.Services.AddTransient<Views.DetalleVentaPage>();
+            builder.Services.AddSingleton<Services.DevolucionService>();
+            builder.Services.AddTransient<ViewModels.DevolucionesViewModel>();
+            builder.Services.AddTransient<Views.DevolucionesPage>();
+            builder.Services.AddTransient<ViewModels.ListaSorteosDevolucionViewModel>();
+            builder.Services.AddTransient<Views.ListaSorteosDevolucionPage>();
+            builder.Services.AddTransient<ViewModels.NuevaDevolucionViewModel>();
+            builder.Services.AddTransient<Views.NuevaDevolucionPage>();
+            builder.Services.AddTransient<ViewModels.DesgloseDevolucionViewModel>();
+            builder.Services.AddTransient<Views.DesgloseDevolucionPage>();
+            builder.Services.AddTransient<ViewModels.EscanearSeriesViewModel>();
+            builder.Services.AddTransient<Views.EscanearSeriesPage>();
             builder.Services.AddTransient<Views.ExpendiosPage>();
 
 #if ANDROID

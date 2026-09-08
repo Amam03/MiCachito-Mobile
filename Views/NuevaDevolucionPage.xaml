@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
+    x:Class="MiCachito.Mobile.Views.NuevaDevolucionPage"
+    x:DataType="vm:NuevaDevolucionViewModel"
+    Title="Nueva Devolución"
+    BackgroundColor="{StaticResource McFieldBg}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- ============ HEADER morado "Nueva Devolución - N" + sorteo verde (mockup 6.2) ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,12,16,14">
+
+            <Grid RowDefinitions="Auto,Auto" RowSpacing="2">
+                <Label
+                    Grid.Row="0"
+                    Text="{Binding Titulo}"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+                <Label
+                    Grid.Row="1"
+                    Text="{Binding NombreSorteo}"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="#01C852"
+                    HorizontalOptions="Center" />
+            </Grid>
+        </Border>
+
+        <!-- ============ CUERPO: modos, Escanear, contadores ============ -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout
+                Padding="16,16,16,12"
+                Spacing="12"
+                VerticalOptions="Start">
+
+                <!-- 3 modos de captura (Series | Tiras | Cachitos) -->
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                    <Border
+                        Grid.Column="0"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="{Binding BgSeries}"
+                        HeightRequest="44"
+                        Padding="0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SeleccionarModoCommand}" CommandParameter="Series" />
+                        </Border.GestureRecognizers>
+                        <Label
+                            Text="Series"
+                            FontSize="15"
+                            FontAttributes="Bold"
+                            TextColor="{Binding TextoSeries}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+                    <Border
+                        Grid.Column="1"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="{Binding BgTiras}"
+                        HeightRequest="44"
+                        Padding="0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SeleccionarModoCommand}" CommandParameter="Tiras" />
+                        </Border.GestureRecognizers>
+                        <Label
+                            Text="Tiras"
+                            FontSize="15"
+                            FontAttributes="Bold"
+                            TextColor="{Binding TextoTiras}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+                    <Border
+                        Grid.Column="2"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="{Binding BgCachitos}"
+                        HeightRequest="44"
+                        Padding="0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SeleccionarModoCommand}" CommandParameter="Cachitos" />
+                        </Border.GestureRecognizers>
+                        <Label
+                            Text="Cachitos"
+                            FontSize="15"
+                            FontAttributes="Bold"
+                            TextColor="{Binding TextoCachitos}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+                </Grid>
+
+                <!-- Boton Escanear (morado, patron CapturaPremiosReintegros) -->
+                <Border
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="{StaticResource McLotenalHeader}"
+                    HeightRequest="48"
+                    Padding="0">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding EscanearCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="Escanear"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        FontFamily="OpenSansSemibold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <!-- Contadores con flecha al desglose (mockup 6.2) -->
+                <Border
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource White}"
+                    Padding="16,4">
+
+                    <VerticalStackLayout Spacing="0">
+
+                        <!-- Cachitos capturados -->
+                        <Grid ColumnDefinitions="Auto,*,Auto" HeightRequest="52">
+                            <Label
+                                Grid.Column="0"
+                                Text="{Binding ContadorCachitos, StringFormat='{0:00}'}"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                TextColor="#01C852"
+                                VerticalOptions="Center" />
+                            <Label
+                                Grid.Column="1"
+                                Text="Cachitos capturados"
+                                FontSize="15"
+                                TextColor="{StaticResource McTextDark}"
+                                VerticalOptions="Center"
+                                Margin="12,0,0,0" />
+                            <Label
+                                Grid.Column="2"
+                                Text="&#x2192;"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource McLotenalHeader}"
+                                VerticalOptions="Center" />
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding AbrirDesgloseCommand}" CommandParameter="Cachitos" />
+                            </Grid.GestureRecognizers>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Color="{StaticResource McPlaceholder}" Opacity="0.35" />
+
+                        <!-- Tiras capturadas -->
+                        <Grid ColumnDefinitions="Auto,*,Auto" HeightRequest="52">
+                            <Label
+                                Grid.Column="0"
+                                Text="{Binding ContadorTiras, StringFormat='{0:00}'}"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                TextColor="#01C852"
+                                VerticalOptions="Center" />
+                            <Label
+                                Grid.Column="1"
+                                Text="Tiras capturadas"
+                                FontSize="15"
+                                TextColor="{StaticResource McTextDark}"
+                                VerticalOptions="Center"
+                                Margin="12,0,0,0" />
+                            <Label
+                                Grid.Column="2"
+                                Text="&#x2192;"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource McLotenalHeader}"
+                                VerticalOptions="Center" />
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding AbrirDesgloseCommand}" CommandParameter="Tiras" />
+                            </Grid.GestureRecognizers>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Color="{StaticResource McPlaceholder}" Opacity="0.35" />
+
+                        <!-- Series capturadas -->
+                        <Grid ColumnDefinitions="Auto,*,Auto" HeightRequest="52">
+                            <Label
+                                Grid.Column="0"
+                                Text="{Binding ContadorSeries, StringFormat='{0:00}'}"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                TextColor="#01C852"
+                                VerticalOptions="Center" />
+                            <Label
+                                Grid.Column="1"
+                                Text="Series capturadas"
+                                FontSize="15"
+                                TextColor="{StaticResource McTextDark}"
+                                VerticalOptions="Center"
+                                Margin="12,0,0,0" />
+                            <Label
+                                Grid.Column="2"
+                                Text="&#x2192;"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                TextColor="{StaticResource McLotenalHeader}"
+                                VerticalOptions="Center" />
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding AbrirDesgloseCommand}" CommandParameter="Series" />
+                            </Grid.GestureRecognizers>
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ============ Guardar / Cancelar (mockup 6.2) ============ -->
+        <VerticalStackLayout
+            Grid.Row="2"
+            Padding="16,8,16,20"
+            Spacing="10">
+
+            <Button
+                Text="Guardar"
+                FontSize="16"
+                FontAttributes="Bold"
+                FontFamily="OpenSansSemibold"
+                BackgroundColor="#01C852"
+                TextColor="{StaticResource White}"
+                CornerRadius="10"
+                HeightRequest="48"
+                Command="{Binding GuardarCommand}" />
+
+            <Button
+                x:Name="BotonCancelar"
+                Text="Cancelar"
+                FontSize="16"
+                FontAttributes="Bold"
+                FontFamily="OpenSansSemibold"
+                BackgroundColor="{StaticResource McLotenalHeader}"
+                TextColor="{StaticResource White}"
+                CornerRadius="10"
+                HeightRequest="48"
+                Command="{Binding CancelarCommand}" />
+
+        </VerticalStackLayout>
+
+        <!-- ============ Dialogo Atencion (mockup 6.2 Cancelar) ============ -->
+        <Grid
+            Grid.Row="0" Grid.RowSpan="3"
+            IsVisible="{Binding AvisoCancelarVisible}"
+            BackgroundColor="#B3000000"
+            InputTransparent="False">
+            <Border
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 14"
+                BackgroundColor="{StaticResource White}"
+                WidthRequest="300"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Padding="22,18">
+                <VerticalStackLayout Spacing="14">
+                    <Label
+                        Text="Atención"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        FontFamily="OpenSansSemibold"
+                        TextColor="{StaticResource McTextDark}"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="Manten presionado el boton para cancelar"
+                        FontSize="14"
+                        TextColor="{StaticResource McTextDark}"
+                        HorizontalTextAlignment="Center" />
+                    <Button
+                        Text="ACEPTAR"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        BackgroundColor="{StaticResource McLotenalHeader}"
+                        TextColor="{StaticResource White}"
+                        CornerRadius="8"
+                        HeightRequest="40"
+                        Command="{Binding AceptarAvisoCommand}" />
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

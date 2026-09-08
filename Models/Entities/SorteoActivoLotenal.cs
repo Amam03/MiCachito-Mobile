@@ -86,4 +86,12 @@ public class SorteoActivoLotenal
     /// </summary>
     public string FechaLarga =>
         FechaCelebracion.ToString("dd-MMMM-yyyy", CultureInfo.CreateSpecificCulture("es-MX"));
+
+    /// <summary>
+    /// Fecha en formato comparable con la del código de barras del boleto
+    /// ("yyyy-MM-dd" con padding de 2 dígitos, como la produce
+    /// BilleteParser.FechaSorteo a partir de los dígitos crudos DDMMYYYY).
+    /// </summary>
+    public string FechaSorteoCodigo =>
+        $"{FechaCelebracion.Year:0000}-{FechaCelebracion.Month:00}-{FechaCelebracion.Day:00}";
 }

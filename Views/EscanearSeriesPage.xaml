@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:MiCachito.Mobile.Controls"
+    xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
+    x:Class="MiCachito.Mobile.Views.EscanearSeriesPage"
+    x:DataType="vm:EscanearSeriesViewModel"
+    Title="Escanear Series"
+    BackgroundColor="{StaticResource McPremioFondoOscuro}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ============ HEADER morado oscuro "Escanear Series" (mockup 6.2 escaneo) ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McHeaderDimmed}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <Label
+                    Grid.Column="1"
+                    Text="{Binding TituloModo, FallbackValue='Escanear Series'}"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    HorizontalTextAlignment="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- ============ CUERPO: camara + banner + manual + acumulado ============ -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20,18,20,24" Spacing="14">
+
+                <!-- Camara integrada (mismo componente que Premios y Reintegros) -->
+                <Border
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 14"
+                    BackgroundColor="{StaticResource McPremioPanelOscuro}"
+                    HeightRequest="240"
+                    Padding="0">
+                    <Grid>
+                        <controls:CameraScannerView
+                            x:Name="Escaner"
+                            DetectionCommand="{Binding CodigoDetectadoCommand}"
+                            IsScanning="{Binding CamaraLista}"
+                            TorchOn="{Binding LinternaEncendida}" />
+                        <Border
+                            StrokeThickness="2"
+                            StrokeShape="RoundRectangle 12"
+                            Stroke="{StaticResource McLotenalHeader}"
+                            WidthRequest="170"
+                            HeightRequest="170"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center"
+                            InputTransparent="True" />
+                        <Border
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 18"
+                            BackgroundColor="#B3000000"
+                            WidthRequest="36"
+                            HeightRequest="36"
+                            HorizontalOptions="End"
+                            VerticalOptions="Start"
+                            Margin="0,10,10,0">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleLinternaCommand}" />
+                            </Border.GestureRecognizers>
+                            <Image
+                                Source="icon_linterna_blanco.svg"
+                                WidthRequest="18"
+                                HeightRequest="18"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
+                        </Border>
+                        <Label
+                            Text="Permiso de camara no concedido. Puedes capturar el codigo a mano."
+                            TextColor="{StaticResource White}"
+                            FontSize="13"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center"
+                            HorizontalTextAlignment="Center"
+                            Margin="20,0,20,0"
+                            IsVisible="{Binding PermisoDenegado}" />
+                    </Grid>
+                </Border>
+
+                <!-- Banner de error (mockup 6.2: fecha del cachito) -->
+                <Border
+                    IsVisible="{Binding HayAviso}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="#B3261E"
+                    Padding="14,10">
+                    <Label
+                        Text="{Binding Aviso}"
+                        TextColor="{StaticResource White}"
+                        FontSize="13"
+                        HorizontalTextAlignment="Center" />
+                </Border>
+
+                <!-- Entrada manual (via de prueba en emulador) -->
+                <Label
+                    Text="O captura el codigo a mano:"
+                    FontSize="13"
+                    TextColor="#D6D6D6" />
+                <Entry
+                    x:Name="CampoManual"
+                    Text="{Binding CodigoManual}"
+                    Placeholder="34 o 35 digitos"
+                    Keyboard="Plain"
+                    ReturnType="Done"
+                    ReturnCommand="{Binding ConsultarManualCommand}"
+                    ClearButtonVisibility="WhileEditing" />
+
+                <!-- Acumulado de la devolucion en curso -->
+                <Label
+                    Text="Capturas de la devolución en curso:"
+                    FontSize="13"
+                    TextColor="#D6D6D6"
+                    Margin="0,6,0,0" />
+                <Label
+                    Text="{Binding AcumuladoText}"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+
+</ContentPage>

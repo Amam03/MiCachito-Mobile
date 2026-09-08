@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
+    xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
+    x:Class="MiCachito.Mobile.Views.DevolucionesPage"
+    x:DataType="vm:DevolucionesViewModel"
+    Title="Devoluciones"
+    BackgroundColor="{StaticResource McFieldBg}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- ============ HEADER morado "Devoluciones" + back (mockup 6) ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <Label
+                    Grid.Column="1"
+                    Text="Devoluciones"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- ============ Lista / estado vacio ============ -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout
+                Padding="16,16,16,90"
+                Spacing="10"
+                VerticalOptions="Start">
+
+                <!-- Estado vacio (mockup 6) -->
+                <Label
+                    IsVisible="{Binding SinRegistros}"
+                    Text="No se encontraron Devoluciones"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource McPlaceholder}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Start"
+                    Margin="0,80,0,0" />
+
+                <!-- Registros guardados -->
+                <VerticalStackLayout
+                    Spacing="10"
+                    BindableLayout.ItemsSource="{Binding Devoluciones}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="entities:Devolucion">
+                            <Border
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 12"
+                                BackgroundColor="{StaticResource White}"
+                                Padding="16,12">
+                                <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="4">
+                                    <Grid Row="0" ColumnDefinitions="Auto,*">
+                                        <Label
+                                            Grid.Column="0"
+                                            Text="{Binding Folio, StringFormat='Folio: {0}'}"
+                                            FontSize="15"
+                                            FontAttributes="Bold"
+                                            TextColor="{StaticResource McTextDark}" />
+                                        <Label
+                                            Grid.Column="1"
+                                            Text="{Binding RegistradaEnUtc, StringFormat='{0:dd MMM yyyy}'}"
+                                            FontSize="13"
+                                            TextColor="{StaticResource McPlaceholder}"
+                                            HorizontalOptions="End" />
+                                    </Grid>
+                                    <Label
+                                        Grid.Row="1"
+                                        Text="{Binding NombreSorteo}"
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        TextColor="#01C852" />
+                                    <Label
+                                        Grid.Row="2"
+                                        Text="{Binding ResumenText}"
+                                        FontSize="13"
+                                        TextColor="{StaticResource McPlaceholder}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ============ FAB "+" azul (mockup 6) ============ -->
+        <Border
+            Grid.Row="2"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 32"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            WidthRequest="64"
+            HeightRequest="64"
+            HorizontalOptions="End"
+            VerticalOptions="End"
+            Margin="0,0,24,24"
+            InputTransparent="False">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding AgregarCommand}" />
+            </Border.GestureRecognizers>
+            <Label
+                Text="+"
+                FontSize="32"
+                FontAttributes="Bold"
+                TextColor="{StaticResource White}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+        </Border>
+
+    </Grid>
+
+</ContentPage>
