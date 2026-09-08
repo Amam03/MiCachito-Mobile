@@ -77,6 +77,15 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Views.ConsultaPremiosPage>();
             builder.Services.AddTransient<ViewModels.ResultadoConsultaPremiosViewModel>();
             builder.Services.AddTransient<Views.ResultadoConsultaPremiosPage>();
+            builder.Services.AddSingleton<Services.PremiosReintegrosService>();
+            builder.Services.AddTransient<ViewModels.PremiosReintegrosViewModel>();
+            builder.Services.AddTransient<Views.PremiosReintegrosPage>();
+            builder.Services.AddTransient<ViewModels.DetallePremiosReintegrosViewModel>();
+            builder.Services.AddTransient<Views.DetallePremiosReintegrosPage>();
+            builder.Services.AddTransient<ViewModels.CapturaPremiosReintegrosViewModel>();
+            builder.Services.AddTransient<Views.CapturaPremiosReintegrosPage>();
+            builder.Services.AddTransient<ViewModels.EscanearBoletosViewModel>();
+            builder.Services.AddTransient<Views.EscanearBoletosPage>();
             builder.Services.AddTransient<Views.ExpendiosPage>();
 
 #if ANDROID

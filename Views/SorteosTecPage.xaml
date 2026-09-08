@@ -150,10 +150,10 @@
                     <Border.GestureRecognizers>
                         <TapGestureRecognizer Command="{Binding AbrirCarritoCommand}" />
                     </Border.GestureRecognizers>
-                    <Label
-                        Text="&#x1F6D2;"
-                        FontSize="24"
-                        TextColor="{StaticResource White}"
+                    <Image
+                        Source="icon_carrito_blanco.svg"
+                        WidthRequest="26"
+                        HeightRequest="26"
                         HorizontalOptions="Center"
                         VerticalOptions="Center" />
                 </Border>

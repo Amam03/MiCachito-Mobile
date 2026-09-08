@@ -55,13 +55,29 @@ public class CameraScannerHandler : ViewHandler<CameraScannerView, PreviewView>
 
     protected override void DisconnectHandler(PreviewView platformView)
     {
-        VirtualView.PropertyChanged -= OnVirtualViewPropertyChanged;
+        // Invalidar callbacks asincronos EN VUELO (provider de la camara) ANTES
+        // de soltar la vista virtual: si el runnable llega despues de aqui,
+        // AlProviderListo ve _liberado=true y retorna sin tocar VirtualView
+        // (cuyo getter LANTA InvalidOperationException al estar desconectado,
+        // causa de crash al salir rapido del escaner mientras la camara arranca).
+        _liberado = true;
+        if (VirtualView is not null)
+        {
+            VirtualView.PropertyChanged -= OnVirtualViewPropertyChanged;
+        }
         LiberarCamara();
         base.DisconnectHandler(platformView);
     }
 
     private void OnVirtualViewPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
+        // sender puede ser null tras un DisconnectHandler defensivo; y el
+        // getter VirtualView lanza si el handler ya se solto (guard barato).
+        if (_liberado || sender is not CameraScannerView vista)
+        {
+            return;
+        }
+
         if (e.PropertyName == CameraScannerView.IsScanningProperty.PropertyName)
         {
             if (VirtualView.IsScanning)
@@ -98,9 +114,9 @@ public class CameraScannerHandler : ViewHandler<CameraScannerView, PreviewView>
 
     private void ArrancarCamara()
     {
-        if (_provider is not null)
+        if (_provider is not null || _liberado)
         {
-            return; // ya arrancada
+            return; // ya arrancada o handler desconectado (callback invalido)
         }
 
         var context = MauiContext?.Context;
@@ -117,7 +133,26 @@ public class CameraScannerHandler : ViewHandler<CameraScannerView, PreviewView>
 
     private void AlProviderListo(IListenableFuture futuro, AndroidContext context)
     {
-        if (VirtualView is null || !VirtualView.IsScanning)
+        // El runnable puede llegar DESPUES de un DisconnectHandler (navegar
+        // atras rapido o salir del escaner mientras la camara aun arranca):
+        // _liberado=true invalida esta respuesta tardia. No tocar VirtualView
+        // antes de este check: su getter lanza si el handler ya se solto.
+        if (_liberado || _provider is not null)
+        {
+            return;
+        }
+
+        CameraScannerView? vista = null;
+        try
+        {
+            vista = VirtualView; // lanza si el handler ya esta desconectado
+        }
+        catch (System.InvalidOperationException)
+        {
+            return; // handler desconectado entre el bind y este callback
+        }
+
+        if (vista is null || !vista.IsScanning)
         {
             return; // se solto mientras llegaba el provider
         }
@@ -138,11 +173,13 @@ public class CameraScannerHandler : ViewHandler<CameraScannerView, PreviewView>
             texto =>
             {
                 string t = texto;
-                _ = VirtualView.Dispatcher.DispatchAsync(() => VirtualView?.RaiseDetection(t));
+                // capturar vista (no VirtualView): un frame ya en cola puede
+                // ejecutarse tras DisconnectHandler y el getter lanzaria.
+                _ = vista.Dispatcher.DispatchAsync(() => vista.RaiseDetection(t));
             },
             () =>
             {
-                _ = VirtualView.Dispatcher.DispatchAsync(() => VirtualView?.RaiseNoDetectado());
+                _ = vista.Dispatcher.DispatchAsync(() => vista.RaiseNoDetectado());
             });
 
         // defaults de ImageAnalysis: KEEP_ONLY_LATEST + ~640x480

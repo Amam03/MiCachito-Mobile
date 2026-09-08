@@ -52,6 +52,7 @@ public partial class GestionViewModel : BaseViewModel
         return modulo switch
         {
             "consultaPremios" => Shell.Current.GoToAsync(nameof(Views.ConsultaPremiosPage)),
+            "premiosReintegros" => Shell.Current.GoToAsync(nameof(Views.PremiosReintegrosPage)),
             _ => Task.CompletedTask,
         };
     }

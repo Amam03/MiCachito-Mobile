@@ -68,10 +68,10 @@
                         HeightRequest="44"
                         HorizontalOptions="End"
                         VerticalOptions="Center">
-                        <Label
-                            Text="&#x1F6D2;"
-                            FontSize="22"
-                            TextColor="{StaticResource White}"
+                        <Image
+                            Source="icon_carrito_blanco.svg"
+                            WidthRequest="24"
+                            HeightRequest="24"
                             HorizontalOptions="Center"
                             VerticalOptions="Center" />
                     </Border>

@@ -66,6 +66,18 @@
         <MauiImage Update="Resources\Images\tab_expendios.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\tab_cuenta.svg" BaseSize="24,24" />
 
+        <!-- Iconos de UI (reemplazo de emojis, sep-2026) -->
+        <MauiImage Update="Resources\Images\icon_premio_blanco.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_premio_morado.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_reintegro_blanco.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_reintegro_morado.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_linterna_blanco.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_camara_blanco.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_carrito_blanco.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_carrito_oscuro.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_check_blanco.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_check_verde.svg" BaseSize="24,24" />
+
         <!-- Provider logos (Tiempo Aire) — image 3.1 -->
         <MauiImage Update="Resources\Images\logo_telcel.svg" BaseSize="80,32" />
         <MauiImage Update="Resources\Images\logo_att.svg" BaseSize="44,44" />

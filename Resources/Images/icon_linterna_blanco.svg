@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <!-- Linterna (boton flash del escaner, blanca) -->
+  <path d="M7 2v3l2 2v11c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2V7l2-2V2H7z" fill="white"/>
+</svg>

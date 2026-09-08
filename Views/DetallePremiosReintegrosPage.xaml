@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
+    x:Class="MiCachito.Mobile.Views.DetallePremiosReintegrosPage"
+    Title="Premios y Reintegros"
+    BackgroundColor="{StaticResource McFieldBg}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
+
+        <!-- ============ HEADER morado con folio (mockup 3.1) ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,10,16,10">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <StackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                    <Label
+                        Text="{Binding TituloHeader}"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        FontFamily="OpenSansSemibold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        HorizontalTextAlignment="Center" />
+                    <Label
+                        Text="{Binding Fecha}"
+                        FontSize="12"
+                        TextColor="#D9D2FF"
+                        HorizontalOptions="Center" />
+                </StackLayout>
+
+            </Grid>
+        </Border>
+
+        <!-- ============ RESUMEN 3 columnas (mockup 3.1) ============ -->
+        <Border
+            Grid.Row="1"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,0,16,12">
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+
+                <StackLayout Grid.Column="0" Spacing="2">
+                    <Label Text="Premios" FontSize="12" TextColor="#D9D2FF"
+                           HorizontalTextAlignment="Center" />
+                    <Label Text="{Binding PremiosText}" FontSize="16"
+                           FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource White}"
+                           HorizontalTextAlignment="Center" />
+                </StackLayout>
+
+                <StackLayout Grid.Column="1" Spacing="2">
+                    <Label Text="Reintegros" FontSize="12" TextColor="#D9D2FF"
+                           HorizontalTextAlignment="Center" />
+                    <Label Text="{Binding ReintegrosText}" FontSize="16"
+                           FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource White}"
+                           HorizontalTextAlignment="Center" />
+                </StackLayout>
+                <StackLayout Grid.Column="2" Spacing="2">
+                    <Label Text="Total" FontSize="12" TextColor="#D9D2FF"
+                           HorizontalTextAlignment="Center" />
+                    <Label Text="{Binding TotalText}" FontSize="16"
+                           FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource White}"
+                           HorizontalTextAlignment="Center" />
+                </StackLayout>
+
+            </Grid>
+        </Border>
+
+        <!-- ============ PESTANAS (mockup 3.1/3.2: Premios/Reintegros) ============ -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,*" BackgroundColor="{StaticResource White}" Margin="16,12,16,0">
+
+            <Border
+                Grid.Column="0"
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 10,10,0,0"
+                BackgroundColor="{Binding ColorFondoPestanaPremios}"
+                Padding="0,10,0,10">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding CambiarPestanaCommand}"
+                                          CommandParameter="premios" />
+                </Border.GestureRecognizers>
+                <StackLayout Orientation="Horizontal" Spacing="6" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Image Source="icon_premio_blanco.svg" WidthRequest="16" HeightRequest="16"
+                           IsVisible="{Binding PestanaPremiosVisible}" VerticalOptions="Center" />
+                    <Image Source="icon_premio_morado.svg" WidthRequest="16" HeightRequest="16"
+                           IsVisible="{Binding PestanaReintegrosVisible}" VerticalOptions="Center" />
+                    <Label Text="Premios" FontSize="14" FontAttributes="Bold"
+                           FontFamily="OpenSansSemibold"
+                           TextColor="{Binding ColorTextoPestanaPremios}"
+                           VerticalOptions="Center" />
+                </StackLayout>
+            </Border>
+
+            <Border
+                Grid.Column="1"
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 10,10,0,0"
+                BackgroundColor="{Binding ColorFondoPestanaReintegros}"
+                Padding="0,10,0,10">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding CambiarPestanaCommand}"
+                                          CommandParameter="reintegros" />
+                </Border.GestureRecognizers>
+                <StackLayout Orientation="Horizontal" Spacing="6" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Image Source="icon_reintegro_blanco.svg" WidthRequest="16" HeightRequest="16"
+                           IsVisible="{Binding PestanaReintegrosVisible}" VerticalOptions="Center" />
+                    <Image Source="icon_reintegro_morado.svg" WidthRequest="16" HeightRequest="16"
+                           IsVisible="{Binding PestanaPremiosVisible}" VerticalOptions="Center" />
+                    <Label Text="Reintegros" FontSize="14" FontAttributes="Bold"
+                           FontFamily="OpenSansSemibold"
+                           TextColor="{Binding ColorTextoPestanaReintegros}"
+                           VerticalOptions="Center" />
+                </StackLayout>
+            </Border>
+
+        </Grid>
+
+        <!-- ============ SORTEOS expandibles + tabla (mockup 3.2) ============ -->
+        <ScrollView Grid.Row="3">
+            <VerticalStackLayout
+                BindableLayout.ItemsSource="{Binding Sorteos}"
+                Padding="16,8,16,20" Spacing="10">
+
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="entities:SorteoPremiosReintegros">
+                        <Border
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 0,0,10,10"
+                            BackgroundColor="{StaticResource White}"
+                            Padding="14,12,14,12">
+                            <VerticalStackLayout Spacing="0">
+
+                                <!-- Encabezado del sorteo: nombre + flecha -->
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ToggleSorteoCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Grid.GestureRecognizers>
+
+                                    <Label
+                                        Grid.Column="0"
+                                        Text="{Binding NombreSorteo}"
+                                        FontSize="15" FontAttributes="Bold"
+                                        FontFamily="OpenSansSemibold"
+                                        TextColor="{StaticResource McTextDark}" />
+
+                                    <Label
+                                        Grid.Column="1"
+                                        Text="{Binding Flecha}"
+                                        FontSize="14"
+                                        TextColor="{StaticResource McLotenalHeader}"
+                                        VerticalOptions="Center" />
+
+                                </Grid>
+
+                                <!-- Tabla del sorteo: Billete | Signo | Vig. | Valor -->
+                                <Border
+                                    IsVisible="{Binding Expandido}"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 8"
+                                    BackgroundColor="{StaticResource McFieldBg}"
+                                    Padding="10,8,10,8"
+                                    Margin="0,10,0,0">
+                                    <Grid RowDefinitions="Auto,*">
+
+                                        <!-- Encabezados de columnas -->
+                                        <Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10">
+                                            <Label Grid.Column="0" Text="Billete" FontSize="11" FontAttributes="Bold"
+                                                   TextColor="{StaticResource McGrayText}" />
+                                            <Label Grid.Column="1" Text="Signo" FontSize="11" FontAttributes="Bold"
+                                                   TextColor="{StaticResource McGrayText}" />
+                                            <Label Grid.Column="2" Text="Vig." FontSize="11" FontAttributes="Bold"
+                                                   TextColor="{StaticResource McGrayText}" />
+                                            <Label Grid.Column="3" Text="Valor" FontSize="11" FontAttributes="Bold"
+                                                   TextColor="{StaticResource McGrayText}"
+                                                   HorizontalTextAlignment="End" />
+                                        </Grid>
+
+                                        <!-- Filas de boletos -->
+                                        <VerticalStackLayout
+                                            Grid.Row="1"
+                                            BindableLayout.ItemsSource="{Binding Boletos}"
+                                            Spacing="6"
+                                            Margin="0,8,0,0">
+                                            <BindableLayout.ItemTemplate>
+                                                <DataTemplate x:DataType="entities:BoletoPremioReintegro">
+                                                    <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="10">
+                                                        <Label Grid.Column="0" Text="{Binding NumeroBillete}"
+                                                               FontSize="13" TextColor="{StaticResource McTextDark}" />
+                                                        <Label Grid.Column="1" Text="{Binding Signo}"
+                                                               FontSize="13" TextColor="{StaticResource McTextDark}" />
+                                                        <Label Grid.Column="2" Text="{Binding Vig}"
+                                                               FontSize="13" TextColor="{StaticResource McTextDark}" />
+                                                        <Label Grid.Column="3" Text="{Binding Valor, StringFormat='${0:0.00}'}"
+                                                               FontSize="13" FontAttributes="Bold"
+                                                               TextColor="{StaticResource McTextDark}"
+                                                               HorizontalTextAlignment="End" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </BindableLayout.ItemTemplate>
+                                        </VerticalStackLayout>
+
+                                    </Grid>
+                                </Border>
+
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+</ContentPage>

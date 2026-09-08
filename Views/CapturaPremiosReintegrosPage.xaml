@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MiCachito.Mobile.Views.CapturaPremiosReintegrosPage"
+    Title="Captura Premios y Reintegros"
+    BackgroundColor="{StaticResource McFieldBg}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- ============ HEADER azul (mockup 3.3) ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <Label
+                    Grid.Column="1"
+                    Text="Captura Premios y Reintegros"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    HorizontalTextAlignment="Center"
+                    LineBreakMode="WordWrap"
+                    MaxLines="2" />
+
+            </Grid>
+        </Border>
+
+        <!-- ============ CUERPO: folio, escanear, resumen, contadores ============ -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20,18,20,10" Spacing="14">
+
+                <Label
+                    Text="{Binding FolioText}"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource McTextDark}"
+                    HorizontalOptions="Center" />
+
+                <!-- Boton Escanear con icono de camara (mockup 3.3) -->
+                <Border
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="#464DF6"
+                    HeightRequest="48">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding EscanearCommand}" />
+                    </Border.GestureRecognizers>
+                    <StackLayout Orientation="Horizontal" Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
+                        <Image Source="icon_camara_blanco.svg" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" />
+                        <Label Text="Escanear" FontSize="16" FontAttributes="Bold"
+                               FontFamily="OpenSansSemibold"
+                               TextColor="{StaticResource White}" VerticalOptions="Center" />
+                    </StackLayout>
+                </Border>
+
+                <!-- Resumen 3 columnas (mockup 3.3) -->
+                <Border
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource White}"
+                    Padding="14,12,14,12">
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+
+                        <StackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Premios" FontSize="12" TextColor="{StaticResource McGrayText}"
+                                   HorizontalTextAlignment="Center" />
+                            <Label Text="{Binding MontoPremiosText}" FontSize="16"
+                                   FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                                   TextColor="{StaticResource McTextDark}"
+                                   HorizontalTextAlignment="Center" />
+                        </StackLayout>
+
+                        <StackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="Reintegros" FontSize="12" TextColor="{StaticResource McGrayText}"
+                                   HorizontalTextAlignment="Center" />
+                            <Label Text="{Binding MontoReintegrosText}" FontSize="16"
+                                   FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                                   TextColor="{StaticResource McTextDark}"
+                                   HorizontalTextAlignment="Center" />
+                        </StackLayout>
+
+                        <StackLayout Grid.Column="2" Spacing="2">
+                            <Label Text="Total" FontSize="12" TextColor="{StaticResource McGrayText}"
+                                   HorizontalTextAlignment="Center" />
+                            <Label Text="{Binding MontoTotalText}" FontSize="16"
+                                   FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                                   TextColor="{StaticResource McTextDark}"
+                                   HorizontalTextAlignment="Center" />
+                        </StackLayout>
+
+                    </Grid>
+                </Border>
+
+                <!-- Contadores (mockup 3.3): valor grande a la derecha -->
+                <Border
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource White}"
+                    Padding="14,12,14,12">
+                    <VerticalStackLayout Spacing="10">
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Premios capturados" FontSize="14"
+                                   TextColor="{StaticResource McTextDark}" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{Binding ContadorPremiosText}" FontSize="20"
+                                   FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                                   TextColor="{StaticResource McLotenalHeader}"
+                                   VerticalOptions="Center" />
+                        </Grid>
+
+                        <BoxView HeightRequest="1" BackgroundColor="{StaticResource McDivider}" />
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="Reintegros capturados" FontSize="14"
+                                   TextColor="{StaticResource McTextDark}" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{Binding ContadorReintegrosText}" FontSize="20"
+                                   FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                                   TextColor="{StaticResource McLotenalHeader}"
+                                   VerticalOptions="Center" />
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Aviso (Cancelar tap simple / sin boletos); vacio = invisible -->
+                <Label
+                    Text="{Binding Aviso}"
+                    TextColor="{StaticResource McPremioRojo}"
+                    FontSize="13"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ============ GUARDAR / CANCELAR (mockup 3.3) ============ -->
+        <VerticalStackLayout Grid.Row="2" Margin="20,0,20,24" Spacing="10">
+
+            <!-- Guardar: verde, tap simple -->
+            <Button
+                Text="Guardar"
+                Command="{Binding GuardarCommand}"
+                BackgroundColor="#01C853"
+                TextColor="{StaticResource White}"
+                FontAttributes="Bold"
+                FontFamily="OpenSansSemibold"
+                FontSize="16"
+                HeightRequest="48"
+                CornerRadius="10" />
+
+            <!-- Cancelar: texto morado; DESCARTA solo con pulsacion larga
+                 (regla del usuario: mantener presionado para cancelar). -->
+            <Button
+                x:Name="BotonCancelar"
+                Text="Cancelar"
+                TextColor="#8118FF"
+                BackgroundColor="Transparent"
+                BorderColor="#8118FF"
+                BorderWidth="1"
+                FontAttributes="Bold"
+                FontFamily="OpenSansSemibold"
+                FontSize="15"
+                HeightRequest="44"
+                CornerRadius="10"
+                Pressed="OnCancelarPressed"
+                Released="OnCancelarReleased" />
+
+        </VerticalStackLayout>
+
+    </Grid>
+</ContentPage>
