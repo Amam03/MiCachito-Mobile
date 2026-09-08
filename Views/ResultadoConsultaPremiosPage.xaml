@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MiCachito.Mobile.Views.ResultadoConsultaPremiosPage"
+    Title="Consulta de Premios"
+    BackgroundColor="{StaticResource McPremioFondoOscuro}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- ============ HEADER morado oscuro (mockup 2.1) ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McHeaderDimmed}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <Label
+                    Grid.Column="1"
+                    Text="Consulta de Premios"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center"
+                    HorizontalTextAlignment="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- ============ CUERPO: boleto escaneado + tarjeta de resultado ============ -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20,18,20,10" Spacing="16">
+
+                <!-- Boleto escaneado (panel oscuro con los datos parseados) -->
+                <Border
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 14"
+                    BackgroundColor="{StaticResource McPremioPanelOscuro}"
+                    Padding="18,14,18,14">
+                    <VerticalStackLayout Spacing="6">
+                        <Label
+                            Text="BOLETO ESCANEADO"
+                            TextColor="#9E9E9E"
+                            FontSize="11"
+                            FontAttributes="Bold" />
+                        <Label Text="{Binding NombreSorteo}" TextColor="{StaticResource White}" FontSize="17" FontAttributes="Bold" />
+                        <Label Text="{Binding NumeroBillete}" TextColor="#D6D6D6" FontSize="14" />
+                        <Label Text="{Binding SerieOsigno}" TextColor="#D6D6D6" FontSize="14" />
+                        <Label Text="{Binding Fraccion}" TextColor="#D6D6D6" FontSize="14" />
+                        <Label Text="{Binding Fecha}" TextColor="#D6D6D6" FontSize="14" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Tarjeta blanca con el mensaje (mockup 2.1) -->
+                <Border
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 14"
+                    BackgroundColor="{StaticResource White}"
+                    Padding="16,16,16,4">
+                    <VerticalStackLayout Spacing="12">
+                        <Label
+                            Text="{Binding MensajeResultado}"
+                            TextColor="{Binding ColorResultado}"
+                            FontSize="19"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ============ BOTON ACEPTAR (rojo en no-premio, mockup) ============ -->
+        <Border
+            Grid.Row="2"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 10"
+            BackgroundColor="{Binding ColorResultado}"
+            Margin="20,0,20,24"
+            HeightRequest="52"
+            InputTransparent="False">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding AceptarCommand}" />
+            </Border.GestureRecognizers>
+            <Label
+                Text="Aceptar"
+                TextColor="{StaticResource White}"
+                FontSize="17"
+                FontAttributes="Bold"
+                FontFamily="OpenSansSemibold"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+        </Border>
+
+    </Grid>
+</ContentPage>

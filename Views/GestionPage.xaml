@@ -3,27 +3,405 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     x:Class="MiCachito.Mobile.Views.GestionPage"
-    Title="Gestion">
+    Title="Gestion"
+    BackgroundColor="{StaticResource McFieldBg}">
 
-    <VerticalStackLayout
-        Padding="30"
-        Spacing="16"
-        VerticalOptions="Center"
-        HorizontalOptions="Center">
+    <Grid RowDefinitions="Auto,*">
 
-        <Label
-            Text="Gestion"
-            FontSize="28"
-            FontAttributes="Bold"
-            TextColor="{StaticResource McTextDark}"
-            HorizontalOptions="Center" />
+        <!-- ============ Encabezado: Saldo (mockup 1) ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            HeightRequest="64"
+            Padding="20,0">
+            <StackLayout
+                Orientation="Horizontal"
+                Spacing="6"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
+                <Label
+                    Text="Saldo:"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    VerticalOptions="Center" />
+                <Label
+                    Text="{Binding Saldo}"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource McGesSaldoVerde}"
+                    VerticalOptions="Center" />
+            </StackLayout>
+        </Border>
 
-        <Label
-            Text="Modulo en desarrollo"
-            FontSize="16"
-            TextColor="{StaticResource McPlaceholder}"
-            HorizontalOptions="Center" />
+        <!-- ============ Menu de modulos (mockup 1: grid 2 x 4 + tarjeta 9) ============ -->
+        <ScrollView Grid.Row="1">
+            <Grid
+                Padding="14,12,14,16"
+                ColumnDefinitions="*,*"
+                RowDefinitions="116,116,116,116,116"
+                ColumnSpacing="10"
+                RowSpacing="10">
 
-    </VerticalStackLayout>
+                <!-- ===== 1. Consulta de Premios (amarillo) ===== -->
+                <Border
+                    Grid.Row="0" Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource McGesAmarillo}"
+                    Padding="8">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding AbrirModuloCommand}"
+                            CommandParameter="consultaPremios" />
+                    </Border.GestureRecognizers>
+                    <Grid RowDefinitions="*,Auto" RowSpacing="4">
+                        <!-- icono: medalla (anillo + listones) -->
+                        <AbsoluteLayout Grid.Row="0" WidthRequest="44" HeightRequest="44" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Polygon Points="12,34 19,34 15,44 8,44" Fill="White"
+                                     AbsoluteLayout.LayoutBounds="0,0,44,44" AbsoluteLayout.LayoutFlags="None" />
+                            <Polygon Points="25,34 32,34 36,44 29,44" Fill="White"
+                                     AbsoluteLayout.LayoutBounds="0,0,44,44" AbsoluteLayout.LayoutFlags="None" />
+                            <Ellipse Stroke="White" StrokeThickness="3"
+                                     AbsoluteLayout.LayoutBounds="7,4,30,30" AbsoluteLayout.LayoutFlags="None" />
+                        </AbsoluteLayout>
+                        <Label
+                            Grid.Row="1"
+                            Text="Consulta de Premios"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource White}"
+                            HorizontalTextAlignment="Center"
+                            LineBreakMode="WordWrap"
+                            MaxLines="2"
+                            VerticalOptions="End" />
+                    </Grid>
+                </Border>
+
+                <!-- ===== 2. Devolución (verde) ===== -->
+                <Border
+                    Grid.Row="0" Grid.Column="1"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource McGesVerde}"
+                    Padding="8">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding AbrirModuloCommand}"
+                            CommandParameter="devolucion" />
+                    </Border.GestureRecognizers>
+                    <Grid RowDefinitions="*,Auto" RowSpacing="4">
+                        <!-- icono: portapapeles con flecha hacia abajo -->
+                        <AbsoluteLayout Grid.Row="0" WidthRequest="40" HeightRequest="44" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Border Stroke="White" StrokeThickness="2.5" StrokeShape="RoundRectangle 5"
+                                     AbsoluteLayout.LayoutBounds="8,6,28,36" AbsoluteLayout.LayoutFlags="None" />
+                            <Border StrokeThickness="0" BackgroundColor="White" StrokeShape="RoundRectangle 2"
+                                     AbsoluteLayout.LayoutBounds="16,3,12,6" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="20.5,16,3,11" AbsoluteLayout.LayoutFlags="None" />
+                            <Polygon Points="13,26 31,26 22,37" Fill="White"
+                                     AbsoluteLayout.LayoutBounds="0,0,44,44" AbsoluteLayout.LayoutFlags="None" />
+                        </AbsoluteLayout>
+                        <Label
+                            Grid.Row="1"
+                            Text="Devolución"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource White}"
+                            HorizontalTextAlignment="Center"
+                            LineBreakMode="WordWrap"
+                            MaxLines="2"
+                            VerticalOptions="End" />
+                    </Grid>
+                </Border>
+
+                <!-- ===== 3. Premios y Reintegros (morado) ===== -->
+                <Border
+                    Grid.Row="1" Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource McGesMorado}"
+                    Padding="8">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding AbrirModuloCommand}"
+                            CommandParameter="premiosReintegros" />
+                    </Border.GestureRecognizers>
+                    <Grid RowDefinitions="*,Auto" RowSpacing="4">
+                        <!-- icono: bandeja con flecha hacia arriba -->
+                        <AbsoluteLayout Grid.Row="0" WidthRequest="44" HeightRequest="44" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Polygon Points="22,3 30,13 25,13 25,22 19,22 19,13 14,13" Fill="White"
+                                     AbsoluteLayout.LayoutBounds="0,0,44,44" AbsoluteLayout.LayoutFlags="None" />
+                            <Border Stroke="White" StrokeThickness="2.5" StrokeShape="RoundRectangle 4"
+                                     AbsoluteLayout.LayoutBounds="4,24,36,17" AbsoluteLayout.LayoutFlags="None" />
+                        </AbsoluteLayout>
+                        <Label
+                            Grid.Row="1"
+                            Text="Premios y Reintegros"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource White}"
+                            HorizontalTextAlignment="Center"
+                            LineBreakMode="WordWrap"
+                            MaxLines="2"
+                            VerticalOptions="End" />
+                    </Grid>
+                </Border>
+
+                <!-- ===== 4. Depósitos (naranja) ===== -->
+                <Border
+                    Grid.Row="1" Grid.Column="1"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource McGesNaranja}"
+                    Padding="8">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding AbrirModuloCommand}"
+                            CommandParameter="depositos" />
+                    </Border.GestureRecognizers>
+                    <Grid RowDefinitions="*,Auto" RowSpacing="4">
+                        <!-- icono: monedas con $ -->
+                        <AbsoluteLayout Grid.Row="0" WidthRequest="44" HeightRequest="42" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Ellipse Fill="White"
+                                     AbsoluteLayout.LayoutBounds="4,16,26,26" AbsoluteLayout.LayoutFlags="None" />
+                            <Ellipse Fill="White"
+                                     AbsoluteLayout.LayoutBounds="15,6,27,27" AbsoluteLayout.LayoutFlags="None" />
+                            <Label Text="$" TextColor="#FF6D00" FontSize="17" FontAttributes="Bold"
+                                   HorizontalTextAlignment="Center" VerticalTextAlignment="Center"
+                                   AbsoluteLayout.LayoutBounds="15,6,27,27" AbsoluteLayout.LayoutFlags="None" />
+                        </AbsoluteLayout>
+                        <Label
+                            Grid.Row="1"
+                            Text="Depósitos"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource White}"
+                            HorizontalTextAlignment="Center"
+                            LineBreakMode="WordWrap"
+                            MaxLines="2"
+                            VerticalOptions="End" />
+                    </Grid>
+                </Border>
+
+                <!-- ===== 5. Sorteos (violeta) ===== -->
+                <Border
+                    Grid.Row="2" Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource McGesVioleta}"
+                    Padding="8">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding AbrirModuloCommand}"
+                            CommandParameter="sorteos" />
+                    </Border.GestureRecognizers>
+                    <Grid RowDefinitions="*,Auto" RowSpacing="4">
+                        <!-- icono: bombo de lotería (esfera con ranuras) -->
+                        <AbsoluteLayout Grid.Row="0" WidthRequest="44" HeightRequest="44" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Ellipse Stroke="White" StrokeThickness="2.5"
+                                     AbsoluteLayout.LayoutBounds="5,5,34,34" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="9,20.75,26,2.5" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="13.75,10,2.5,24" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="20.75,10,2.5,24" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="27.75,10,2.5,24" AbsoluteLayout.LayoutFlags="None" />
+                        </AbsoluteLayout>
+                        <Label
+                            Grid.Row="1"
+                            Text="Sorteos"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource White}"
+                            HorizontalTextAlignment="Center"
+                            LineBreakMode="WordWrap"
+                            MaxLines="2"
+                            VerticalOptions="End" />
+                    </Grid>
+                </Border>
+
+                <!-- ===== 6. Recibos de Pago (rojo) ===== -->
+                <Border
+                    Grid.Row="2" Grid.Column="1"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource McGesRojo}"
+                    Padding="8">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding AbrirModuloCommand}"
+                            CommandParameter="recibosPago" />
+                    </Border.GestureRecognizers>
+                    <Grid RowDefinitions="*,Auto" RowSpacing="4">
+                        <!-- icono: ticket con muesca y rayas -->
+                        <AbsoluteLayout Grid.Row="0" WidthRequest="40" HeightRequest="44" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Border Stroke="White" StrokeThickness="2.5" StrokeShape="RoundRectangle 4"
+                                     AbsoluteLayout.LayoutBounds="9,5,26,34" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="15,13,14,2.5" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="15,19,14,2.5" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="15,25,14,2.5" AbsoluteLayout.LayoutFlags="None" />
+                            <Ellipse Fill="{StaticResource McGesRojo}"
+                                     AbsoluteLayout.LayoutBounds="5,18,8,8" AbsoluteLayout.LayoutFlags="None" />
+                        </AbsoluteLayout>
+                        <Label
+                            Grid.Row="1"
+                            Text="Recibos de Pago"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource White}"
+                            HorizontalTextAlignment="Center"
+                            LineBreakMode="WordWrap"
+                            MaxLines="2"
+                            VerticalOptions="End" />
+                    </Grid>
+                </Border>
+
+                <!-- ===== 7. Tickets de Venta (cian) ===== -->
+                <Border
+                    Grid.Row="3" Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource McGesCian}"
+                    Padding="8">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding AbrirModuloCommand}"
+                            CommandParameter="ticketsVenta" />
+                    </Border.GestureRecognizers>
+                    <Grid RowDefinitions="*,Auto" RowSpacing="4">
+                        <!-- icono: carrito (canasta + asa + ruedas) -->
+                        <AbsoluteLayout Grid.Row="0" WidthRequest="42" HeightRequest="44" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Polygon Points="2,4 7,4 11,13 6,13" Fill="White"
+                                     AbsoluteLayout.LayoutBounds="0,0,44,44" AbsoluteLayout.LayoutFlags="None" />
+                            <Polygon Points="8,14 40,14 35,29 13,29" Fill="White"
+                                     AbsoluteLayout.LayoutBounds="0,0,44,44" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="16,29,2,4" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="30,29,2,4" AbsoluteLayout.LayoutFlags="None" />
+                            <Ellipse Fill="White"
+                                     AbsoluteLayout.LayoutBounds="14,33,6,6" AbsoluteLayout.LayoutFlags="None" />
+                            <Ellipse Fill="White"
+                                     AbsoluteLayout.LayoutBounds="28,33,6,6" AbsoluteLayout.LayoutFlags="None" />
+                        </AbsoluteLayout>
+                        <Label
+                            Grid.Row="1"
+                            Text="Tickets de Venta"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource White}"
+                            HorizontalTextAlignment="Center"
+                            LineBreakMode="WordWrap"
+                            MaxLines="2"
+                            VerticalOptions="End" />
+                    </Grid>
+                </Border>
+
+                <!-- ===== 8. Reportes (azul rey) ===== -->
+                <Border
+                    Grid.Row="3" Grid.Column="1"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource McGesAzulRey}"
+                    Padding="8">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding AbrirModuloCommand}"
+                            CommandParameter="reportes" />
+                    </Border.GestureRecognizers>
+                    <Grid RowDefinitions="*,Auto" RowSpacing="4">
+                        <!-- icono: impresora (papel, cuerpo con ranura, patas, bandeja) -->
+                        <AbsoluteLayout Grid.Row="0" WidthRequest="42" HeightRequest="42" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Border StrokeThickness="0" BackgroundColor="White" StrokeShape="RoundRectangle 2"
+                                     AbsoluteLayout.LayoutBounds="15,1,14,9" AbsoluteLayout.LayoutFlags="None" />
+                            <Border StrokeThickness="0" BackgroundColor="White" StrokeShape="RoundRectangle 3"
+                                     AbsoluteLayout.LayoutBounds="6,9,32,14" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="{StaticResource McGesAzulRey}"
+                                     AbsoluteLayout.LayoutBounds="14,14,16,4" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="8,23,4,4" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="32,23,4,4" AbsoluteLayout.LayoutFlags="None" />
+                            <Border Stroke="White" StrokeThickness="2" StrokeShape="RoundRectangle 2"
+                                     AbsoluteLayout.LayoutBounds="15,27,14,10" AbsoluteLayout.LayoutFlags="None" />
+                        </AbsoluteLayout>
+                        <Label
+                            Grid.Row="1"
+                            Text="Reportes"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource White}"
+                            HorizontalTextAlignment="Center"
+                            LineBreakMode="WordWrap"
+                            MaxLines="2"
+                            VerticalOptions="End" />
+                    </Grid>
+                </Border>
+
+                <!-- ===== 9. Tira de Liquidación (azul medio) ===== -->
+                <Border
+                    Grid.Row="4" Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="{StaticResource McGesAzulMedio}"
+                    Padding="8">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer
+                            Command="{Binding AbrirModuloCommand}"
+                            CommandParameter="tiraLiquidacion" />
+                    </Border.GestureRecognizers>
+                    <Grid RowDefinitions="*,Auto" RowSpacing="4">
+                        <!-- icono: lista de verificación (hoja con casillas) -->
+                        <AbsoluteLayout Grid.Row="0" WidthRequest="40" HeightRequest="44" HorizontalOptions="Center" VerticalOptions="Center">
+                            <Border Stroke="White" StrokeThickness="2.5" StrokeShape="RoundRectangle 6"
+                                     AbsoluteLayout.LayoutBounds="7,3,30,38" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="12,9,6,6" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="22,11,12,2.5" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="12,17,6,6" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="22,19,12,2.5" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="12,25,6,6" AbsoluteLayout.LayoutFlags="None" />
+                            <Rectangle Fill="White"
+                                     AbsoluteLayout.LayoutBounds="22,27,12,2.5" AbsoluteLayout.LayoutFlags="None" />
+                        </AbsoluteLayout>
+                        <Label
+                            Grid.Row="1"
+                            Text="Tira de Liquidación"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource White}"
+                            HorizontalTextAlignment="Center"
+                            LineBreakMode="WordWrap"
+                            MaxLines="2"
+                            VerticalOptions="End" />
+                    </Grid>
+                </Border>
+
+            </Grid>
+        </ScrollView>
+
+    </Grid>
 
 </ContentPage>

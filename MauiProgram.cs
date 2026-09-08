@@ -69,8 +69,23 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Views.DatosClienteTecPage>();
             builder.Services.AddTransient<ViewModels.VentaExitosaTecViewModel>();
             builder.Services.AddTransient<Views.VentaExitosaTecPage>();
+            builder.Services.AddTransient<ViewModels.GestionViewModel>();
             builder.Services.AddTransient<Views.GestionPage>();
+            builder.Services.AddSingleton<Services.Scanning.ConsultaPremiosService>();
+            builder.Services.AddSingleton<Services.Scanning.QrDecoderService>();
+            builder.Services.AddTransient<ViewModels.ConsultaPremiosViewModel>();
+            builder.Services.AddTransient<Views.ConsultaPremiosPage>();
+            builder.Services.AddTransient<ViewModels.ResultadoConsultaPremiosViewModel>();
+            builder.Services.AddTransient<Views.ResultadoConsultaPremiosPage>();
             builder.Services.AddTransient<Views.ExpendiosPage>();
+
+#if ANDROID
+            builder.ConfigureMauiHandlers(handlers =>
+            {
+                handlers.AddHandler(typeof(Controls.CameraScannerView),
+                    typeof(Platforms.Android.Handlers.CameraScannerHandler));
+            });
+#endif
             builder.Services.AddTransient<Views.CuentaPage>();
             builder.Services.AddTransient<Views.SplashPage>();
             builder.Services.AddTransient<AppShell>();

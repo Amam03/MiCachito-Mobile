@@ -21,6 +21,14 @@ public partial class HomeViewModel : BaseViewModel
     [ObservableProperty]
     private string sede = string.Empty;
 
+    /// <summary>
+    /// Saldo mostrado en el encabezado de la pestaña (patron Gestion).
+    /// Inicial en $0.00: se calculara desde el backend cuando exista la
+    /// conexion; por ahora no la hay (fase solo-interfaz).
+    /// </summary>
+    [ObservableProperty]
+    private string saldo = "$0.00";
+
     public HomeViewModel(
         ISessionService sessionService,
         IAuthService authService,
@@ -29,7 +37,7 @@ public partial class HomeViewModel : BaseViewModel
         _sessionService = sessionService;
         _authService = authService;
         _navigationService = navigationService;
-        Title = "Inicio";
+        Title = "Vender";
     }
 
     public async Task LoadAsync()

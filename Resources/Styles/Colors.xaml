@@ -48,6 +48,23 @@
     <!-- Pantalla 13: pleca verde de billete agregado (medida en mockup 13) -->
     <Color x:Key="McPlecaVerde">#64B56B</Color>
 
+    <!-- Pestaña Gestion (mockup 1, colores medidos con PIL) -->
+    <Color x:Key="McGesAmarillo">#FEC400</Color>
+    <Color x:Key="McGesVerde">#38C13D</Color>
+    <Color x:Key="McGesMorado">#6200E9</Color>
+    <Color x:Key="McGesNaranja">#FF6D00</Color>
+    <Color x:Key="McGesVioleta">#AA00FF</Color>
+    <Color x:Key="McGesRojo">#FF5353</Color>
+    <Color x:Key="McGesCian">#02C8E2</Color>
+    <Color x:Key="McGesAzulRey">#2A62FF</Color>
+    <Color x:Key="McGesAzulMedio">#039BE6</Color>
+    <Color x:Key="McGesSaldoVerde">#6DEDB4</Color>
+
+    <!-- Consulta de Premios (mockups 2 / 2.1, medidos con PIL) -->
+    <Color x:Key="McPremioRojo">#EE534F</Color>
+    <Color x:Key="McPremioPanelOscuro">#343432</Color>
+    <Color x:Key="McPremioFondoOscuro">#2B2B29</Color>
+
     <Color x:Key="Primary">#00C851</Color>
     <Color x:Key="PrimaryDark">#00A040</Color>
     <Color x:Key="PrimaryDarkText">#242424</Color>
