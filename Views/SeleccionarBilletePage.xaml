@@ -71,10 +71,10 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding AbrirCarritoCommand}" />
                         </Border.GestureRecognizers>
-                        <Label
-                            Text="&#x1F6D2;"
-                            FontSize="22"
-                            TextColor="{StaticResource White}"
+                        <Image
+                            Source="icon_carrito_blanco.svg"
+                            WidthRequest="24"
+                            HeightRequest="24"
                             HorizontalOptions="Center"
                             VerticalOptions="Center" />
                     </Border>
@@ -164,10 +164,10 @@
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.AgregarBilleteCommand}"
                                             CommandParameter="{Binding .}" />
                                     </Border.GestureRecognizers>
-                                    <Label
-                                        Text="&#x1F6D2;"
-                                        FontSize="20"
-                                        TextColor="{StaticResource McTextDark}"
+                                    <Image
+                                        Source="icon_carrito_oscuro.svg"
+                                        WidthRequest="22"
+                                        HeightRequest="22"
                                         HorizontalOptions="Center"
                                         VerticalOptions="Center" />
                                 </Border>

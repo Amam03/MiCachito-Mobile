@@ -25,11 +25,10 @@
             WidthRequest="96"
             HeightRequest="96"
             HorizontalOptions="Center">
-            <Label
-                Text="&#x2713;"
-                FontSize="44"
-                FontAttributes="Bold"
-                TextColor="{StaticResource White}"
+            <Image
+                Source="icon_check_blanco.svg"
+                WidthRequest="48"
+                HeightRequest="48"
                 HorizontalOptions="Center"
                 VerticalOptions="Center" />
         </Border>

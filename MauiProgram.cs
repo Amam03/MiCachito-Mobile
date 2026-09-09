@@ -77,6 +77,48 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Views.ConsultaPremiosPage>();
             builder.Services.AddTransient<ViewModels.ResultadoConsultaPremiosViewModel>();
             builder.Services.AddTransient<Views.ResultadoConsultaPremiosPage>();
+            builder.Services.AddSingleton<Services.PremiosReintegrosService>();
+            builder.Services.AddTransient<ViewModels.PremiosReintegrosViewModel>();
+            builder.Services.AddTransient<Views.PremiosReintegrosPage>();
+            builder.Services.AddTransient<ViewModels.DetallePremiosReintegrosViewModel>();
+            builder.Services.AddTransient<Views.DetallePremiosReintegrosPage>();
+            builder.Services.AddTransient<ViewModels.CapturaPremiosReintegrosViewModel>();
+            builder.Services.AddTransient<Views.CapturaPremiosReintegrosPage>();
+            builder.Services.AddTransient<ViewModels.EscanearBoletosViewModel>();
+            builder.Services.AddTransient<Views.EscanearBoletosPage>();
+            builder.Services.AddTransient<Services.SorteosService>();
+            builder.Services.AddTransient<ViewModels.SorteosViewModel>();
+            builder.Services.AddTransient<Views.SorteosPage>();
+            builder.Services.AddSingleton<Services.TicketsVentaService>();
+            builder.Services.AddSingleton<Services.TicketPdfService>();
+            builder.Services.AddSingleton<Services.IImpresoraService>(
+                new Platforms.Android.Services.ImpresoraService());
+            builder.Services.AddTransient<ViewModels.TicketsVentaViewModel>();
+            builder.Services.AddTransient<Views.TicketsVentaPage>();
+            builder.Services.AddTransient<ViewModels.DetalleVentaViewModel>();
+            builder.Services.AddTransient<Views.DetalleVentaPage>();
+            builder.Services.AddSingleton<Services.DevolucionService>();
+            builder.Services.AddTransient<ViewModels.DevolucionesViewModel>();
+            builder.Services.AddTransient<Views.DevolucionesPage>();
+            builder.Services.AddTransient<ViewModels.ListaSorteosDevolucionViewModel>();
+            builder.Services.AddTransient<Views.ListaSorteosDevolucionPage>();
+            builder.Services.AddTransient<ViewModels.NuevaDevolucionViewModel>();
+            builder.Services.AddTransient<Views.NuevaDevolucionPage>();
+            builder.Services.AddTransient<ViewModels.DesgloseDevolucionViewModel>();
+            builder.Services.AddTransient<Views.DesgloseDevolucionPage>();
+            builder.Services.AddTransient<ViewModels.EscanearSeriesViewModel>();
+            builder.Services.AddTransient<Views.EscanearSeriesPage>();
+            builder.Services.AddSingleton<Services.DepositoService>();
+            builder.Services.AddTransient<ViewModels.DepositosViewModel>();
+            builder.Services.AddTransient<Views.DepositosPage>();
+            builder.Services.AddTransient<ViewModels.NuevoDepositoViewModel>();
+            builder.Services.AddTransient<Views.NuevoDepositoPage>();
+            builder.Services.AddSingleton<Services.RecibosPagoService>();
+            builder.Services.AddSingleton<Services.ReciboPagoPdfService>();
+            builder.Services.AddTransient<ViewModels.RecibosPagoViewModel>();
+            builder.Services.AddTransient<Views.RecibosPagoPage>();
+            builder.Services.AddTransient<ViewModels.DetallePagoViewModel>();
+            builder.Services.AddTransient<Views.DetallePagoPage>();
             builder.Services.AddTransient<Views.ExpendiosPage>();
 
 #if ANDROID

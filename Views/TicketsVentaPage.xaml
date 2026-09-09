@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
+    xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
+    x:Class="MiCachito.Mobile.Views.TicketsVentaPage"
+    x:DataType="vm:TicketsVentaViewModel"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*" RowSpacing="0">
+
+        <!-- ============ Header morado "Ventas" + filtro (mockup 5) ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,16,12,16"
+            StrokeShape="RoundRectangle 0,0,12,12">
+            <Grid ColumnDefinitions="44,*,Auto">
+
+                <!-- Boton de retroceso (patron SorteosPage) -->
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <Label
+                    Grid.Column="1"
+                    Text="Ventas"
+                    TextColor="White"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center" />
+
+                <Border
+                    Grid.Column="2"
+                    StrokeThickness="0"
+                    BackgroundColor="#33FFFFFF"
+                    StrokeShape="RoundRectangle 18"
+                    WidthRequest="36" HeightRequest="36">
+                    <Grid>
+                        <Image
+                            Source="icon_filtro_blanco.svg"
+                            WidthRequest="20" HeightRequest="20"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                        <Button
+                            BackgroundColor="Transparent"
+                            Padding="0"
+                            Command="{Binding AbrirFiltroCommand}" />
+                    </Grid>
+                </Border>
+
+            </Grid>
+        </Border>
+
+        <!-- ============ Lista de ventas ============ -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="10" Padding="14,14,14,24">
+
+                <!-- Filtro activo (solo visible si hay filtro) -->
+                <Border
+                    IsVisible="{Binding FiltroActivo}"
+                    StrokeThickness="0"
+                    BackgroundColor="#EDEAFF"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="12,8">
+                    <Label
+                        Text="{Binding FiltroText}"
+                        TextColor="{StaticResource McLotenalHeader}"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center" />
+                </Border>
+
+                <VerticalStackLayout
+                    BindableLayout.ItemsSource="{Binding Movimientos}"
+                    Spacing="10">
+
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="entities:MovimientoVenta">
+                            <Border
+                                StrokeThickness="0"
+                                BackgroundColor="White"
+                                StrokeShape="RoundRectangle 10"
+                                Padding="12,10">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorLevel=1, AncestorType={x:Type vm:TicketsVentaViewModel}}, Path=AbrirDetalleCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <Grid
+                                    ColumnDefinitions="Auto,*,Auto"
+                                    RowDefinitions="Auto,Auto,Auto"
+                                    ColumnSpacing="10"
+                                    RowSpacing="2">
+
+                                    <Border
+                                        Grid.RowSpan="3"
+                                        StrokeThickness="0"
+                                        BackgroundColor="{Binding ColorChipHex}"
+                                        StrokeShape="RoundRectangle 14"
+                                        WidthRequest="28" HeightRequest="28"
+                                        VerticalOptions="Start" />
+
+                                    <Label
+                                        Grid.Column="1"
+                                        Text="{Binding Descripcion}"
+                                        TextColor="{StaticResource McTextDark}"
+                                        FontSize="14"
+                                        FontAttributes="Bold"
+                                        LineBreakMode="TailTruncation" />
+
+                                    <Label
+                                        Grid.Column="2"
+                                        Text="{Binding ImporteText}"
+                                        TextColor="{StaticResource McTextDark}"
+                                        FontSize="15"
+                                        FontAttributes="Bold"
+                                        VerticalOptions="Center" />
+
+                                    <Label
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        Text="{Binding Cliente}"
+                                        TextColor="{StaticResource McGrayText}"
+                                        FontSize="12"
+                                        LineBreakMode="TailTruncation" />
+
+                                    <Label
+                                        Grid.Row="2"
+                                        Grid.Column="1"
+                                        Grid.ColumnSpan="2"
+                                        Text="{Binding FolioFechaText}"
+                                        TextColor="{StaticResource McGrayText}"
+                                        FontSize="11" />
+
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ============ Overlay filtro (patrón pantalla 8) ============ -->
+        <Grid
+            Grid.RowSpan="2"
+            IsVisible="{Binding FiltroVisible}"
+            RowDefinitions="*,Auto,*">
+
+            <Button
+                Grid.Row="0"
+                Grid.RowSpan="3"
+                BackgroundColor="{StaticResource McScrimBlack55}"
+                Command="{Binding CerrarFiltroCommand}" />
+
+            <Border
+                Grid.Row="1"
+                StrokeThickness="0"
+                BackgroundColor="White"
+                StrokeShape="RoundRectangle 14"
+                WidthRequest="300"
+                VerticalOptions="Center">
+                <VerticalStackLayout Spacing="0">
+
+                    <Label
+                        Text="Filtrar por tipo"
+                        TextColor="{StaticResource McTextDark}"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        Padding="18,14,18,10" />
+
+                    <!-- Todos -->
+                    <Grid Padding="18,12" ColumnDefinitions="*,Auto"
+                          x:Name="FilaTodos">
+                        <Label
+                            Text="Todos"
+                            TextColor="{StaticResource McTextDark}"
+                            FontSize="14"
+                            VerticalOptions="Center" />
+                        <Image
+                            Grid.Column="1"
+                            Source="icon_check_verde.svg"
+                            WidthRequest="18" HeightRequest="18"
+                            IsVisible="{Binding EsTodos}"
+                            VerticalOptions="Center" />
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SeleccionarFiltroCommand}"
+                                CommandParameter="{x:Null}" />
+                        </Grid.GestureRecognizers>
+                    </Grid>
+
+                    <!-- LOTENAL -->
+                    <Grid Padding="18,12" ColumnDefinitions="*,Auto">
+                        <Label
+                            Text="LOTENAL"
+                            TextColor="{StaticResource McTextDark}"
+                            FontSize="14"
+                            VerticalOptions="Center" />
+                        <Image
+                            Grid.Column="1"
+                            Source="icon_check_verde.svg"
+                            WidthRequest="18" HeightRequest="18"
+                            IsVisible="{Binding EsLotenal}"
+                            VerticalOptions="Center" />
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SeleccionarFiltroCommand}"
+                                CommandParameter="Lotenal" />
+                        </Grid.GestureRecognizers>
+                    </Grid>
+
+                    <!-- Sorteos Tec -->
+                    <Grid Padding="18,12" ColumnDefinitions="*,Auto">
+                        <Label
+                            Text="Sorteos Tec"
+                            TextColor="{StaticResource McTextDark}"
+                            FontSize="14"
+                            VerticalOptions="Center" />
+                        <Image
+                            Grid.Column="1"
+                            Source="icon_check_verde.svg"
+                            WidthRequest="18" HeightRequest="18"
+                            IsVisible="{Binding EsTec}"
+                            VerticalOptions="Center" />
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SeleccionarFiltroCommand}"
+                                CommandParameter="SorteosTec" />
+                        </Grid.GestureRecognizers>
+                    </Grid>
+
+                    <!-- Tiempo Aire -->
+                    <Grid Padding="18,12,18,16" ColumnDefinitions="*,Auto">
+                        <Label
+                            Text="Tiempo Aire"
+                            TextColor="{StaticResource McTextDark}"
+                            FontSize="14"
+                            VerticalOptions="Center" />
+                        <Image
+                            Grid.Column="1"
+                            Source="icon_check_verde.svg"
+                            WidthRequest="18" HeightRequest="18"
+                            IsVisible="{Binding EsTa}"
+                            VerticalOptions="Center" />
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding SeleccionarFiltroCommand}"
+                                CommandParameter="TiempoAire" />
+                        </Grid.GestureRecognizers>
+                    </Grid>
+
+                </VerticalStackLayout>
+            </Border>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

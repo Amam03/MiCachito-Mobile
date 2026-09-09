@@ -172,11 +172,10 @@
                     HorizontalOptions="Center"
                     Margin="0,4,0,0">
 
-                    <Label
-                        Text="&#x2713;"
-                        FontSize="22"
-                        FontAttributes="Bold"
-                        TextColor="#01C852"
+                    <Image
+                        Source="icon_check_verde.svg"
+                        WidthRequest="22"
+                        HeightRequest="22"
                         VerticalOptions="Center" />
 
                     <Label

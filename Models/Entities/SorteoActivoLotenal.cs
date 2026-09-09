@@ -74,4 +74,24 @@ public class SorteoActivoLotenal
         FechaCelebracion.ToString("dd MMM", new CultureInfo("es-MX"))
             .Replace(".", string.Empty)
             .ToLowerInvariant();
+
+    /// <summary>
+    /// Nombre + número para listados compactos (ej. "MAYOR 4024").
+    /// </summary>
+    public string NombreCorto => $"{Linea2} {NumeroSorteo}";
+
+    /// <summary>
+    /// Fecha larga en español (ej. "08-septiembre-2026") para el selector
+    /// de la pantalla Sorteos de Gestión.
+    /// </summary>
+    public string FechaLarga =>
+        FechaCelebracion.ToString("dd-MMMM-yyyy", CultureInfo.CreateSpecificCulture("es-MX"));
+
+    /// <summary>
+    /// Fecha en formato comparable con la del código de barras del boleto
+    /// ("yyyy-MM-dd" con padding de 2 dígitos, como la produce
+    /// BilleteParser.FechaSorteo a partir de los dígitos crudos DDMMYYYY).
+    /// </summary>
+    public string FechaSorteoCodigo =>
+        $"{FechaCelebracion.Year:0000}-{FechaCelebracion.Month:00}-{FechaCelebracion.Day:00}";
 }

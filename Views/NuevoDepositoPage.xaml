@@ -1,0 +1,631 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
+    x:Class="MiCachito.Mobile.Views.NuevoDepositoPage"
+    x:DataType="vm:NuevoDepositoViewModel"
+    Title="Nuevo Depósito"
+    BackgroundColor="{StaticResource McFieldBg}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- ============ HEADER morado "Nuevo Depósito" + back ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CancelarCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <Label
+                    Grid.Column="1"
+                    Text="Nuevo Depósito"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- ============ Formulario (mockup 7.1) ============ -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout
+                Padding="20,14,20,10"
+                Spacing="0"
+                VerticalOptions="Start">
+
+                <!-- Campo: Seleccionar Banco -->
+                <Grid
+                    RowDefinitions="Auto,1"
+                    Padding="0,14">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding AbrirSelectorBancoCommand}" />
+                    </Grid.GestureRecognizers>
+                    <Grid Row="0" ColumnDefinitions="*,Auto">
+                        <Label
+                            Grid.Column="0"
+                            Text="{Binding BancoSeleccionado}"
+                            IsVisible="{Binding TieneBanco}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource McTextDark}"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Column="0"
+                            Text="Seleccionar Banco"
+                            IsVisible="{Binding SinBanco}"
+                            FontSize="16"
+                            TextColor="{StaticResource McPlaceholder}"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Column="1"
+                            Text="&#x25BC;"
+                            FontSize="12"
+                            TextColor="{StaticResource McPlaceholder}"
+                            VerticalOptions="Center" />
+                    </Grid>
+                    <BoxView
+                        Grid.Row="1"
+                        Color="{StaticResource McDivider}"
+                        HeightRequest="1"
+                        Margin="0,10,0,0" />
+                </Grid>
+
+                <!-- Aviso banco (rojo, mockup 7.2) -->
+                <Label
+                    IsVisible="{Binding AvisoBanco}"
+                    Text="Seleccionar Banco"
+                    FontSize="12"
+                    TextColor="#C40000"
+                    Padding="0,4,0,2" />
+
+                <!-- Campo: Fecha Depósito -->
+                <Grid
+                    RowDefinitions="Auto,1"
+                    Padding="0,14">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ElegirFechaCommand}" />
+                    </Grid.GestureRecognizers>
+                    <Grid Row="0" ColumnDefinitions="*,Auto">
+                        <Label
+                            Grid.Column="0"
+                            Text="{Binding FechaTexto}"
+                            IsVisible="{Binding TieneFecha}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource McTextDark}"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Column="0"
+                            Text="Fecha Depósito"
+                            IsVisible="{Binding SinFecha}"
+                            FontSize="16"
+                            TextColor="{StaticResource McPlaceholder}"
+                            VerticalOptions="Center" />
+                    </Grid>
+                    <BoxView
+                        Grid.Row="1"
+                        Color="{StaticResource McDivider}"
+                        HeightRequest="1"
+                        Margin="0,10,0,0" />
+                </Grid>
+
+                <!-- Aviso fecha -->
+                <Label
+                    IsVisible="{Binding AvisoFecha}"
+                    Text="Fecha Depósito"
+                    FontSize="12"
+                    TextColor="#C40000"
+                    Padding="0,4,0,2" />
+
+                <!-- Campo: Hora Depósito -->
+                <Grid
+                    RowDefinitions="Auto,1"
+                    Padding="0,14">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding ElegirHoraCommand}" />
+                    </Grid.GestureRecognizers>
+                    <Grid Row="0" ColumnDefinitions="*,Auto">
+                        <Label
+                            Grid.Column="0"
+                            Text="{Binding HoraTexto}"
+                            IsVisible="{Binding TieneHora}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource McTextDark}"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Column="0"
+                            Text="Hora Depósito"
+                            IsVisible="{Binding SinHora}"
+                            FontSize="16"
+                            TextColor="{StaticResource McPlaceholder}"
+                            VerticalOptions="Center" />
+                    </Grid>
+                    <BoxView
+                        Grid.Row="1"
+                        Color="{StaticResource McDivider}"
+                        HeightRequest="1"
+                        Margin="0,10,0,0" />
+                </Grid>
+
+                <!-- Aviso hora -->
+                <Label
+                    IsVisible="{Binding AvisoHora}"
+                    Text="Hora Depósito"
+                    FontSize="12"
+                    TextColor="#C40000"
+                    Padding="0,4,0,2" />
+
+                <!-- Campo: Folio/Movimiento/Autorización (máx 20) -->
+                <Grid
+                    RowDefinitions="Auto,1"
+                    Padding="0,14">
+                    <Grid Row="0" ColumnDefinitions="*,Auto">
+                        <Entry
+                            Grid.Column="0"
+                            Text="{Binding FolioMovimiento}"
+                            Placeholder="Folio/Movimiento/Autorización"
+                            PlaceholderColor="{StaticResource McPlaceholder}"
+                            FontSize="16"
+                            TextColor="{StaticResource McTextDark}"
+                            MaxLength="20"
+                            ReturnType="Done"
+                            IsSpellCheckEnabled="False"
+                            ClearButtonVisibility="Never"
+                            BackgroundColor="Transparent"
+                            />
+                        <Label
+                            Grid.Column="1"
+                            Text="{Binding FolioContador}"
+                            FontSize="12"
+                            TextColor="{StaticResource McPlaceholder}"
+                            VerticalOptions="Center" />
+                    </Grid>
+                    <BoxView
+                        Grid.Row="1"
+                        Color="{StaticResource McDivider}"
+                        HeightRequest="1"
+                        Margin="0,10,0,0" />
+                </Grid>
+
+                <!-- Aviso folio -->
+                <Label
+                    IsVisible="{Binding AvisoFolio}"
+                    Text="Folio/Movimiento/Autorización"
+                    FontSize="12"
+                    TextColor="#C40000"
+                    Padding="0,4,0,2" />
+
+                <!-- Campo: Monto del Depósito (abre dial-pad) -->
+                <Grid
+                    RowDefinitions="Auto,1"
+                    Padding="0,14">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding AbrirTecladoMontoCommand}" />
+                    </Grid.GestureRecognizers>
+                    <Grid Row="0" ColumnDefinitions="*,Auto">
+                        <Label
+                            Grid.Column="0"
+                            Text="{Binding MontoTexto}"
+                            IsVisible="{Binding TieneMonto}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            FontFamily="OpenSansSemibold"
+                            TextColor="{StaticResource McTextDark}"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Column="0"
+                            Text="Monto del Depósito"
+                            IsVisible="{Binding SinMonto}"
+                            FontSize="16"
+                            TextColor="{StaticResource McPlaceholder}"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Column="1"
+                            Text="{Binding MontoContador}"
+                            FontSize="12"
+                            TextColor="{StaticResource McPlaceholder}"
+                            VerticalOptions="Center" />
+                    </Grid>
+                    <BoxView
+                        Grid.Row="1"
+                        Color="{StaticResource McDivider}"
+                        HeightRequest="1"
+                        Margin="0,10,0,0" />
+                </Grid>
+
+                <!-- Aviso monto -->
+                <Label
+                    IsVisible="{Binding AvisoMonto}"
+                    Text="Monto del Depósito"
+                    FontSize="12"
+                    TextColor="#C40000"
+                    Padding="0,4,0,2" />
+
+                <!-- Campo: Observaciones (nombre del sorteo, máx 50) -->
+                <Grid
+                    RowDefinitions="Auto,1"
+                    Padding="0,14">
+                    <Grid Row="0" ColumnDefinitions="*,Auto">
+                        <Entry
+                            Grid.Column="0"
+                            Text="{Binding Observaciones}"
+                            Placeholder="Observaciones"
+                            PlaceholderColor="{StaticResource McPlaceholder}"
+                            FontSize="16"
+                            TextColor="{StaticResource McTextDark}"
+                            MaxLength="50"
+                            ReturnType="Done"
+                            ClearButtonVisibility="Never"
+                            BackgroundColor="Transparent"
+                            />
+                        <Label
+                            Grid.Column="1"
+                            Text="{Binding ObservacionesContador}"
+                            FontSize="12"
+                            TextColor="{StaticResource McPlaceholder}"
+                            VerticalOptions="Center" />
+                    </Grid>
+                    <BoxView
+                        Grid.Row="1"
+                        Color="{StaticResource McDivider}"
+                        HeightRequest="1"
+                        Margin="0,10,0,0" />
+                </Grid>
+
+                <!-- Aviso observaciones (mockup 7.2) -->
+                <Label
+                    IsVisible="{Binding AvisoObservaciones}"
+                    Text="Indica el sorteo del depósito"
+                    FontSize="12"
+                    TextColor="#E60000"
+                    Padding="0,4,0,2" />
+
+                <!-- Campo: Comprobante Deposito (adjuntar imagen) -->
+                <Grid
+                    RowDefinitions="Auto,1"
+                    Padding="0,14">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding AdjuntarComprobanteCommand}" />
+                    </Grid.GestureRecognizers>
+                    <Grid Row="0" ColumnDefinitions="Auto,*">
+                        <Image
+                            Grid.Column="0"
+                            Source="icon_adjuntar_verde.svg"
+                            WidthRequest="22"
+                            HeightRequest="22"
+                            VerticalOptions="Center"
+                            Margin="0,0,8,0" />
+                        <Label
+                            Grid.Column="1"
+                            Text="{Binding NombreComprobante}"
+                            IsVisible="{Binding TieneComprobante}"
+                            FontSize="15"
+                            TextColor="{StaticResource McTextDark}"
+                            LineBreakMode="MiddleTruncation"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Column="1"
+                            Text="Comprobante Deposito"
+                            IsVisible="{Binding SinComprobante}"
+                            FontSize="16"
+                            TextColor="#63D596"
+                            VerticalOptions="Center" />
+                    </Grid>
+                    <BoxView
+                        Grid.Row="1"
+                        Color="{StaticResource McDivider}"
+                        HeightRequest="1"
+                        Margin="0,10,0,0" />
+                </Grid>
+
+                <!-- Botones (mockup 7.1/7.2) -->
+                <Button
+                    Text="Aceptar"
+                    Command="{Binding AceptarCommand}"
+                    BackgroundColor="#03C84D"
+                    TextColor="{StaticResource White}"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    CornerRadius="24"
+                    HeightRequest="48"
+                    Margin="0,26,0,10" />
+                <Button
+                    Text="Cancelar"
+                    Command="{Binding CancelarCommand}"
+                    BackgroundColor="{StaticResource McFieldBg}"
+                    TextColor="{StaticResource McTextDark}"
+                    FontSize="15"
+                    CornerRadius="24"
+                    HeightRequest="44" />
+
+                <!-- Espacio inferior para el pad -->
+                <BoxView HeightRequest="{Binding EspacioPad}" IsVisible="{Binding TecladoMontoVisible}" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ============ Dial-pad del monto (mockup 7.2, estilo pantalla 10) ============ -->
+        <!-- 4 columnas: fila X(1,2,3) / 4,5,6,Realiz. / 7,8,9,. / Borrar,0,vacío,vacío. -->
+        <Border
+            Grid.Row="2"
+            IsVisible="{Binding TecladoMontoVisible}"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McKeyboardBg}"
+            Padding="10,10,10,12"
+            InputTransparent="False">
+
+            <Grid
+                RowDefinitions="Auto,*,*,*,*"
+                ColumnDefinitions="*,*,*,*"
+                ColumnSpacing="10"
+                RowSpacing="10">
+
+                <!-- Display del monto en captura (strip verde) -->
+                <Border
+                    Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 6"
+                    BackgroundColor="#D8F0D8"
+                    HeightRequest="30"
+                    Padding="10,0">
+                    <Label
+                        Text="{Binding MontoCaptura}"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        FontFamily="OpenSansSemibold"
+                        TextColor="{StaticResource McTextDark}"
+                        HorizontalOptions="Start"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <!-- Fila 1: 1 2 3 X(limpiar) -->
+                <Border Grid.Row="1" Grid.Column="0"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadKey}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding TeclaMontoCommand}" CommandParameter="1" />
+                    </Border.GestureRecognizers>
+                    <Label Text="1" FontSize="20" FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource McTextDark}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border Grid.Row="1" Grid.Column="1"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadKey}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding TeclaMontoCommand}" CommandParameter="2" />
+                    </Border.GestureRecognizers>
+                    <Label Text="2" FontSize="20" FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource McTextDark}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border Grid.Row="1" Grid.Column="2"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadKey}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding TeclaMontoCommand}" CommandParameter="3" />
+                    </Border.GestureRecognizers>
+                    <Label Text="3" FontSize="20" FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource McTextDark}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border Grid.Row="1" Grid.Column="3"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadBeige}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding LimpiarMontoCommand}" />
+                    </Border.GestureRecognizers>
+                    <Image Source="icon_x_oscuro.svg" WidthRequest="22" HeightRequest="22"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+
+                <!-- Fila 2: 4 5 6 Realiz. -->
+                <Border Grid.Row="2" Grid.Column="0"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadKey}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding TeclaMontoCommand}" CommandParameter="4" />
+                    </Border.GestureRecognizers>
+                    <Label Text="4" FontSize="20" FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource McTextDark}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border Grid.Row="2" Grid.Column="1"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadKey}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding TeclaMontoCommand}" CommandParameter="5" />
+                    </Border.GestureRecognizers>
+                    <Label Text="5" FontSize="20" FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource McTextDark}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border Grid.Row="2" Grid.Column="2"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadKey}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding TeclaMontoCommand}" CommandParameter="6" />
+                    </Border.GestureRecognizers>
+                    <Label Text="6" FontSize="20" FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource McTextDark}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border Grid.Row="2" Grid.Column="3"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadBeige}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding RealizadoMontoCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="Realiz." FontSize="13" FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource McTextDark}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+
+                <!-- Fila 3: 7 8 9 . -->
+                <Border Grid.Row="3" Grid.Column="0"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadKey}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding TeclaMontoCommand}" CommandParameter="7" />
+                    </Border.GestureRecognizers>
+                    <Label Text="7" FontSize="20" FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource McTextDark}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border Grid.Row="3" Grid.Column="1"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadKey}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding TeclaMontoCommand}" CommandParameter="8" />
+                    </Border.GestureRecognizers>
+                    <Label Text="8" FontSize="20" FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource McTextDark}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border Grid.Row="3" Grid.Column="2"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadKey}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding TeclaMontoCommand}" CommandParameter="9" />
+                    </Border.GestureRecognizers>
+                    <Label Text="9" FontSize="20" FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource McTextDark}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border Grid.Row="3" Grid.Column="3"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadKey}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding TeclaMontoCommand}" CommandParameter="." />
+                    </Border.GestureRecognizers>
+                    <Label Text="." FontSize="24" FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource McTextDark}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+
+                <!-- Fila 4: Borrar 0 (vacías no interactivas, beige) -->
+                <Border Grid.Row="4" Grid.Column="0"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadBeige}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding BorrarDigitoMontoCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label Text="Borrar" FontSize="14" FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource McTextDark}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border Grid.Row="4" Grid.Column="1"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadKey}" HeightRequest="52">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding TeclaMontoCommand}" CommandParameter="0" />
+                    </Border.GestureRecognizers>
+                    <Label Text="0" FontSize="20" FontAttributes="Bold" FontFamily="OpenSansSemibold"
+                           TextColor="{StaticResource McTextDark}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <Border Grid.Row="4" Grid.Column="2"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadBeige}" HeightRequest="52"
+                        InputTransparent="True" />
+                <Border Grid.Row="4" Grid.Column="3"
+                        StrokeShape="RoundRectangle 8" StrokeThickness="0"
+                        BackgroundColor="{StaticResource McKeypadBeige}" HeightRequest="52"
+                        InputTransparent="True" />
+
+            </Grid>
+        </Border>
+
+        <!-- ============ Overlay selector de banco (mockup 7.2) ============ -->
+        <Grid
+            Grid.Row="1"
+            IsVisible="{Binding SelectorBancoVisible}"
+            BackgroundColor="#80000000">
+            <Grid.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CerrarSelectorBancoCommand}" />
+            </Grid.GestureRecognizers>
+            <Border
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 12"
+                BackgroundColor="{StaticResource White}"
+                Margin="16,0,16,0"
+                VerticalOptions="Center"
+                InputTransparent="False">
+                <VerticalStackLayout>
+                    <Label
+                        Text="Seleccionar Banco"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        FontFamily="OpenSansSemibold"
+                        TextColor="{StaticResource McLotenalHeader}"
+                        Padding="14,12,0,8" />
+                    <VerticalStackLayout
+                        BindableLayout.ItemsSource="{Binding Bancos}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <Grid Padding="14,12" RowDefinitions="Auto,1">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SeleccionarBancoCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Grid.GestureRecognizers>
+                                    <Label
+                                        Grid.Row="0"
+                                        Text="{Binding .}"
+                                        FontSize="15"
+                                        FontAttributes="Bold"
+                                        FontFamily="OpenSansSemibold"
+                                        TextColor="{StaticResource McTextDark}"
+                                        VerticalOptions="Center" />
+                                    <BoxView
+                                        Grid.Row="1"
+                                        Color="{StaticResource McDivider}"
+                                        HeightRequest="1"
+                                        Margin="0,10,0,0" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

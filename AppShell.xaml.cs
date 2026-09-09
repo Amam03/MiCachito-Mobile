@@ -23,5 +23,21 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(VentaExitosaTecPage), typeof(VentaExitosaTecPage));
         Routing.RegisterRoute(nameof(ConsultaPremiosPage), typeof(ConsultaPremiosPage));
         Routing.RegisterRoute(nameof(ResultadoConsultaPremiosPage), typeof(ResultadoConsultaPremiosPage));
+        Routing.RegisterRoute(nameof(PremiosReintegrosPage), typeof(PremiosReintegrosPage));
+        Routing.RegisterRoute(nameof(DetallePremiosReintegrosPage), typeof(DetallePremiosReintegrosPage));
+        Routing.RegisterRoute(nameof(CapturaPremiosReintegrosPage), typeof(CapturaPremiosReintegrosPage));
+        Routing.RegisterRoute(nameof(EscanearBoletosPage), typeof(EscanearBoletosPage));
+        Routing.RegisterRoute(nameof(SorteosPage), typeof(SorteosPage));
+        Routing.RegisterRoute(nameof(TicketsVentaPage), typeof(TicketsVentaPage));
+        Routing.RegisterRoute(nameof(DetalleVentaPage), typeof(DetalleVentaPage));
+        Routing.RegisterRoute(nameof(DevolucionesPage), typeof(DevolucionesPage));
+        Routing.RegisterRoute(nameof(ListaSorteosDevolucionPage), typeof(ListaSorteosDevolucionPage));
+        Routing.RegisterRoute(nameof(NuevaDevolucionPage), typeof(NuevaDevolucionPage));
+        Routing.RegisterRoute(nameof(DesgloseDevolucionPage), typeof(DesgloseDevolucionPage));
+        Routing.RegisterRoute(nameof(EscanearSeriesPage), typeof(EscanearSeriesPage));
+        Routing.RegisterRoute(nameof(DepositosPage), typeof(DepositosPage));
+        Routing.RegisterRoute(nameof(NuevoDepositoPage), typeof(NuevoDepositoPage));
+        Routing.RegisterRoute(nameof(RecibosPagoPage), typeof(RecibosPagoPage));
+        Routing.RegisterRoute(nameof(DetallePagoPage), typeof(DetallePagoPage));
     }
 }

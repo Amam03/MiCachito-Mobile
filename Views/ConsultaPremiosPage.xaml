@@ -98,10 +98,10 @@
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding ToggleLinternaCommand}" />
                             </Border.GestureRecognizers>
-                            <Label
-                                Text="&#x26A1;"
-                                FontSize="16"
-                                TextColor="{StaticResource White}"
+                            <Image
+                                Source="icon_linterna_blanco.svg"
+                                WidthRequest="18"
+                                HeightRequest="18"
                                 HorizontalOptions="Center"
                                 VerticalOptions="Center" />
                         </Border>

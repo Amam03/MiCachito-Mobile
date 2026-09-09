@@ -355,18 +355,15 @@
                     </Grid>
                 </Border>
 
-                <!-- ===== 9. Tira de Liquidación (azul medio) ===== -->
+                <!-- ===== 9. Tira de Liquidación (azul medio) — DESHABILITADO ===== -->
                 <Border
                     Grid.Row="4" Grid.Column="0"
                     StrokeThickness="0"
                     StrokeShape="RoundRectangle 12"
                     BackgroundColor="{StaticResource McGesAzulMedio}"
+                    Opacity="0.45"
+                    InputTransparent="True"
                     Padding="8">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer
-                            Command="{Binding AbrirModuloCommand}"
-                            CommandParameter="tiraLiquidacion" />
-                    </Border.GestureRecognizers>
                     <Grid RowDefinitions="*,Auto" RowSpacing="4">
                         <!-- icono: lista de verificación (hoja con casillas) -->
                         <AbsoluteLayout Grid.Row="0" WidthRequest="40" HeightRequest="44" HorizontalOptions="Center" VerticalOptions="Center">

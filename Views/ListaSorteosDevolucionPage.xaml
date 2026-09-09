@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
+    xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
+    x:Class="MiCachito.Mobile.Views.ListaSorteosDevolucionPage"
+    x:DataType="vm:ListaSorteosDevolucionViewModel"
+    Title="Lista de Sorteos"
+    BackgroundColor="{StaticResource McFieldBg}"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ============ HEADER morado "Lista de Sorteos" + back (mockup 6.1) ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="16,14,16,14">
+
+            <Grid ColumnDefinitions="44,*,44" VerticalOptions="Center">
+
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="Transparent"
+                    WidthRequest="44"
+                    HeightRequest="44"
+                    HorizontalOptions="Start"
+                    VerticalOptions="Center">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Border.GestureRecognizers>
+                    <Label
+                        Text="&#x2190;"
+                        FontSize="24"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <Label
+                    Grid.Column="1"
+                    Text="Lista de Sorteos"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- ============ Sorteos activos (misma fuente LOTENAL) ============ -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout
+                Padding="16,16,16,24"
+                Spacing="10"
+                VerticalOptions="Start">
+
+                <Label
+                    IsVisible="{Binding SinSorteos}"
+                    Text="No hay sorteos disponibles"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource McPlaceholder}"
+                    HorizontalOptions="Center"
+                    Margin="0,60,0,0" />
+
+                <VerticalStackLayout
+                    Spacing="10"
+                    BindableLayout.ItemsSource="{Binding Sorteos}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="entities:SorteoActivoLotenal">
+                            <Border
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 12"
+                                BackgroundColor="{Binding ColorHex}"
+                                HeightRequest="72"
+                                Padding="16,0">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SeleccionarSorteoCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                                <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
+                                    <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
+                                        <Label
+                                            Text="{Binding Linea1}"
+                                            FontSize="14"
+                                            FontAttributes="Bold"
+                                            TextColor="{StaticResource White}" />
+                                        <Label
+                                            Text="{Binding Linea2}"
+                                            FontSize="20"
+                                            FontAttributes="Bold"
+                                            FontFamily="OpenSansSemibold"
+                                            TextColor="{StaticResource White}" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                        <Label
+                                            Text="{Binding DisplayPrecio}"
+                                            FontSize="20"
+                                            FontAttributes="Bold"
+                                            FontFamily="OpenSansSemibold"
+                                            TextColor="{StaticResource White}"
+                                            HorizontalOptions="End" />
+                                        <Label
+                                            Text="{Binding FechaSorteoTexto}"
+                                            FontSize="12"
+                                            TextColor="{StaticResource White}"
+                                            HorizontalOptions="End" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+    </Grid>
+
+</ContentPage>
