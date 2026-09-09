@@ -58,6 +58,7 @@ public partial class GestionViewModel : BaseViewModel
             "devolucion" => Shell.Current.GoToAsync(nameof(Views.DevolucionesPage)),
             "depositos" => Shell.Current.GoToAsync(nameof(Views.DepositosPage)),
             "recibosPago" => Shell.Current.GoToAsync(nameof(Views.RecibosPagoPage)),
+            "reportes" => Shell.Current.GoToAsync(nameof(Views.ReportesPage)),
             _ => Task.CompletedTask,
         };
     }

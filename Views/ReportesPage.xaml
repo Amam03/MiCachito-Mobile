@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
+    x:Class="MiCachito.Mobile.Views.ReportesPage"
+    x:DataType="vm:ReportesViewModel"
+    BackgroundColor="#FAFAFA"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="0">
+
+        <!-- ============ Header azul (patrón Gestión) ============ -->
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="#4125F4" Padding="14,10">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <Label
+                    Grid.Column="0"
+                    Text="←"
+                    FontSize="22"
+                    FontAttributes="Bold"
+                    TextColor="White"
+                    VerticalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <Label
+                    Grid.Column="1"
+                    Text="{Binding Title}"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    TextColor="White"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center" />
+                <Label
+                    Grid.Column="2"
+                    Text="•••"
+                    FontSize="16"
+                    TextColor="White"
+                    VerticalOptions="Center" />
+            </Grid>
+        </VerticalStackLayout>
+
+        <!-- ============ Contenido por pestaña ============ -->
+        <Grid Grid.Row="1">
+
+            <!-- ── Pestaña 1: Estado de Cuenta ── -->
+            <ScrollView IsVisible="{Binding Pestana0Activa}">
+                <VerticalStackLayout Padding="12,12,12,102" Spacing="10">
+
+                    <!-- Estado inicial: botón Generar Reporte -->
+                    <Border
+                        IsVisible="{Binding SinReporte}"
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="#4125F4"
+                        StrokeThickness="0"
+                        HeightRequest="48"
+                        Margin="20,24,20,0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding GenerarReporteCommand}" />
+                        </Border.GestureRecognizers>
+                        <Label
+                            Text="Generar Reporte"
+                            TextColor="White"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+
+                    <!-- Reporte generado: resumen de saldo -->
+                    <Border
+                        IsVisible="{Binding HayReporte}"
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="White"
+                        StrokeThickness="0"
+                        Padding="14,12"
+                        Margin="0,4,0,0">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Resumen de saldo" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+                                <Label Grid.Row="0" Grid.Column="0" Text="Fondo de Ahorro:" FontSize="13" TextColor="#1A1A1A" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding FondoDeAhorro, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                                <Label Grid.Row="1" Grid.Column="0" Text="Fideicomiso:" FontSize="13" TextColor="#1A1A1A" />
+                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Fideicomiso, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                                <Label Grid.Row="2" Grid.Column="0" Text="Pagarés:" FontSize="13" TextColor="#1A1A1A" />
+                                <Label Grid.Row="2" Grid.Column="1" Text="{Binding Pagares, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                                <Label Grid.Row="3" Grid.Column="0" Text="Bolsa Electrónica:" FontSize="13" TextColor="#1A1A1A" />
+                                <Label Grid.Row="3" Grid.Column="1" Text="{Binding BolsaElectronica, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                                <Label Grid.Row="4" Grid.Column="0" Text="Garantía Total:" FontSize="13" TextColor="#1A1A1A" />
+                                <Label Grid.Row="4" Grid.Column="1" Text="{Binding GarantiaTotal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                                <Label Grid.Row="5" Grid.Column="0" Text="Capacidad de Crédito:" FontSize="13" TextColor="#1A1A1A" />
+                                <Label Grid.Row="5" Grid.Column="1" Text="{Binding CapacidadDeCredito, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Reporte generado: listado de sorteos (estructura, sin registros) -->
+                    <Border
+                        IsVisible="{Binding HayReporte}"
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="White"
+                        StrokeThickness="0"
+                        Padding="14,12">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Sorteos" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label
+                                Text="Sin registros"
+                                FontSize="13"
+                                TextColor="#9E9E9E"
+                                IsVisible="{Binding SinSorteos}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Reporte generado: totales -->
+                    <Border
+                        IsVisible="{Binding HayReporte}"
+                        StrokeShape="RoundRectangle 10"
+                        BackgroundColor="White"
+                        StrokeThickness="0"
+                        Padding="14,12">
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto">
+                            <Label Grid.Row="0" Grid.Column="0" Text="Vencido Total:" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Grid.Row="0" Grid.Column="1" Text="{Binding VencidoTotal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Grid.Row="1" Grid.Column="0" Text="Consigna Total:" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding ConsignaTotal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Grid.Row="2" Grid.Column="0" Text="Pagos Total:" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Grid.Row="2" Grid.Column="1" Text="{Binding PagosTotal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Grid.Row="3" Grid.Column="0" Text="Total Final:" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Grid.Row="3" Grid.Column="1" Text="{Binding TotalFinal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                        </Grid>
+                    </Border>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <!-- ── Pestañas 2 y 3: placeholders (Fondo de Ahorro / Facturación) ── -->
+            <VerticalStackLayout
+                IsVisible="{Binding PestanaPlaceholder}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Spacing="8"
+                Padding="24">
+                <Label Text="{Binding TituloPestana}" FontSize="17" FontAttributes="Bold" TextColor="#1A1A1A" HorizontalOptions="Center" />
+                <Label Text="En preparación" FontSize="13" TextColor="#9E9E9E" HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- FAB descarga: visible tras generar (derecha, sobre el contenido) -->
+            <Border
+                StrokeShape="RoundRectangle 30"
+                BackgroundColor="#4125F4"
+                StrokeThickness="0"
+                WidthRequest="56" HeightRequest="56"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                Margin="0,0,18,18"
+                IsVisible="{Binding HayReporte}"
+                SemanticProperties.Description="Descargar reporte">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding DescargarCommand}" />
+                </Border.GestureRecognizers>
+                <Image
+                    Source="icon_descarga_blanco.svg"
+                    WidthRequest="24" HeightRequest="24" />
+            </Border>
+
+            <!-- FAB PDF: visible tras descargar (izquierda, sobre el contenido) -->
+            <Border
+                StrokeShape="RoundRectangle 30"
+                BackgroundColor="#4125F4"
+                StrokeThickness="0"
+                WidthRequest="56" HeightRequest="56"
+                HorizontalOptions="Start"
+                VerticalOptions="End"
+                Margin="18,0,0,18"
+                IsVisible="{Binding ReporteDescargado}"
+                SemanticProperties.Description="Abrir PDF">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding AbrirPdfCommand}" />
+                </Border.GestureRecognizers>
+                <Image
+                    Source="icon_pdf_blanco.svg"
+                    WidthRequest="24" HeightRequest="24" />
+            </Border>
+
+        </Grid>
+
+        <!-- ============ Tab bar interna de Reportes ============ -->
+        <Border
+            Grid.Row="2"
+            StrokeThickness="0"
+            BackgroundColor="#FFFFFF"
+            Stroke="Transparent">
+            <Grid ColumnDefinitions="*,*,*">
+
+                <VerticalStackLayout Grid.Column="0" Padding="0,8,0,6">
+                    <VerticalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CambiarPestanaCommand}" CommandParameter="0" />
+                    </VerticalStackLayout.GestureRecognizers>
+                    <Image
+                        Source="{Binding IconoPestana0}"
+                        WidthRequest="24" HeightRequest="24"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="Estado de Cuenta"
+                        FontSize="11"
+                        FontAttributes="Bold"
+                        TextColor="{Binding ColorPestana0}"
+                        HorizontalOptions="Center"
+                        Margin="0,3,0,0" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="1" Padding="0,8,0,6">
+                    <VerticalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CambiarPestanaCommand}" CommandParameter="1" />
+                    </VerticalStackLayout.GestureRecognizers>
+                    <Image
+                        Source="{Binding IconoPestana1}"
+                        WidthRequest="24" HeightRequest="24"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="Fondo de Ahorro"
+                        FontSize="11"
+                        TextColor="{Binding ColorPestana1}"
+                        HorizontalOptions="Center"
+                        Margin="0,3,0,0" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Grid.Column="2" Padding="0,8,0,6">
+                    <VerticalStackLayout.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding CambiarPestanaCommand}" CommandParameter="2" />
+                    </VerticalStackLayout.GestureRecognizers>
+                    <Image
+                        Source="{Binding IconoPestana2}"
+                        WidthRequest="24" HeightRequest="24"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="Facturación"
+                        FontSize="11"
+                        TextColor="{Binding ColorPestana2}"
+                        HorizontalOptions="Center"
+                        Margin="0,3,0,0" />
+                </VerticalStackLayout>
+
+            </Grid>
+        </Border>
+
+        <!-- ============ Overlay Procesando.... ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="3"
+            IsVisible="{Binding Procesando}"
+            BackgroundColor="#80707070"
+            StrokeThickness="0"
+            Padding="0">
+            <VerticalStackLayout
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Spacing="14">
+                <ActivityIndicator IsRunning="True" Color="White" WidthRequest="40" HeightRequest="40" />
+                <Label
+                    Text="Procesando...."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ============ Overlay Descargando.... ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="3"
+            IsVisible="{Binding Descargando}"
+            BackgroundColor="#80707070"
+            StrokeThickness="0"
+            Padding="0">
+            <VerticalStackLayout
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Spacing="14">
+                <ActivityIndicator IsRunning="True" Color="White" WidthRequest="40" HeightRequest="40" />
+                <Label
+                    Text="Descargando...."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Border>
+
+    </Grid>
+
+</ContentPage>
