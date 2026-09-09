@@ -108,6 +108,11 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Views.DesgloseDevolucionPage>();
             builder.Services.AddTransient<ViewModels.EscanearSeriesViewModel>();
             builder.Services.AddTransient<Views.EscanearSeriesPage>();
+            builder.Services.AddSingleton<Services.DepositoService>();
+            builder.Services.AddTransient<ViewModels.DepositosViewModel>();
+            builder.Services.AddTransient<Views.DepositosPage>();
+            builder.Services.AddTransient<ViewModels.NuevoDepositoViewModel>();
+            builder.Services.AddTransient<Views.NuevoDepositoPage>();
             builder.Services.AddTransient<Views.ExpendiosPage>();
 
 #if ANDROID

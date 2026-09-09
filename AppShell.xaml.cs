@@ -35,5 +35,7 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(NuevaDevolucionPage), typeof(NuevaDevolucionPage));
         Routing.RegisterRoute(nameof(DesgloseDevolucionPage), typeof(DesgloseDevolucionPage));
         Routing.RegisterRoute(nameof(EscanearSeriesPage), typeof(EscanearSeriesPage));
+        Routing.RegisterRoute(nameof(DepositosPage), typeof(DepositosPage));
+        Routing.RegisterRoute(nameof(NuevoDepositoPage), typeof(NuevoDepositoPage));
     }
 }

@@ -80,6 +80,9 @@
         <MauiImage Update="Resources\Images\icon_filtro_blanco.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_impresora_blanco.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_compartir_blanco.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_nube_ambar.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_x_oscuro.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_adjuntar_verde.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\logo_ticket_pdf.png" Resize="True" BaseSize="117,96" />
 
         <!-- Provider logos (Tiempo Aire) — image 3.1 -->
