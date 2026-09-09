@@ -86,6 +86,7 @@
         <MauiImage Update="Resources\Images\icon_descarga_blanco.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_check_confirmacion.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_grafica_azul.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_calendario_azul.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_grafica_gris.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_alcancia_azul.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_alcancia_gris.svg" BaseSize="24,24" />

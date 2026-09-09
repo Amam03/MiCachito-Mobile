@@ -10,4 +10,13 @@ public partial class ReportesPage : ContentPage
         InitializeComponent();
         BindingContext = vm;
     }
+
+    /// <summary>
+    /// Absorbe el tap sobre la card del modal "Seleccionar Fechas" para
+    /// que no se propague al overlay de fondo (que sí cierra).
+    /// </summary>
+    private void CardModal_Tapped(object? sender, TappedEventArgs e)
+    {
+        // Intencionalmente vacío: solo consume el gesto.
+    }
 }

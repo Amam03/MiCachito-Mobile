@@ -135,7 +135,76 @@
                 </VerticalStackLayout>
             </ScrollView>
 
-            <!-- ── Pestañas 2 y 3: placeholders (Fondo de Ahorro / Facturación) ── -->
+            <!-- ── Pestaña 2: Fondo de Ahorro ── -->
+            <ScrollView IsVisible="{Binding Pestana1Activa}">
+                <VerticalStackLayout Padding="12,12,12,170" Spacing="14">
+
+                    <!-- Estado inicial: campo Periodo (abre el modal) -->
+                    <Grid
+                        IsVisible="{Binding SinFondo}"
+                        ColumnDefinitions="*,Auto"
+                        Margin="8,16,8,0"
+                        Padding="0,6">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding AbrirModalFechasCommand}" />
+                        </Grid.GestureRecognizers>
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Text="Indicar Periodo" FontSize="13" TextColor="#4125F4" />
+                        </VerticalStackLayout>
+                        <Image
+                            Grid.Column="1"
+                            Source="icon_calendario_azul.svg"
+                            WidthRequest="22"
+                            HeightRequest="22"
+                            VerticalOptions="Center" />
+                    </Grid>
+
+                    <!-- Reporte consultado: periodo seleccionado (fechas reales del usuario) -->
+                    <VerticalStackLayout IsVisible="{Binding FondoConsultado}" Spacing="4" Margin="8,16,8,0">
+                        <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
+                        <Label Text="{Binding FechaDesdeLarga}" FontSize="13" FontAttributes="Bold" TextColor="#4125F4" />
+                        <Label Text="{Binding FechaHastaLarga}" FontSize="13" FontAttributes="Bold" TextColor="#4125F4" />
+                    </VerticalStackLayout>
+
+                    <!-- Gráfica de rendimiento: estado SIN datos (línea base en $0.00 + cuadrícula tenue).
+                         La serie real se dibujará aquí cuando existan movimientos. -->
+                    <Grid
+                        IsVisible="{Binding FondoConsultado}"
+                        HeightRequest="140"
+                        Margin="8,6,8,0">
+                        <!-- Cuadrícula horizontal tenue -->
+                        <BoxView Color="#E3E3E3" HeightRequest="1" VerticalOptions="Start" />
+                        <BoxView Color="#E3E3E3" HeightRequest="1" VerticalOptions="Center" />
+                        <BoxView Color="#E3E3E3" HeightRequest="1" VerticalOptions="End" />
+                        <!-- Cuadrícula vertical tenue -->
+                        <BoxView Color="#E3E3E3" WidthRequest="1" HorizontalOptions="Start" />
+                        <BoxView Color="#E3E3E3" WidthRequest="1" HorizontalOptions="Center" />
+                        <BoxView Color="#E3E3E3" WidthRequest="1" HorizontalOptions="End" />
+                        <!-- Serie en cero: línea azul plana sobre la base -->
+                        <BoxView Color="#3A4DBC" HeightRequest="2" VerticalOptions="End" />
+                    </Grid>
+
+                    <!-- Resumen de saldos (flat sobre el fondo, como el mockup 9.2) -->
+                    <Grid
+                        IsVisible="{Binding FondoConsultado}"
+                        ColumnDefinitions="*,Auto"
+                        RowDefinitions="Auto,Auto,Auto,Auto"
+                        Margin="8,10,8,0">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Saldo inicial:" FontSize="13" TextColor="#1A1A1A" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding FaSaldoInicial, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                        <Label Grid.Row="1" Grid.Column="0" Text="Depósitos:" FontSize="13" TextColor="#1A1A1A" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding FaDepositos, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                        <Label Grid.Row="2" Grid.Column="0" Text="Retiros:" FontSize="13" TextColor="#1A1A1A" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding FaRetiros, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                        <Label Grid.Row="3" Grid.Column="0" Text="Saldo final:" FontSize="13" TextColor="#1A1A1A" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="{Binding FaSaldoFinal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                    </Grid>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <!-- ── Pestaña 3: Facturación (placeholder) ── -->
             <VerticalStackLayout
                 IsVisible="{Binding PestanaPlaceholder}"
                 HorizontalOptions="Center"
@@ -146,7 +215,23 @@
                 <Label Text="En preparación" FontSize="13" TextColor="#9E9E9E" HorizontalOptions="Center" />
             </VerticalStackLayout>
 
-            <!-- FAB descarga: visible tras generar (derecha, sobre el contenido) -->
+            <!-- Aviso verde: Fondo de Ahorro guardado en Descargas -->
+            <Border
+                IsVisible="{Binding AvisoFondoVisible}"
+                StrokeThickness="0"
+                BackgroundColor="#4CB050"
+                VerticalOptions="End"
+                Padding="14,10"
+                SemanticProperties.Description="Aviso descarga Fondo de Ahorro">
+                <Label
+                    Text="Fondo de Ahorro guardado en la carpeta de Descargas"
+                    TextColor="White"
+                    FontSize="13"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center" />
+            </Border>
+
+            <!-- FAB descarga Estado de Cuenta (derecha, pestaña 1) -->
             <Border
                 StrokeShape="RoundRectangle 30"
                 BackgroundColor="#4125F4"
@@ -155,7 +240,7 @@
                 HorizontalOptions="End"
                 VerticalOptions="End"
                 Margin="0,0,18,18"
-                IsVisible="{Binding HayReporte}"
+                IsVisible="{Binding FabDescargaEcVisible}"
                 SemanticProperties.Description="Descargar reporte">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding DescargarCommand}" />
@@ -165,7 +250,7 @@
                     WidthRequest="24" HeightRequest="24" />
             </Border>
 
-            <!-- FAB PDF: visible tras descargar (izquierda, sobre el contenido) -->
+            <!-- FAB PDF Estado de Cuenta (izquierda, pestaña 1) -->
             <Border
                 StrokeShape="RoundRectangle 30"
                 BackgroundColor="#4125F4"
@@ -174,10 +259,48 @@
                 HorizontalOptions="Start"
                 VerticalOptions="End"
                 Margin="18,0,0,18"
-                IsVisible="{Binding ReporteDescargado}"
+                IsVisible="{Binding FabPdfEcVisible}"
                 SemanticProperties.Description="Abrir PDF">
                 <Border.GestureRecognizers>
                     <TapGestureRecognizer Command="{Binding AbrirPdfCommand}" />
+                </Border.GestureRecognizers>
+                <Image
+                    Source="icon_pdf_blanco.svg"
+                    WidthRequest="24" HeightRequest="24" />
+            </Border>
+
+            <!-- FAB descarga Fondo de Ahorro (derecha, pestaña 2) -->
+            <Border
+                StrokeShape="RoundRectangle 30"
+                BackgroundColor="#4125F4"
+                StrokeThickness="0"
+                WidthRequest="56" HeightRequest="56"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                Margin="0,0,18,70"
+                IsVisible="{Binding FabDescargaFaVisible}"
+                SemanticProperties.Description="Descargar Fondo de Ahorro">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding DescargarFondoCommand}" />
+                </Border.GestureRecognizers>
+                <Image
+                    Source="icon_descarga_blanco.svg"
+                    WidthRequest="24" HeightRequest="24" />
+            </Border>
+
+            <!-- FAB PDF Fondo de Ahorro (izquierda, pestaña 2) -->
+            <Border
+                StrokeShape="RoundRectangle 30"
+                BackgroundColor="#4125F4"
+                StrokeThickness="0"
+                WidthRequest="56" HeightRequest="56"
+                HorizontalOptions="Start"
+                VerticalOptions="End"
+                Margin="18,0,0,70"
+                IsVisible="{Binding FabPdfFaVisible}"
+                SemanticProperties.Description="Abrir PDF Fondo de Ahorro">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding AbrirPdfFondoCommand}" />
                 </Border.GestureRecognizers>
                 <Image
                     Source="icon_pdf_blanco.svg"
@@ -244,6 +367,103 @@
                 </VerticalStackLayout>
 
             </Grid>
+        </Border>
+
+        <!-- ============ Modal Seleccionar Fechas (Fondo de Ahorro) ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="3"
+            IsVisible="{Binding ModalFechasVisible}"
+            BackgroundColor="#80707070"
+            StrokeThickness="0"
+            Padding="0">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CerrarModalFechasCommand}" />
+            </Border.GestureRecognizers>
+            <Border
+                StrokeShape="RoundRectangle 12"
+                BackgroundColor="White"
+                StrokeThickness="0"
+                WidthRequest="300"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                Padding="18,16">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="CardModal_Tapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="16">
+
+                    <Label
+                        Text="Seleccionar Fechas"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="#4125F4"
+                        HorizontalOptions="Center" />
+
+                    <!-- Campo Desde -->
+                    <Grid
+                        ColumnDefinitions="*,Auto"
+                        BackgroundColor="#FAFAFA"
+                        Padding="12,10"
+                        SemanticProperties.Description="Campo Desde">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ElegirDesdeCommand}" />
+                        </Grid.GestureRecognizers>
+                        <VerticalStackLayout Grid.Column="0" Spacing="3">
+                            <Label Text="Desde" FontSize="11" TextColor="#757575" />
+                            <Label Text="{Binding FechaDesdeTexto}" FontSize="14" TextColor="#1A1A1A" />
+                        </VerticalStackLayout>
+                        <Image
+                            Grid.Column="1"
+                            Source="icon_calendario_azul.svg"
+                            WidthRequest="20"
+                            HeightRequest="20"
+                            VerticalOptions="Center" />
+                    </Grid>
+
+                    <!-- Campo Hasta -->
+                    <Grid
+                        ColumnDefinitions="*,Auto"
+                        BackgroundColor="#FAFAFA"
+                        Padding="12,10"
+                        SemanticProperties.Description="Campo Hasta">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ElegirHastaCommand}" />
+                        </Grid.GestureRecognizers>
+                        <VerticalStackLayout Grid.Column="0" Spacing="3">
+                            <Label Text="Hasta" FontSize="11" TextColor="#757575" />
+                            <Label Text="{Binding FechaHastaTexto}" FontSize="14" TextColor="#1A1A1A" />
+                        </VerticalStackLayout>
+                        <Image
+                            Grid.Column="1"
+                            Source="icon_calendario_azul.svg"
+                            WidthRequest="20"
+                            HeightRequest="20"
+                            VerticalOptions="Center" />
+                    </Grid>
+
+                    <!-- Botón Consultar -->
+                    <Border
+                        StrokeShape="RoundRectangle 8"
+                        BackgroundColor="#4125F4"
+                        StrokeThickness="0"
+                        HeightRequest="44"
+                        IsEnabled="{Binding PuedeConsultar}"
+                        Opacity="{Binding OpacidadConsultar}"
+                        SemanticProperties.Description="Consultar">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ConsultarFondoCommand}" />
+                        </Border.GestureRecognizers>
+                        <Label
+                            Text="Consultar"
+                            TextColor="White"
+                            FontSize="15"
+                            FontAttributes="Bold"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+
+                </VerticalStackLayout>
+            </Border>
         </Border>
 
         <!-- ============ Overlay Procesando.... ============ -->
