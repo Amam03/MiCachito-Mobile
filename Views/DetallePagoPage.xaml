@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
+    xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
+    x:Class="MiCachito.Mobile.Views.DetallePagoPage"
+    x:DataType="vm:DetallePagoViewModel"
+    BackgroundColor="#FAFAFA"
+    NavigationPage.HasNavigationBar="False"
+    Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*" Padding="0">
+
+        <!-- ============ Header azul con Folio/Fecha/Total (mockup 8.1) ============ -->
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="#4125F4" Padding="14,12" Spacing="6">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <Label
+                    Grid.Column="0"
+                    Text="←"
+                    FontSize="22"
+                    FontAttributes="Bold"
+                    TextColor="White"
+                    VerticalOptions="Center">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding GoBackCommand}" />
+                    </Label.GestureRecognizers>
+                </Label>
+                <Label
+                    Grid.Column="1"
+                    Text="{Binding Title}"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    TextColor="White"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center" />
+                <Label
+                    Grid.Column="2"
+                    Text="•••"
+                    FontSize="16"
+                    TextColor="White"
+                    VerticalOptions="Center" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" Margin="4,4,4,0">
+                <Label Grid.Row="0" Grid.Column="0"
+                       Text="{Binding Recibo.FolioTexto}"
+                       FontSize="15" FontAttributes="Bold" TextColor="White"
+                       HorizontalOptions="Start" />
+                <Label Grid.Row="0" Grid.Column="1"
+                       Text="{Binding Recibo.TotalTexto}"
+                       FontSize="15" FontAttributes="Bold" TextColor="White"
+                       HorizontalOptions="End" />
+                <Label Grid.Row="1" Grid.Column="0"
+                       Text="{Binding Recibo.FechaTexto}"
+                       FontSize="13" TextColor="#D8D4F9"
+                       HorizontalOptions="Start" />
+                <Label Grid.Row="1" Grid.Column="1"
+                       Text="Total"
+                       FontSize="12" TextColor="#D8D4F9"
+                       HorizontalOptions="End" />
+            </Grid>
+        </VerticalStackLayout>
+
+        <!-- ============ Desglose + FAB ============ -->
+        <Grid Grid.Row="1" RowDefinitions="*,Auto">
+
+            <ScrollView Grid.Row="0">
+                <VerticalStackLayout Padding="12,12,12,102" Spacing="10">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Recibo.Desglose}" Spacing="10">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="entities:MovimientoPago">
+                                <Border
+                                    StrokeShape="RoundRectangle 10"
+                                    BackgroundColor="White"
+                                    StrokeThickness="0"
+                                    Padding="14,12">
+                                    <Border.Shadow>
+                                        <Shadow Brush="Gray" Radius="2" Opacity="0.15" />
+                                    </Border.Shadow>
+                                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                        <Label Grid.Row="0" Grid.Column="0"
+                                               Text="{Binding Descripcion}"
+                                               FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
+                                        <Label Grid.Row="0" Grid.Column="1"
+                                               Text="{Binding MontoTexto}"
+                                               FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A"
+                                               HorizontalOptions="End" />
+                                        <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
+                                               Text="{Binding Referencia}"
+                                               FontSize="12" TextColor="#666666" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <!-- Aviso verde: guardado en Descargas (mockup 8.2) -->
+            <Border
+                Grid.Row="1"
+                IsVisible="{Binding DescargaExitosa}"
+                StrokeShape="RoundRectangle 8"
+                BackgroundColor="#4CB050"
+                StrokeThickness="0"
+                Padding="14,10"
+                Margin="12,0,12,10">
+                <Grid ColumnDefinitions="*,Auto">
+                    <Label
+                        Grid.Column="0"
+                        Text="Archivo guardado en la carpeta de Descargas"
+                        TextColor="White"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        VerticalOptions="Center" />
+                    <Label
+                        Grid.Column="1"
+                        Text="Abrir"
+                        TextColor="White"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        VerticalOptions="Center"
+                        Padding="8,4">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding AbrirComprobanteCommand}" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </Grid>
+            </Border>
+
+            <!-- FAB azul de descarga (mockup 8.2) -->
+            <Border
+                Grid.Row="0"
+                StrokeShape="RoundRectangle 30"
+                BackgroundColor="#4125F4"
+                StrokeThickness="0"
+                WidthRequest="56" HeightRequest="56"
+                HorizontalOptions="End"
+                VerticalOptions="End"
+                Margin="0,0,18,18"
+                IsVisible="{Binding HayRecibo}"
+                SemanticProperties.Description="Descargar comprobante">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding DescargarCommand}" />
+                </Border.GestureRecognizers>
+                <Image
+                    Source="icon_descarga_blanco.svg"
+                    WidthRequest="24" HeightRequest="24" />
+            </Border>
+
+        </Grid>
+
+        <!-- ============ Overlay "Descargando..." (mockup 8.2) ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="2"
+            IsVisible="{Binding Descargando}"
+            BackgroundColor="#80000000"
+            StrokeThickness="0"
+            Padding="0"
+            InputTransparent="False">
+            <VerticalStackLayout
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Spacing="14">
+                <ActivityIndicator IsRunning="True" Color="White" WidthRequest="40" HeightRequest="40" />
+                <Label
+                    Text="Descargando..."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Border>
+
+    </Grid>
+
+</ContentPage>

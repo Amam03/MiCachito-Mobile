@@ -113,6 +113,12 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Views.DepositosPage>();
             builder.Services.AddTransient<ViewModels.NuevoDepositoViewModel>();
             builder.Services.AddTransient<Views.NuevoDepositoPage>();
+            builder.Services.AddSingleton<Services.RecibosPagoService>();
+            builder.Services.AddSingleton<Services.ReciboPagoPdfService>();
+            builder.Services.AddTransient<ViewModels.RecibosPagoViewModel>();
+            builder.Services.AddTransient<Views.RecibosPagoPage>();
+            builder.Services.AddTransient<ViewModels.DetallePagoViewModel>();
+            builder.Services.AddTransient<Views.DetallePagoPage>();
             builder.Services.AddTransient<Views.ExpendiosPage>();
 
 #if ANDROID
