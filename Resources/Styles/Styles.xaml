@@ -494,7 +494,7 @@
 
     <Style TargetType="Label" x:Key="HomeHeaderSubtitle">
         <Setter Property="FontSize" Value="13" />
-        <Setter Property="TextColor" Value="#CCFFFFFF" />
+        <Setter Property="TextColor" Value="{StaticResource McHeaderSubtitle}" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
@@ -508,7 +508,7 @@
         <Setter Property="HeightRequest" Value="64" />
         <Setter Property="BorderWidth" Value="0" />
         <Setter Property="Shadow">
-            <Shadow Brush="#40000000"
+            <Shadow Brush="{StaticResource McShadow}"
                     Offset="0,2"
                     Radius="6"
                     Opacity="0.25" />

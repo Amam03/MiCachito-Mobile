@@ -58,7 +58,7 @@
                     Text="{Binding NombreSorteo}"
                     FontSize="14"
                     FontAttributes="Bold"
-                    TextColor="#01C852"
+                    TextColor="{StaticResource McSuccess}"
                     HorizontalOptions="Center" />
             </Grid>
         </Border>

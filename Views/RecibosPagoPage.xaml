@@ -6,14 +6,14 @@
     xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
     x:Class="MiCachito.Mobile.Views.RecibosPagoPage"
     x:DataType="vm:RecibosPagoViewModel"
-    BackgroundColor="#FAFAFA"
+    BackgroundColor="{StaticResource McPageBg}"
     NavigationPage.HasNavigationBar="False"
     Shell.NavBarIsVisible="False">
 
     <Grid RowDefinitions="Auto,*" Padding="0">
 
         <!-- ============ Header azul (patrón Gestión) ============ -->
-        <VerticalStackLayout Grid.Row="0" BackgroundColor="#4125F4" Padding="14,10">
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource McPrimaryMorado}" Padding="14,10">
             <Grid ColumnDefinitions="Auto,*,Auto">
                 <Label
                     Grid.Column="0"

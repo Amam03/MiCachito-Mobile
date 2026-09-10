@@ -6,14 +6,14 @@
     xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
     x:Class="MiCachito.Mobile.Views.DetallePagoPage"
     x:DataType="vm:DetallePagoViewModel"
-    BackgroundColor="#FAFAFA"
+    BackgroundColor="{StaticResource McPageBg}"
     NavigationPage.HasNavigationBar="False"
     Shell.NavBarIsVisible="False">
 
     <Grid RowDefinitions="Auto,*" Padding="0">
 
         <!-- ============ Header azul con Folio/Fecha/Total (mockup 8.1) ============ -->
-        <VerticalStackLayout Grid.Row="0" BackgroundColor="#4125F4" Padding="14,12" Spacing="6">
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource McPrimaryMorado}" Padding="14,12" Spacing="6">
             <Grid ColumnDefinitions="Auto,*,Auto">
                 <Label
                     Grid.Column="0"
@@ -134,7 +134,7 @@
             <Border
                 Grid.Row="0"
                 StrokeShape="RoundRectangle 30"
-                BackgroundColor="#4125F4"
+                BackgroundColor="{StaticResource McPrimaryMorado}"
                 StrokeThickness="0"
                 WidthRequest="56" HeightRequest="56"
                 HorizontalOptions="End"

@@ -5,14 +5,14 @@
     xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
     x:Class="MiCachito.Mobile.Views.ReportesPage"
     x:DataType="vm:ReportesViewModel"
-    BackgroundColor="#FAFAFA"
+    BackgroundColor="{StaticResource McPageBg}"
     NavigationPage.HasNavigationBar="False"
     Shell.NavBarIsVisible="False">
 
     <Grid RowDefinitions="Auto,*,Auto" Padding="0">
 
         <!-- ============ Header azul (patrón Gestión) ============ -->
-        <VerticalStackLayout Grid.Row="0" BackgroundColor="#4125F4" Padding="14,10">
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource McPrimaryMorado}" Padding="14,10">
             <Grid ColumnDefinitions="Auto,*,Auto">
                 <Label
                     Grid.Column="0"
@@ -53,7 +53,7 @@
                     <Border
                         IsVisible="{Binding SinReporte}"
                         StrokeShape="RoundRectangle 10"
-                        BackgroundColor="#4125F4"
+                        BackgroundColor="{StaticResource McPrimaryMorado}"
                         StrokeThickness="0"
                         HeightRequest="48"
                         Margin="20,24,20,0">
@@ -150,7 +150,7 @@
                         </Grid.GestureRecognizers>
                         <VerticalStackLayout Grid.Column="0" Spacing="4">
                             <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
-                            <Label Text="Indicar Periodo" FontSize="13" TextColor="#4125F4" />
+                            <Label Text="Indicar Periodo" FontSize="13" TextColor="{StaticResource McPrimaryMorado}" />
                         </VerticalStackLayout>
                         <Image
                             Grid.Column="1"
@@ -167,8 +167,8 @@
                             <TapGestureRecognizer Command="{Binding AbrirModalFechasCommand}" />
                         </VerticalStackLayout.GestureRecognizers>
                         <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
-                        <Label Text="{Binding FechaDesdeLarga}" FontSize="13" FontAttributes="Bold" TextColor="#4125F4" />
-                        <Label Text="{Binding FechaHastaLarga}" FontSize="13" FontAttributes="Bold" TextColor="#4125F4" />
+                        <Label Text="{Binding FechaDesdeLarga}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McPrimaryMorado}" />
+                        <Label Text="{Binding FechaHastaLarga}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McPrimaryMorado}" />
                     </VerticalStackLayout>
 
                     <!-- Gráfica de rendimiento: estado SIN datos (línea base en $0.00 + cuadrícula tenue).
@@ -223,7 +223,7 @@
                         </Grid.GestureRecognizers>
                         <VerticalStackLayout Grid.Column="0" Spacing="4">
                             <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
-                            <Label Text="Indicar Periodo" FontSize="13" TextColor="#4125F4" />
+                            <Label Text="Indicar Periodo" FontSize="13" TextColor="{StaticResource McPrimaryMorado}" />
                         </VerticalStackLayout>
                         <Image
                             Grid.Column="1"
@@ -240,8 +240,8 @@
                             <TapGestureRecognizer Command="{Binding AbrirModalFechasCommand}" />
                         </VerticalStackLayout.GestureRecognizers>
                         <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
-                        <Label Text="{Binding FacDesdeLarga}" FontSize="13" FontAttributes="Bold" TextColor="#4125F4" />
-                        <Label Text="{Binding FacHastaLarga}" FontSize="13" FontAttributes="Bold" TextColor="#4125F4" />
+                        <Label Text="{Binding FacDesdeLarga}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McPrimaryMorado}" />
+                        <Label Text="{Binding FacHastaLarga}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McPrimaryMorado}" />
                     </VerticalStackLayout>
 
                     <!-- Métricas principales: Total facturado + porcentaje principal (dinámicos) -->
@@ -311,7 +311,7 @@
             <!-- FAB descarga Estado de Cuenta (derecha, pestaña 1) -->
             <Border
                 StrokeShape="RoundRectangle 30"
-                BackgroundColor="#4125F4"
+                BackgroundColor="{StaticResource McPrimaryMorado}"
                 StrokeThickness="0"
                 WidthRequest="56" HeightRequest="56"
                 HorizontalOptions="End"
@@ -330,7 +330,7 @@
             <!-- FAB PDF Estado de Cuenta (izquierda, pestaña 1) -->
             <Border
                 StrokeShape="RoundRectangle 30"
-                BackgroundColor="#4125F4"
+                BackgroundColor="{StaticResource McPrimaryMorado}"
                 StrokeThickness="0"
                 WidthRequest="56" HeightRequest="56"
                 HorizontalOptions="Start"
@@ -349,7 +349,7 @@
             <!-- FAB descarga Fondo de Ahorro (derecha, pestaña 2) -->
             <Border
                 StrokeShape="RoundRectangle 30"
-                BackgroundColor="#4125F4"
+                BackgroundColor="{StaticResource McPrimaryMorado}"
                 StrokeThickness="0"
                 WidthRequest="56" HeightRequest="56"
                 HorizontalOptions="End"
@@ -368,7 +368,7 @@
             <!-- FAB PDF Fondo de Ahorro (izquierda, pestaña 2) -->
             <Border
                 StrokeShape="RoundRectangle 30"
-                BackgroundColor="#4125F4"
+                BackgroundColor="{StaticResource McPrimaryMorado}"
                 StrokeThickness="0"
                 WidthRequest="56" HeightRequest="56"
                 HorizontalOptions="Start"
@@ -387,7 +387,7 @@
             <!-- FAB descarga Facturación (derecha, pestaña 3) -->
             <Border
                 StrokeShape="RoundRectangle 30"
-                BackgroundColor="#4125F4"
+                BackgroundColor="{StaticResource McPrimaryMorado}"
                 StrokeThickness="0"
                 WidthRequest="56" HeightRequest="56"
                 HorizontalOptions="End"
@@ -406,7 +406,7 @@
             <!-- FAB PDF Facturación (izquierda, pestaña 3) -->
             <Border
                 StrokeShape="RoundRectangle 30"
-                BackgroundColor="#4125F4"
+                BackgroundColor="{StaticResource McPrimaryMorado}"
                 StrokeThickness="0"
                 WidthRequest="56" HeightRequest="56"
                 HorizontalOptions="Start"
@@ -511,13 +511,13 @@
                         Text="Seleccionar Fechas"
                         FontSize="16"
                         FontAttributes="Bold"
-                        TextColor="#4125F4"
+                        TextColor="{StaticResource McPrimaryMorado}"
                         HorizontalOptions="Center" />
 
                     <!-- Campo Desde -->
                     <Grid
                         ColumnDefinitions="*,Auto"
-                        BackgroundColor="#FAFAFA"
+                        BackgroundColor="{StaticResource McPageBg}"
                         Padding="12,10"
                         SemanticProperties.Description="Campo Desde">
                         <Grid.GestureRecognizers>
@@ -538,7 +538,7 @@
                     <!-- Campo Hasta -->
                     <Grid
                         ColumnDefinitions="*,Auto"
-                        BackgroundColor="#FAFAFA"
+                        BackgroundColor="{StaticResource McPageBg}"
                         Padding="12,10"
                         SemanticProperties.Description="Campo Hasta">
                         <Grid.GestureRecognizers>
@@ -559,7 +559,7 @@
                     <!-- Botón Consultar -->
                     <Border
                         StrokeShape="RoundRectangle 8"
-                        BackgroundColor="#4125F4"
+                        BackgroundColor="{StaticResource McPrimaryMorado}"
                         StrokeThickness="0"
                         HeightRequest="44"
                         IsEnabled="{Binding ModalPuedeConsultar}"

@@ -104,25 +104,25 @@
                         FontSize="16"
                         FontAttributes="Bold"
                         FontFamily="OpenSansSemibold"
-                        TextColor="#333333"
+                        TextColor="{StaticResource McTextBody}"
                         HorizontalOptions="Start" />
 
                     <Border
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 12"
-                        Stroke="#DCDCDC"
+                        Stroke="{StaticResource McBorder}"
                         BackgroundColor="White"
                         Padding="16,14,16,14">
 
                         <Entry
                             Text="{Binding NumeroTelefono}"
                             Placeholder="Ingresa el número a recargar"
-                            PlaceholderColor="#AAAAAA"
+                            PlaceholderColor="{StaticResource McPlaceholderGris}"
                             Keyboard="Telephone"
                             MaxLength="10"
                             FontSize="20"
                             FontFamily="OpenSansRegular"
-                            TextColor="#000000"
+                            TextColor="{StaticResource Black}"
                             HorizontalTextAlignment="Center"
                             ClearButtonVisibility="WhileEditing" />
 
@@ -138,25 +138,25 @@
                         FontSize="16"
                         FontAttributes="Bold"
                         FontFamily="OpenSansSemibold"
-                        TextColor="#333333"
+                        TextColor="{StaticResource McTextBody}"
                         HorizontalOptions="Start" />
 
                     <Border
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 12"
-                        Stroke="#DCDCDC"
+                        Stroke="{StaticResource McBorder}"
                         BackgroundColor="White"
                         Padding="16,14,16,14">
 
                         <Entry
                             Text="{Binding ConfirmarNumeroTelefono}"
                             Placeholder="Confirma el número a recargar"
-                            PlaceholderColor="#AAAAAA"
+                            PlaceholderColor="{StaticResource McPlaceholderGris}"
                             Keyboard="Telephone"
                             MaxLength="10"
                             FontSize="20"
                             FontFamily="OpenSansRegular"
-                            TextColor="#000000"
+                            TextColor="{StaticResource Black}"
                             HorizontalTextAlignment="Center"
                             ClearButtonVisibility="WhileEditing" />
 
@@ -182,7 +182,7 @@
                         Text="Los números coinciden"
                         FontSize="15"
                         FontFamily="OpenSansRegular"
-                        TextColor="#01C852"
+                        TextColor="{StaticResource McSuccess}"
                         VerticalOptions="Center" />
 
                 </HorizontalStackLayout>
@@ -199,14 +199,14 @@
                         FontSize="15"
                         FontAttributes="Bold"
                         FontFamily="OpenSansSemibold"
-                        TextColor="#E53935"
+                        TextColor="{StaticResource McError}"
                         HorizontalOptions="Center" />
 
                     <Label
                         Text="Verifica que ambos números sean iguales"
                         FontSize="12"
                         FontFamily="OpenSansRegular"
-                        TextColor="#E53935"
+                        TextColor="{StaticResource McError}"
                         Opacity="0.8"
                         HorizontalOptions="Center" />
 
@@ -227,7 +227,7 @@
             <Button
                 Text="Finalizar"
                 Command="{Binding FinalizarCommand}"
-                BackgroundColor="#1A1A1A"
+                BackgroundColor="{StaticResource McTextDark}"
                 TextColor="White"
                 FontSize="18"
                 FontAttributes="Bold"

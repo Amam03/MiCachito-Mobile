@@ -35,7 +35,7 @@
                     Text="{Binding NombreSorteo}"
                     FontSize="15"
                     FontAttributes="Bold"
-                    TextColor="#01C852"
+                    TextColor="{StaticResource McSuccess}"
                     HorizontalOptions="Center" />
             </Grid>
         </Border>
@@ -141,7 +141,7 @@
                                 Text="{Binding ContadorCachitos, StringFormat='{0:00}'}"
                                 FontSize="18"
                                 FontAttributes="Bold"
-                                TextColor="#01C852"
+                                TextColor="{StaticResource McSuccess}"
                                 VerticalOptions="Center" />
                             <Label
                                 Grid.Column="1"
@@ -171,7 +171,7 @@
                                 Text="{Binding ContadorTiras, StringFormat='{0:00}'}"
                                 FontSize="18"
                                 FontAttributes="Bold"
-                                TextColor="#01C852"
+                                TextColor="{StaticResource McSuccess}"
                                 VerticalOptions="Center" />
                             <Label
                                 Grid.Column="1"
@@ -201,7 +201,7 @@
                                 Text="{Binding ContadorSeries, StringFormat='{0:00}'}"
                                 FontSize="18"
                                 FontAttributes="Bold"
-                                TextColor="#01C852"
+                                TextColor="{StaticResource McSuccess}"
                                 VerticalOptions="Center" />
                             <Label
                                 Grid.Column="1"
@@ -239,7 +239,7 @@
                 FontSize="16"
                 FontAttributes="Bold"
                 FontFamily="OpenSansSemibold"
-                BackgroundColor="#01C852"
+                BackgroundColor="{StaticResource McSuccess}"
                 TextColor="{StaticResource White}"
                 CornerRadius="10"
                 HeightRequest="48"

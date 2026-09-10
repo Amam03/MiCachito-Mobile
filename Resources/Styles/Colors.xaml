@@ -65,6 +65,17 @@
     <Color x:Key="McPremioPanelOscuro">#343432</Color>
     <Color x:Key="McPremioFondoOscuro">#2B2B29</Color>
 
+    <!-- Colores base (valores existentes en pantallas, centralizados) -->
+    <Color x:Key="McPrimaryMorado">#4125F4</Color>
+    <Color x:Key="McPageBg">#FAFAFA</Color>
+    <Color x:Key="McSuccess">#01C852</Color>
+    <Color x:Key="McTextBody">#333333</Color>
+    <Color x:Key="McBorder">#DCDCDC</Color>
+    <Color x:Key="McPlaceholderGris">#AAAAAA</Color>
+    <Color x:Key="McError">#E53935</Color>
+    <Color x:Key="McHeaderSubtitle">#CCFFFFFF</Color>
+    <Color x:Key="McShadow">#40000000</Color>
+
     <Color x:Key="Primary">#00C851</Color>
     <Color x:Key="PrimaryDark">#00A040</Color>
     <Color x:Key="PrimaryDarkText">#242424</Color>

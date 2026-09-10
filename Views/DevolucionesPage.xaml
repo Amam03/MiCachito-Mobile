@@ -106,7 +106,7 @@
                                         Text="{Binding NombreSorteo}"
                                         FontSize="14"
                                         FontAttributes="Bold"
-                                        TextColor="#01C852" />
+                                        TextColor="{StaticResource McSuccess}" />
                                     <Label
                                         Grid.Row="2"
                                         Text="{Binding ResumenText}"
