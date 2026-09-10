@@ -119,6 +119,8 @@ namespace MiCachito.Mobile
             builder.Services.AddSingleton<Services.EstadoDeCuentaPdfService>();
             builder.Services.AddSingleton<Services.FondoAhorroService>();
             builder.Services.AddSingleton<Services.FondoAhorroPdfService>();
+            builder.Services.AddSingleton<Services.FacturacionService>();
+            builder.Services.AddSingleton<Services.FacturacionPdfService>();
             builder.Services.AddTransient<ViewModels.RecibosPagoViewModel>();
             builder.Services.AddTransient<Views.RecibosPagoPage>();
             builder.Services.AddTransient<ViewModels.ReportesViewModel>();
