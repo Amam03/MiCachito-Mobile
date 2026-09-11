@@ -85,7 +85,7 @@ public class SorteoActivoLotenal
     /// de la pantalla Sorteos de Gestión.
     /// </summary>
     public string FechaLarga =>
-        FechaCelebracion.ToString("dd-MMMM-yyyy", CultureInfo.CreateSpecificCulture("es-MX"));
+        Helpers.FormatosFecha.FechaLarga(FechaCelebracion);
 
     /// <summary>
     /// Fecha en formato comparable con la del código de barras del boleto

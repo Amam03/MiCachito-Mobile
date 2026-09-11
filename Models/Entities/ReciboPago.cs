@@ -52,8 +52,8 @@ public class ReciboPago
     /// <summary>Folio para mostrar: "Folio: 41868".</summary>
     public string FolioTexto => $"Folio: {Folio}";
 
-    /// <summary>Fecha para mostrar/lista: "28-octubre-2025" (dd-MMMM-yyyy, cultura local).</summary>
-    public string FechaTexto => Fecha.ToString("dd-MMMM-yyyy", CultureInfo.CurrentCulture);
+    /// <summary>Fecha para mostrar/lista: "28-octubre-2025" (dd-MMMM-yyyy, es-MX fijo).</summary>
+    public string FechaTexto => Helpers.FormatosFecha.FechaLarga(Fecha);
 
     /// <summary>Total para mostrar: "$4,280.00".</summary>
     public string TotalTexto => $"${Total.ToString("#,##0.00", CultureInfo.CurrentCulture)}";

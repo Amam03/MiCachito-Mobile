@@ -8,11 +8,21 @@ Está dirigido a desarrolladores y a asistentes de IA. Describe únicamente el e
 
 ## Estado del documento
 
-- **Fecha de última actualización:** 2026-08-04
-- **Commit del frontend analizado:** `4a51d17` (Agregar gitignore y limpiar archivos generados)
+- **Fecha de última actualización:** 2026-09-10
+- **Commit del frontend analizado:** `c566350` (Facturación: flujo completo UI-only + correcciones de auditoría en working tree)
 - **Commit de la rama `dev-mobile` utilizada como referencia:** `e7ad8f5` (Conexion con app y usuario de prueba)
 
 > Este documento debe actualizarse cada vez que cambie la arquitectura, se agreguen módulos o se analice una versión distinta del código. Siempre registrar la fecha y los commits analizados.
+
+### Cambios desde la última revisión (2026-08-04 → 2026-09-10)
+
+- Fase **SOLO INTERFAZ** en curso: los módulos nuevos usan mock data estático en memoria (patrón `Data/XxxData.cs` para catálogos verbatim de mockups; services con registros temporales en memoria); la app NO está conectada al backend salvo Login (que funciona contra el backend real y persiste sesión).
+- Pestaña **Gestión** completa: 8 módulos (Tickets de Venta, Devolución, Premios y Reintegros, Sorteos, Depósitos, Recibos de Pago, Reportes, Tira de Liquidación deshabilitada) + **Tiempo de Aire** ya implementado desde agosto (ver `docs/TIEMPO_AIRE_*.md`).
+- **Reportes** completo: Estado de Cuenta + Fondo de Ahorro + Facturación (una página con tab bar interno de 3 pestañas).
+- Nueva carpeta `Controls/` con `PieChartDrawable.cs` (gráfica circular con ICanvas nativo, sin paquetes).
+- 4 servicios PDF con SkiaSharp (ReciboPago, EstadoDeCuenta, FondoAhorro, Facturacion) + TicketPdfService, y `DescargasService` (MediaStore, Android 10+; guard API<29 con respaldo a AppDataDirectory).
+- Escáner QR integrado (CameraX + zxing-cpp nativo) — ver skill `micachito-mobile` / `references/camara-escaner-zxing.md`.
+- `Helpers/FormatosFecha.cs`: única fuente de fechas en español (es-MX) — NUNCA CurrentCulture.
 
 ---
 
@@ -98,9 +108,11 @@ Views (eventos) ──► ViewModels (Commands) ──► Services ──► IAp
 
 ### 2.1 Notas sobre carpetas
 
-- `Controls/` **existe pero está vacía**: se creó en el `.csproj` (`<Folder Include="Controls\" />`) pero no contiene componentes.
-- `MainPage.xaml` / `MainPage.xaml.cs` son **restos de la plantilla de .NET MAUI** (contador "Hello World"): no están registrados en la inyección de dependencias ni se navegan. No forman parte del flujo real.
+- `Controls/` contiene `PieChartDrawable.cs` (gráfica circular de Facturación, ICanvas nativo).
+- ~~`MainPage.xaml` / `MainPage.xaml.cs`~~ **eliminados** (2026-09-10, auditoría): eran restos de la plantilla "Hello World", sin registro en DI ni navegación. También se retiró `dotnet_bot.png` y su entrada en el csproj.
 - Las subcarpetas `Models/Common`, `Models/Entities`, `Models/Requests`, `Models/Responses` existen y se usan.
+- `Helpers/FormatosFecha.cs` (nuevo, 2026-09-10): única fuente de formato de fechas en español (es-MX) para pantalla y nombres de archivo PDF.
+- `Data/` catálogos estáticos verbatim de mockups (fase solo-interfaz) y `Natives/` + `Interop/` (zxing-cpp del escáner QR).
 
 ---
 

@@ -57,7 +57,6 @@
 
         <!-- Images -->
         <MauiImage Include="Resources\Images\*" />
-        <MauiImage Update="Resources\Images\dotnet_bot.png" Resize="True" BaseSize="300,185" />
         <MauiImage Update="Resources\Images\logo_micachito.svg" BaseSize="120,120" />
 
         <!-- Tab icons -->
@@ -107,6 +106,9 @@
         <MauiImage Update="Resources\Images\logo_virquin_mobile.svg" BaseSize="100,32" />
         <MauiImage Update="Resources\Images\logo_soriana.svg" BaseSize="80,32" />
         <MauiImage Update="Resources\Images\logo_diry_movil.svg" BaseSize="90,32" />
+        <MauiImage Update="Resources\Images\logo_cfe_bienestar.svg" BaseSize="110,40" />
+        <MauiImage Update="Resources\Images\logo_unefon.svg" BaseSize="80,36" />
+        <MauiImage Update="Resources\Images\logo_yobicel.svg" BaseSize="85,34" />
         <MauiImage Update="Resources\Images\logo_oui.svg" BaseSize="60,32" />
         <MauiImage Update="Resources\Images\logo_pillo_fon.svg" BaseSize="90,32" />
         <MauiImage Update="Resources\Images\logo_cierto.svg" BaseSize="70,32" />

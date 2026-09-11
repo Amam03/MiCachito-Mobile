@@ -108,6 +108,8 @@ FORMA DE TRABAJO
 
 El desarrollo será pantalla por pantalla.
 
+**Estado actual (2026-09-10, commit c566350):** Fase SOLO INTERFAZ con mock data — la app NO está conectada al backend salvo Login (funciona contra el backend real y persiste sesión). Implementado y pusheado: pestaña Vender LOTENAL completa + Sorteos Tec + Consulta de Premios (escáner QR integrado); pestaña Gestión completa: Tickets de Venta, Devolución, Premios y Reintegros, Sorteos, Depósitos, Recibos de Pago, Reportes (Estado de Cuenta + Fondo de Ahorro + Facturación) y Tira de Liquidación (deshabilitada); Tiempo de Aire implementado desde agosto (pendiente revisar contra mockups frescos). Expendios y Cuenta aún son placeholders. Reglas de estilo fijadas en `docs/Convenciones.md` §4.5-4.6 (BoxView/Padding, cero emojis, NavBarIsVisible, fechas es-MX). Documentación por módulo en `docs/NOTAS_*.md`.
+
 Para cada pantalla debes seguir este flujo:
 
 1. Analizar el diagrama de la pantalla.

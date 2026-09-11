@@ -1,5 +1,6 @@
 using Android.App;
 using Android.Content;
+using Android.OS;
 using Android.Provider;
 using Java.IO;
 using Java.Lang;
@@ -21,12 +22,24 @@ public static class DescargasService
     {
         try
         {
+            // MediaStore.Downloads + RelativePath exigen API 29+ (Android 10).
+            // En API < 29 el guard devuelve null: el llamador ya usa
+            // AppDataDirectory como respaldo (el PDF se abre igual desde el
+            // visor). Soporte directo a Descargas en Android 9-: se cierra en
+            // la fase de integración backend (WRITE_EXTERNAL_STORAGE).
+            if (Build.VERSION.SdkInt < BuildVersionCodes.Q)
+            {
+                return null;
+            }
+
             Activity? activity = Platform.CurrentActivity;
             if (activity is null || activity.IsFinishing || activity.IsDestroyed)
             {
                 return null;
             }
 
+            // Sitios de llamada API 29+: protegidos por el guard de arriba.
+#pragma warning disable CA1416
             var valores = new ContentValues();
             valores.Put(MediaStore.IMediaColumns.DisplayName, nombreVisible);
             valores.Put(MediaStore.IMediaColumns.MimeType, "application/pdf");
@@ -45,6 +58,7 @@ public static class DescargasService
             {
                 return null;
             }
+#pragma warning restore CA1416
 
             entrada.CopyTo(salida);
             salida.Flush();

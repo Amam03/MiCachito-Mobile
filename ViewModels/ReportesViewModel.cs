@@ -166,17 +166,6 @@ public partial class ReportesViewModel : BaseViewModel
     /// <summary>True si la pestaña Facturación está activa.</summary>
     public bool Pestana2Activa => PestanaActiva == 2;
 
-    /// <summary>Placeholder de Facturación (pestaña 3).</summary>
-    public bool PestanaPlaceholder => PestanaActiva == 2;
-
-    /// <summary>Nombre de la pestaña activa (título del placeholder).</summary>
-    public string TituloPestana => PestanaActiva switch
-    {
-        1 => "Fondo de Ahorro",
-        2 => "Facturación",
-        _ => "Estado de Cuenta",
-    };
-
     /// <summary>Iconos de las pestañas (azul la activa, gris las demás).</summary>
     public string IconoPestana0 => Pestana0Activa ? "icon_grafica_azul.svg" : "icon_grafica_gris.svg";
     public string IconoPestana1 => Pestana1Activa ? "icon_alcancia_azul.svg" : "icon_alcancia_gris.svg";
@@ -299,15 +288,13 @@ public partial class ReportesViewModel : BaseViewModel
 
     /// <summary>Formato de pantalla: "29-octubre-2025" (meses en español).</summary>
     private static string FormatoLargo(DateTime d) =>
-        $"{d:dd}-{d.ToString("MMMM", System.Globalization.CultureInfo.CreateSpecificCulture("es-MX")).ToLowerInvariant()}-{d:yyyy}";
+        Helpers.FormatosFecha.FechaLarga(d);
 
     partial void OnPestanaActivaChanged(int value)
     {
         OnPropertyChanged(nameof(Pestana0Activa));
         OnPropertyChanged(nameof(Pestana1Activa));
         OnPropertyChanged(nameof(Pestana2Activa));
-        OnPropertyChanged(nameof(PestanaPlaceholder));
-        OnPropertyChanged(nameof(TituloPestana));
         OnPropertyChanged(nameof(IconoPestana0));
         OnPropertyChanged(nameof(IconoPestana1));
         OnPropertyChanged(nameof(IconoPestana2));
@@ -600,7 +587,7 @@ public partial class ReportesViewModel : BaseViewModel
             await Task.Delay(2000);
 
 #if ANDROID
-            string nombre = $"fondo-ahorro-{_fondoAhorro.FechaFin:dd}-{MesEspanol(_fondoAhorro.FechaFin)}-{_fondoAhorro.FechaFin:yyyy}.pdf";
+            string nombre = $"fondo-ahorro-{Helpers.FormatosFecha.FechaArchivo(_fondoAhorro.FechaFin)}.pdf";
             Platforms.Android.Services.DescargasService.GuardarEnDescargas(ruta, nombre);
 #endif
             FondoDescargado = true;
@@ -664,7 +651,7 @@ public partial class ReportesViewModel : BaseViewModel
             await Task.Delay(2000);
 
 #if ANDROID
-            string nombre = $"facturacion-{_facturacion.FechaFin:dd}-{MesEspanol(_facturacion.FechaFin)}-{_facturacion.FechaFin:yyyy}.pdf";
+            string nombre = $"facturacion-{Helpers.FormatosFecha.FechaArchivo(_facturacion.FechaFin)}.pdf";
             Platforms.Android.Services.DescargasService.GuardarEnDescargas(ruta, nombre);
 #endif
             FacDescargado = true;
@@ -701,10 +688,6 @@ public partial class ReportesViewModel : BaseViewModel
             });
         }
     }
-
-    /// <summary>Mes en español minúscula ("octubre").</summary>
-    private static string MesEspanol(DateTime d) =>
-        d.ToString("MMMM", System.Globalization.CultureInfo.CreateSpecificCulture("es-MX")).ToLowerInvariant();
 
     partial void OnFondoDescargadoChanged(bool value)
     {

@@ -65,6 +65,12 @@ public partial class NuevoDepositoViewModel : BaseViewModel
     [ObservableProperty]
     private bool tecladoMontoVisible;
 
+    /// <summary>Notifica el padding derivado del dial-pad.</summary>
+    partial void OnTecladoMontoVisibleChanged(bool value)
+    {
+        OnPropertyChanged(nameof(PaddingPad));
+    }
+
     /// <summary>Cadena cruda del dial-pad (ej. "1", "1.", "1.5", "1.50").</summary>
     [ObservableProperty]
     private string montoCaptura = string.Empty;
@@ -111,8 +117,10 @@ public partial class NuevoDepositoViewModel : BaseViewModel
     public bool TieneComprobante => !string.IsNullOrWhiteSpace(NombreComprobante);
     public bool SinComprobante => !TieneComprobante;
 
-    /// <summary>Espacio inferior del ScrollView cuando el pad está abierto.</summary>
-    public double EspacioPad => TecladoMontoVisible ? 300 : 0;
+    /// <summary>Padding del contenido: márgenes del mockup 7.1 + 300 extra abajo cuando el pad está abierto (sustituye al BoxView espaciador).</summary>
+    public Thickness PaddingPad => TecladoMontoVisible
+        ? new Thickness(20, 14, 20, 310)
+        : new Thickness(20, 14, 20, 10);
 
     public NuevoDepositoViewModel(DepositoService depositos)
     {

@@ -174,11 +174,11 @@ public class FondoAhorroPdfService
 
     /// <summary>Fecha en formato de pantalla: "29-octubre-2025".</summary>
     private static string FormatoFecha(DateTime d) =>
-        $"{d:dd}-{d.ToString("MMMM", CultureInfo.CreateSpecificCulture("es-MX")).ToLowerInvariant()}-{d:yyyy}";
+        Helpers.FormatosFecha.FechaArchivo(d);
 
     /// <summary>Mes corto para el nombre del archivo: "octubre" → "octubre".</summary>
     private static string MesCorto(DateTime d) =>
-        d.ToString("MMMM", CultureInfo.CreateSpecificCulture("es-MX")).ToLowerInvariant();
+        Helpers.FormatosFecha.MesEspanol(d);
 
     /// <summary>Texto o guion si está vacío (estado vacío, sin inventar datos).</summary>
     private static string Vacio(string texto) => string.IsNullOrWhiteSpace(texto) ? "—" : texto;

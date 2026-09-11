@@ -12,7 +12,6 @@ namespace MiCachito.Mobile.Views;
 public partial class NuevaDevolucionPage : ContentPage
 {
     private readonly NuevaDevolucionViewModel _vm;
-    private readonly CancellationTokenSource? _holdCts;
     private System.Timers.Timer? _holdTimer;
 
     public NuevaDevolucionPage(NuevaDevolucionViewModel vm)

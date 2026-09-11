@@ -172,6 +172,21 @@ public partial class LoginPage : ContentPage
 - `Spacing` uniforme dentro de cada stack (el proyecto usa 20) y `Margin` puntual solo donde haga falta.
 - Mantener `Padding` consistente entre pantallas del mismo nivel.
 
+### 4.5 Reglas de UI fijadas durante el desarrollo (sep-2026)
+
+- **NUNCA un `BoxView` como espaciador** (aunque lleve `Color="Transparent"`): en Android se pinta NEGRO. Para espacio usar SIEMPRE `Padding` del contenedor. `BoxView` solo con `Color` explícito (líneas de cuadrícula, indicadores).
+- **Cero emojis** en pantallas y VMs: todo glifo va como SVG Material-style 24×24 (`Resources/Images/icon_<glifo>_<color>.svg`, `<MauiImage Update ... BaseSize="24,24"/>` en el csproj — sin BaseSize se ven borrosos). Las flechas tipográficas (← ▼ ▲) y el "+" del FAB SÍ se permiten como texto de Label.
+- `Shell.NavBarIsVisible="False"` en TODAS las páginas nuevas (la página dibuja su propio header institucional).
+- Colores institucionales: header/botones/FABs `#4125F4`; aviso verde `#4CB050`; fondo de contenido `#F5F5F5`; scrim de overlay `#707070` al 50-80%.
+- Overlays de carga ("Procesando....", "Descargando....") simulados ~2 s en esta fase, texto blanco centrado.
+- Bindings de color hex en `BackgroundColor`/`TextColor` SIEMPRE con `#` inicial.
+- En placeholders de pestañas/tarjetas deshabilitadas: `Opacity` ~0.45 + `InputTransparent="True"` (patrón Tira de Liquidación).
+
+### 4.6 Fechas y montos en pantalla
+
+- **Fechas en español: NUNCA `CurrentCulture`** — el dispositivo puede correr en en-US y renderizar "28-October-2025" (bug real Recibos de Pago, auditoría 2026-09-10). Usar `Helpers/FormatosFecha.cs` (`FechaLarga`, `FechaArchivo`, `MesEspanol`, `FechaHoraLarga`), única fuente con es-MX explícito.
+- Nombre del archivo PDF según el mockup de su pantalla (EC `estado-cuenta-<dd-MM-yyyy>.pdf`, FA/FAC `<nombre>-<dd-mes-aaaa>.pdf`): cada uno replica su mockup, NO unificar.
+
 ---
 
 ## 5. Convenciones C#

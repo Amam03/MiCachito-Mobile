@@ -34,9 +34,9 @@ public class Deposito
     /// <summary>Fecha/hora en que se guardó el registro.</summary>
     public DateTime RegistradoEnUtc { get; set; }
 
-    /// <summary>Fecha y hora del depósito: "dd-MMMM-yyyy HH:mm".</summary>
+    /// <summary>Fecha y hora del depósito: "dd-MMMM-yyyy HH:mm" (es-MX fijo).</summary>
     public string FechaHoraTexto =>
-        $"{FechaDeposito:dd-MMMM-yyyy} {HoraDeposito:hh\\:mm}";
+        Helpers.FormatosFecha.FechaHoraLarga(FechaDeposito, HoraDeposito);
 
     /// <summary>Importe formateado con 2 decimales: "$1.00".</summary>
     public string MontoTexto => $"${Monto:0.00}";
@@ -44,6 +44,6 @@ public class Deposito
     /// <summary>Línea del card: "BANCO AZTECA - $1.00" (mockup 7.3).</summary>
     public string BancoMontoTexto => $"{Banco} - {MontoTexto}";
 
-    /// <summary>Fecha de captura: "Captura: dd-MMMM-yyyy".</summary>
-    public string CapturaTexto => $"Captura: {RegistradoEnUtc:dd-MMMM-yyyy}";
+    /// <summary>Fecha de captura: "Captura: dd-MMMM-yyyy" (es-MX fijo).</summary>
+    public string CapturaTexto => $"Captura: {Helpers.FormatosFecha.FechaLarga(RegistradoEnUtc)}";
 }

@@ -59,7 +59,7 @@
         <!-- ============ Formulario (mockup 7.1) ============ -->
         <ScrollView Grid.Row="1">
             <VerticalStackLayout
-                Padding="20,14,20,10"
+                Padding="{Binding PaddingPad}"
                 Spacing="0"
                 VerticalOptions="Start">
 
@@ -372,9 +372,6 @@
                     FontSize="15"
                     CornerRadius="24"
                     HeightRequest="44" />
-
-                <!-- Espacio inferior para el pad -->
-                <BoxView HeightRequest="{Binding EspacioPad}" IsVisible="{Binding TecladoMontoVisible}" />
 
             </VerticalStackLayout>
         </ScrollView>

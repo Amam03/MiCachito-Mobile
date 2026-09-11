@@ -1,8 +1,10 @@
 # NOTAS — Reportes / Estado de Cuenta (mockups 9.x)
 
-Fase: SOLO INTERFAZ. Pestañas Fondo de Ahorro y Facturación quedaron como
-placeholders navegables ("En preparación") — su contenido es desarrollo
-posterior.
+Fase: SOLO INTERFAZ. Las 3 pestañas de Reportes están implementadas:
+
+- **Estado de Cuenta (9.1)**: ver más abajo (esta misma nota).
+- **Fondo de Ahorro (9.2)**: ver `NOTAS_FONDO_AHORRO.md` (commit 5eb5973).
+- **Facturación (9.3)**: ver `NOTAS_FACTURACION.md` (commit c566350).
 
 ## Qué está implementado
 
@@ -24,6 +26,8 @@ posterior.
   de Recibos de Pago).
 - Descarga real a la carpeta pública Descargas vía MediaStore
   (`DescargasService` reutilizado), nombre `estado-cuenta-<dd-MM-yyyy>.pdf`.
+- Fechas en pantalla y nombres de archivo SIEMPRE en español (es-MX)
+  vía `Helpers/FormatosFecha.cs` (ver "Fechas en español" abajo).
 
 ## Pendientes de backend (NO implementar todavía)
 
@@ -46,16 +50,28 @@ posterior.
 5. **Datos del PDF**: Vendedor y Plaza van vacíos en esta fase —
    llenarlos desde la sesión del usuario autenticado. La tabla resumen
    del PDF debe recibir los mismos valores que la pantalla.
-6. **Pestañas Fondo de Ahorro (9.2) y Facturación (9.3)**: mocks
-   existentes en docs/UI/Gestion; implementar selección de rango de
-   fechas + detalle + PDF cuando toque su etapa.
+6. **Pestañas Fondo de Ahorro (9.2) y Facturación (9.3)**: YA
+   implementadas — ver sus notas. Pendiente de backend: conectar sus
+   services (`FondoAhorroService`, `FacturacionService`) a los
+   endpoints reales.
+
+## Fechas en español (regla de proyecto)
+
+- NUNCA usar `CurrentCulture` para meses por nombre: el dispositivo
+  puede correr en en-US y renderizar "28-October-2025" (bug real
+  Recibos de Pago, hallado en la auditoría 2026-09-10).
+- `Helpers/FormatosFecha.cs` es la única fuente: `MesEspanol(d)`,
+  `FechaArchivo(d)` ("09-octubre-2026"), `FechaLarga(d)` (pantalla),
+  `FechaHoraLarga(fecha, hora)`. Todas con es-MX explícito.
+- Nombre del archivo PDF según el mockup de su pantalla: EC usa
+  `estado-cuenta-<dd-MM-yyyy>.pdf`, FA/FAC usan `<nombre>-<dd-mes-aaaa>.pdf`
+  — cada uno replica su mockup; NO unificar.
 
 ## Supuestos declarados (corregibles)
 
-- a. Pestañas 2 y 3 muestran placeholder "En preparación" (navegables).
-- b. Vendedor/Plaza del PDF vacíos (no inventar datos de negocio).
-- c. FAB descarga visible desde el estado "generado" (spec); el mockup
+- a. Vendedor/Plaza del PDF vacíos (no inventar datos de negocio).
+- b. FAB descarga visible desde el estado "generado" (spec); el mockup
   "Reporte Generado" no lo muestra.
-- d. Pestaña activa: icono+label azul #4125F4; inactivas gris #9E9E9E.
-- e. Overlays ~2 s; la descarga genera el PDF real y lo guarda en
+- c. Pestaña activa: icono+label azul #4125F4; inactivas gris #9E9E9E.
+- d. Overlays ~2 s; la descarga genera el PDF real y lo guarda en
   Descargas (comportamiento igual a Recibos de Pago).
