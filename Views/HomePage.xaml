@@ -44,8 +44,9 @@
             VerticalOptions="Start"
             Padding="20,14,20,0">
 
-            <!-- LOTENAL -->
+            <!-- LOTENAL (visible según Permisos de Venta del expendio) -->
             <Border
+                IsVisible="{Binding MuestraLotenal}"
                 StrokeThickness="0"
                 StrokeShape="RoundRectangle 12"
                 BackgroundColor="{StaticResource McLotenal}"
@@ -65,8 +66,9 @@
                     VerticalOptions="Center" />
             </Border>
 
-            <!-- Sorteos Tec -->
+            <!-- Sorteos Tec (visible según Permisos de Venta del expendio) -->
             <Border
+                IsVisible="{Binding MuestraSorteosTec}"
                 StrokeThickness="0"
                 StrokeShape="RoundRectangle 12"
                 BackgroundColor="{StaticResource McSorteosTec}"
@@ -93,8 +95,9 @@
                 </Grid>
             </Border>
 
-            <!-- Tiempo Aire -->
+            <!-- Tiempo Aire (visible según Permisos de Venta del expendio) -->
             <Border
+                IsVisible="{Binding MuestraTiempoAire}"
                 StrokeThickness="0"
                 StrokeShape="RoundRectangle 12"
                 BackgroundColor="{StaticResource McTiempoAire}"

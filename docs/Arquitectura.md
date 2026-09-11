@@ -8,7 +8,7 @@ Está dirigido a desarrolladores y a asistentes de IA. Describe únicamente el e
 
 ## Estado del documento
 
-- **Fecha de última actualización:** 2026-09-10
+- **Fecha de última actualización:** 2026-09-11
 - **Commit del frontend analizado:** `c566350` (Facturación: flujo completo UI-only + correcciones de auditoría en working tree)
 - **Commit de la rama `dev-mobile` utilizada como referencia:** `e7ad8f5` (Conexion con app y usuario de prueba)
 
@@ -112,7 +112,7 @@ Views (eventos) ──► ViewModels (Commands) ──► Services ──► IAp
 - ~~`MainPage.xaml` / `MainPage.xaml.cs`~~ **eliminados** (2026-09-10, auditoría): eran restos de la plantilla "Hello World", sin registro en DI ni navegación. También se retiró `dotnet_bot.png` y su entrada en el csproj.
 - Las subcarpetas `Models/Common`, `Models/Entities`, `Models/Requests`, `Models/Responses` existen y se usan.
 - `Helpers/FormatosFecha.cs` (nuevo, 2026-09-10): única fuente de formato de fechas en español (es-MX) para pantalla y nombres de archivo PDF.
-- `Data/` catálogos estáticos verbatim de mockups (fase solo-interfaz) y `Natives/` + `Interop/` (zxing-cpp del escáner QR).
+- `Data/` catálogos estáticos verbatim de mockups (fase solo-interfaz) y `Natives/` + `Interop/` (zxing-cpp del escáner QR). Incluye `Data/ExpendiosDemoData.cs` (módulo Expendios, datos demo en memoria de la relación usuario↔expendios).
 
 ---
 

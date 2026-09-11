@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Checkbox de selección: caja vacía, borde indigo tenue -->
+<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path fill="none" stroke="#8A8A8A" stroke-width="2" d="M5 5h14v14H5z"/>
+</svg>

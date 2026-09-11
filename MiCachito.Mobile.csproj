@@ -86,6 +86,20 @@
         <MauiImage Update="Resources\Images\icon_check_confirmacion.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_grafica_azul.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_calendario_azul.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_impresora_morado.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_lista_blanco.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_lista_indigo.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_tienda_blanco.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_tienda_indigo.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_tienda_morado.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_lapiz_indigo.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_ojo_gris.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_ojo_tachado_gris.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_sorteo_tec_azul.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_tiempo_aire_magenta.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_srb_lotenal_rojo.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_caja_vacia_gris.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_caja_marcada_indigo.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_grafica_gris.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_alcancia_azul.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_alcancia_gris.svg" BaseSize="24,24" />
@@ -209,9 +223,12 @@
 	  <MauiXaml Update="Views\GestionPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\ExpendiosPage.xaml">
-	    <Generator>MSBuild:Compile</Generator>
-	  </MauiXaml>
+	  	  	  <MauiXaml Update="Views\ExpendiosPage.xaml">
+	  	  	    <Generator>MSBuild:Compile</Generator>
+	  	  	  </MauiXaml>
+	  	  	  <MauiXaml Update="Views\ExpendioFormPage.xaml">
+	  	  	    <Generator>MSBuild:Compile</Generator>
+	  	  	  </MauiXaml>
 	  <MauiXaml Update="Views\CuentaPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

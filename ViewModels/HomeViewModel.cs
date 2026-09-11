@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MiCachito.Mobile.Data;
 using MiCachito.Mobile.Models.Entities;
 using MiCachito.Mobile.Navigation;
 using MiCachito.Mobile.Services;
@@ -29,6 +30,23 @@ public partial class HomeViewModel : BaseViewModel
     [ObservableProperty]
     private string saldo = "$0.00";
 
+    // ── Visibilidad de botones por Permisos de Venta (regla spec Expendios §7/§14):
+    // la fuente de verdad es el expendio (PermisosVenta), NO esta pantalla.
+    // Fase UI: se leen del expendio demo del usuario (ExpendiosDemoData);
+    // con backend vendrán de la sesión del expendio activo. ──
+
+    /// <summary>True para mostrar el botón Sorteos Tec.</summary>
+    [ObservableProperty]
+    private bool muestraSorteosTec = true;
+
+    /// <summary>True para mostrar el botón Tiempo Aire.</summary>
+    [ObservableProperty]
+    private bool muestraTiempoAire = true;
+
+    /// <summary>True para mostrar el botón LOTENAL.</summary>
+    [ObservableProperty]
+    private bool muestraLotenal = true;
+
     public HomeViewModel(
         ISessionService sessionService,
         IAuthService authService,
@@ -53,6 +71,31 @@ public partial class HomeViewModel : BaseViewModel
         Username = usuario.Username ?? string.Empty;
         TipoUsuario = usuario.TipoUsuario ?? string.Empty;
         Sede = BuildSede(usuario);
+
+        CargarPermisosVenta();
+    }
+
+    /// <summary>
+    /// Botones de Vender según los Permisos de Venta del expendio del usuario
+    /// (única fuente de verdad: la configuración hecha en Gestión/Expendios).
+    /// Fase UI: expendio demo (ExpendiosDemoData); sin expendio se mantienen
+    /// los tres visibles (comportamiento previo). Con backend: permisos del
+    /// expendio activo de la sesión.
+    /// </summary>
+    private void CargarPermisosVenta()
+    {
+        var expendio = ExpendiosDemoData.ObtenerExpendios().FirstOrDefault();
+        if (expendio is null)
+        {
+            MuestraSorteosTec = true;
+            MuestraTiempoAire = true;
+            MuestraLotenal = true;
+            return;
+        }
+
+        MuestraSorteosTec = expendio.Permisos.SorteosTec;
+        MuestraTiempoAire = expendio.Permisos.TiempoAire;
+        MuestraLotenal = expendio.Permisos.Lotenal;
     }
 
     [RelayCommand]

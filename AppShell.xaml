@@ -6,6 +6,12 @@
     x:Class="MiCachito.Mobile.AppShell"
     FlyoutBehavior="Disabled">
 
+    <!--
+        Barra inferior: Vender | Gestión | Expendios | Cuenta (mockup 1).
+        ExpendiosMain es el tab raíz del módulo; el formulario
+        ExpendioFormPage se registra como ruta relativa en AppShell.xaml.cs
+        para navegar con Shell (GoToAsync "ExpendioForm").
+    -->
     <TabBar>
 
         <ShellContent
@@ -21,6 +27,7 @@
         <ShellContent
             Title="Expendios"
             Icon="tab_expendios"
+            Route="ExpendiosMain"
             ContentTemplate="{DataTemplate views:ExpendiosPage}" />
 
         <ShellContent
