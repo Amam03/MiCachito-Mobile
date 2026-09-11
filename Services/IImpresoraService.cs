@@ -15,4 +15,13 @@ public interface IImpresoraService
     /// vinculada).
     /// </summary>
     Task<string> ImprimirAsync(string rutaArchivo, string titulo);
+
+    /// <summary>
+    /// Nombres de los dispositivos Bluetooth VINCULADOS al teléfono
+    /// (mockup Cuenta 5: Dispositivos Enlazados). Lista vacía si el
+    /// Bluetooth está apagado, falta el permiso o no hay vínculos
+    /// (caso emulador). El emparejamiento real (discovery + SPP) queda
+    /// para la integración.
+    /// </summary>
+    Task<IReadOnlyList<string>> ObtenerDispositivosEnlazadosAsync();
 }

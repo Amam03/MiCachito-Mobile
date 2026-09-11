@@ -100,6 +100,13 @@
         <MauiImage Update="Resources\Images\icon_srb_lotenal_rojo.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_caja_vacia_gris.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_caja_marcada_indigo.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_campana_azul.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_impresora_gris.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_power_rojo.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_chevron_derecha_gris.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_chevron_abajo_gris.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_bluetooth_azul.svg" BaseSize="24,24" />
+        <MauiImage Update="Resources\Images\icon_atencion_rojo.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_grafica_gris.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_alcancia_azul.svg" BaseSize="24,24" />
         <MauiImage Update="Resources\Images\icon_alcancia_gris.svg" BaseSize="24,24" />

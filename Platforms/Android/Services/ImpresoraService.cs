@@ -70,4 +70,54 @@ public class ImpresoraService : IImpresoraService
             $"Impresoras vinculadas: {nombres}. El envío Bluetooth real se "
             + "implementará con la integración del backend.");
     }
+
+    /// <inheritdoc />
+    public Task<IReadOnlyList<string>> ObtenerDispositivosEnlazadosAsync()
+    {
+        var ctx = (global::Android.Content.Context)global::Android.App.Application.Context;
+
+        // 1) Permiso runtime BLUETOOTH_CONNECT (Android 12+)
+        if (OperatingSystem.IsAndroidVersionAtLeast(31))
+        {
+            if (ctx.CheckSelfPermission(PermisoConnect)
+                != global::Android.Content.PM.Permission.Granted)
+            {
+                return Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
+            }
+        }
+
+        // 2) Adapter y dispositivos vinculados
+        var manager = ctx.GetSystemService(
+            global::Android.Content.Context.BluetoothService)
+            as global::Android.Bluetooth.BluetoothManager;
+        global::Android.Bluetooth.BluetoothAdapter? adapter = manager?.Adapter;
+
+        if (adapter is null || !adapter.IsEnabled)
+        {
+            return Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
+        }
+
+        global::System.Collections.Generic.ICollection<global::Android.Bluetooth.BluetoothDevice>? vinculados;
+        try
+        {
+            vinculados = adapter.BondedDevices;
+        }
+        catch (global::Java.Lang.SecurityException)
+        {
+            return Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
+        }
+
+        if (vinculados is null || vinculados.Count == 0)
+        {
+            return Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
+        }
+
+        var nombres = vinculados
+            .Select(d => d.Name ?? d.Address)
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .OrderBy(n => n)
+            .Cast<string>()
+            .ToList();
+        return Task.FromResult<IReadOnlyList<string>>(nombres);
+    }
 }

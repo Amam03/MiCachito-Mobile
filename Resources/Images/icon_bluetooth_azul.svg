@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Icono Bluetooth (sub-fila Seleccionar Dispositivo, mockup 4) — azul del mockup -->
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+    <path fill="#0087E5" d="M17 7l-4.29-4.29c-.63-.63-1.71-.18-1.71.71L11 8.59 5.71 3.29a.996.996 0 1 0-1.41 1.41L9.88 10 4.3 15.59a.996.996 0 1 0 1.41 1.41L11 11.41v6.88c0 .89 1.08 1.34 1.71.71L17 15l-3.59-3.59L17 7zm-5-2.83l2.88 2.88L12 9.83V4.17zm2.88 9.71L12 17.34v-5.66l2.88 2.88z" />
+</svg>

@@ -1,6 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true"></application>
+	<!-- Opt-out del back predictivo (default-ON con targetSdk 36): sin esto
+	     el sistema NO llama a MainActivity.OnBackPressed y el back en raíz
+	     finaliza la Activity -> crash MAUI 10 (ShellFragmentContainer.OnDestroy
+	     con IServiceProvider disposed, dotnet/maui#32750). Con opt-out, el
+	     back en raíz manda la app a segundo plano (comportamiento estándar). -->
+	<application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true" android:enableOnBackInvokedCallback="false"></application>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />
 	<uses-permission android:name="android.permission.CAMERA" />

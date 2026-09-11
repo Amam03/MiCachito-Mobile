@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
+    x:Class="MiCachito.Mobile.Views.NotificacionesPage"
+    x:DataType="vm:NotificacionesViewModel"
+    Title="Notificaciones"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="White">
+
+    <Grid RowDefinitions="Auto,*" RowSpacing="0">
+
+        <!-- ============ Header morado con flecha atrás (patrón DetalleVenta) ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="12,16"
+            StrokeShape="RoundRectangle 0,0,12,12">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    BackgroundColor="Transparent"
+                    StrokeShape="RoundRectangle 18"
+                    WidthRequest="36" HeightRequest="36">
+                    <Grid>
+                        <Label
+                            Text="&#x2190;"
+                            TextColor="White"
+                            FontSize="20"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                        <Button
+                            BackgroundColor="Transparent"
+                            Padding="0"
+                            Command="{Binding VolverCommand}" />
+                    </Grid>
+                </Border>
+
+                <Label
+                    Grid.Column="1"
+                    Text="Notificaciones"
+                    TextColor="White"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    VerticalOptions="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- ============ Cuerpo: estado vacío (mockup 3, sin registros inventados) ============ -->
+        <!--
+            El mockup 3 muestra la pantalla en blanco: no hay datos reales
+            de notificaciones en esta fase, así que el cuerpo queda vacío
+            (regla: no inventar registros). El listado se conectará con el
+            backend en la fase de integración.
+        -->
+        <Grid Grid.Row="1" />
+
+    </Grid>
+
+</ContentPage>

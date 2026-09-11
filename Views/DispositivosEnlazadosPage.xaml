@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
+    x:Class="MiCachito.Mobile.Views.DispositivosEnlazadosPage"
+    x:DataType="vm:DispositivosEnlazadosViewModel"
+    Title="Dispositivos Enlazados"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="{StaticResource McPageBg}">
+
+    <Grid RowDefinitions="Auto,*" RowSpacing="0">
+
+        <!-- ============ Header morado con flecha atrás (patrón DetalleVenta) ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="12,16"
+            StrokeShape="RoundRectangle 0,0,12,12">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    BackgroundColor="Transparent"
+                    StrokeShape="RoundRectangle 18"
+                    WidthRequest="36" HeightRequest="36">
+                    <Grid>
+                        <Label
+                            Text="&#x2190;"
+                            TextColor="White"
+                            FontSize="20"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                        <Button
+                            BackgroundColor="Transparent"
+                            Padding="0"
+                            Command="{Binding VolverCommand}" />
+                    </Grid>
+                </Border>
+
+                <Label
+                    Grid.Column="1"
+                    Text="Dispositivos Enlazados"
+                    TextColor="White"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    VerticalOptions="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- ============ Cuerpo: dispositivos Bluetooth vinculados reales (mockup 5) ============ -->
+        <!--
+            Lista dinámica de dispositivos VINCULADOS (IImpresoraService).
+            En el emulador no hay vínculos: el cuerpo queda vacío tal como
+            el mockup 5 (sin registros ficticios). La selección/vínculo
+            real (discovery + SPP) queda para la integración.
+        -->
+        <ScrollView Grid.Row="1">
+            <StackLayout BindableLayout.ItemsSource="{Binding Dispositivos}" Spacing="0" Margin="0,8,0,0">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Grid
+                            ColumnDefinitions="*,Auto"
+                            Padding="16,14"
+                            BackgroundColor="White">
+                            <Label
+                                Grid.Column="0"
+                                Text="{Binding .}"
+                                FontSize="15"
+                                TextColor="{StaticResource McTextDark}"
+                                VerticalOptions="Center" />
+                            <Image
+                                Grid.Column="1"
+                                Source="icon_chevron_derecha_gris.svg"
+                                WidthRequest="18" HeightRequest="18"
+                                VerticalOptions="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </StackLayout>
+        </ScrollView>
+
+    </Grid>
+
+</ContentPage>

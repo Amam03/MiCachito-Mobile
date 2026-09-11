@@ -131,6 +131,11 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Views.ExpendiosPage>();
             builder.Services.AddTransient<ViewModels.ExpendioFormViewModel>();
             builder.Services.AddTransient<Views.ExpendioFormPage>();
+            builder.Services.AddTransient<ViewModels.CuentaViewModel>();
+            builder.Services.AddTransient<ViewModels.NotificacionesViewModel>();
+            builder.Services.AddTransient<Views.NotificacionesPage>();
+            builder.Services.AddTransient<ViewModels.DispositivosEnlazadosViewModel>();
+            builder.Services.AddTransient<Views.DispositivosEnlazadosPage>();
 
 #if ANDROID
             builder.ConfigureMauiHandlers(handlers =>

@@ -2,28 +2,343 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
     x:Class="MiCachito.Mobile.Views.CuentaPage"
-    Title="Cuenta">
+    x:DataType="vm:CuentaViewModel"
+    Title="Cuenta"
+    BackgroundColor="{StaticResource McPageBg}">
 
-    <VerticalStackLayout
-        Padding="30"
-        Spacing="16"
-        VerticalOptions="Center"
-        HorizontalOptions="Center">
+    <Grid RowDefinitions="Auto,*" RowSpacing="0">
 
-        <Label
-            Text="Cuenta"
-            FontSize="28"
-            FontAttributes="Bold"
-            TextColor="{StaticResource McTextDark}"
-            HorizontalOptions="Center" />
+        <!-- ============ Encabezado con saldo (patrón Gestión, mockup 1) ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            HeightRequest="64"
+            Padding="20,0">
+            <StackLayout
+                Orientation="Horizontal"
+                Spacing="6"
+                HorizontalOptions="Center"
+                VerticalOptions="Center">
+                <Label
+                    Text="Saldo:"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    VerticalOptions="Center" />
+                <Label
+                    Text="{Binding Saldo}"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource McGesSaldoVerde}"
+                    VerticalOptions="Center" />
+            </StackLayout>
+        </Border>
 
-        <Label
-            Text="Modulo en desarrollo"
-            FontSize="16"
-            TextColor="{StaticResource McPlaceholder}"
-            HorizontalOptions="Center" />
+        <!-- ============ Cuerpo (mockup 1: logo + identidad + usuario + opciones) ============ -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="0" Padding="0,0,0,24">
 
-    </VerticalStackLayout>
+                <!-- Logo + nombre de la app + versión -->
+                <VerticalStackLayout
+                    Spacing="4"
+                    HorizontalOptions="Center"
+                    Margin="0,24,0,0">
+                    <Image
+                        Source="logo_micachito.svg"
+                        WidthRequest="64"
+                        HeightRequest="64" />
+                    <Label
+                        Text="Mi Cachito"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource McTextDark}"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="{Binding VersionApp}"
+                        FontSize="12"
+                        TextColor="{StaticResource McGrayText}"
+                        HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <!-- Usuario autenticado -->
+                <Label
+                    Text="{Binding NombreUsuario}"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource McTextDark}"
+                    HorizontalOptions="Center"
+                    Margin="0,16,0,0" />
+
+                <!-- Card de opciones (blanca, mockup 1) -->
+                <Border
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12"
+                    BackgroundColor="White"
+                    Margin="16,16,16,0"
+                    Padding="16,4">
+
+                    <VerticalStackLayout>
+
+                        <!-- Fila Notificaciones -->
+                        <Grid
+                            ColumnDefinitions="Auto,*,Auto"
+                            ColumnSpacing="12"
+                            Padding="0,14">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding AbrirNotificacionesCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Image
+                                Grid.Column="0"
+                                Source="icon_campana_azul.svg"
+                                WidthRequest="22" HeightRequest="22"
+                                VerticalOptions="Center" />
+                            <Label
+                                Grid.Column="1"
+                                Text="Notificaciones"
+                                FontSize="15"
+                                TextColor="{StaticResource McTextDark}"
+                                VerticalOptions="Center" />
+                            <Image
+                                Grid.Column="2"
+                                Source="icon_chevron_derecha_gris.svg"
+                                WidthRequest="18" HeightRequest="18"
+                                VerticalOptions="Center" />
+                        </Grid>
+
+                        <BoxView Color="{StaticResource McDivider}" HeightRequest="1" HorizontalOptions="Fill" />
+
+                        <!-- Fila Impresora (desplegable) -->
+                        <Grid
+                            ColumnDefinitions="Auto,*,Auto"
+                            ColumnSpacing="12"
+                            Padding="0,14">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding AlternarImpresoraCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Image
+                                Grid.Column="0"
+                                Source="icon_impresora_gris.svg"
+                                WidthRequest="22" HeightRequest="22"
+                                VerticalOptions="Center" />
+                            <Label
+                                Grid.Column="1"
+                                Text="Impresora"
+                                FontSize="15"
+                                TextColor="{StaticResource McTextDark}"
+                                VerticalOptions="Center" />
+                            <!-- Chevron: abajo si expandida, derecha si colapsada -->
+                            <Image
+                                Grid.Column="2"
+                                IsVisible="{Binding ImpresoraExpandida}"
+                                Source="icon_chevron_abajo_gris.svg"
+                                WidthRequest="18" HeightRequest="18"
+                                VerticalOptions="Center" />
+                            <Image
+                                Grid.Column="2"
+                                IsVisible="{Binding NoImpresoraExpandida}"
+                                Source="icon_chevron_derecha_gris.svg"
+                                WidthRequest="18" HeightRequest="18"
+                                VerticalOptions="Center" />
+                        </Grid>
+
+                        <!-- Sub-fila Seleccionar Dispositivo (solo expandida, mockup 4):
+                             texto azul + icono Bluetooth a la derecha, SIN chevron -->
+                        <Grid
+                            IsVisible="{Binding ImpresoraExpandida}"
+                            ColumnDefinitions="*,Auto"
+                            ColumnSpacing="10"
+                            Padding="12,10,12,10"
+                            BackgroundColor="{StaticResource McPageBg}">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SeleccionarDispositivoCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Label
+                                Grid.Column="0"
+                                Text="Seleccionar Dispositivo"
+                                FontSize="13"
+                                TextColor="#3F51B5"
+                                VerticalOptions="Center" />
+                            <Image
+                                Grid.Column="1"
+                                Source="icon_bluetooth_azul.svg"
+                                WidthRequest="18" HeightRequest="18"
+                                VerticalOptions="Center" />
+                        </Grid>
+
+                        <BoxView
+                            IsVisible="{Binding ImpresoraExpandida}"
+                            Color="{StaticResource McDivider}"
+                            HeightRequest="1"
+                            HorizontalOptions="Fill" />
+
+                        <!-- Fila Cerrar Sesión -->
+                        <Grid
+                            ColumnDefinitions="Auto,*,Auto"
+                            ColumnSpacing="12"
+                            Padding="0,14">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding AbrirCerrarSesionCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Image
+                                Grid.Column="0"
+                                Source="icon_power_rojo.svg"
+                                WidthRequest="22" HeightRequest="22"
+                                VerticalOptions="Center" />
+                            <Label
+                                Grid.Column="1"
+                                Text="Cerrar Sesión"
+                                FontSize="15"
+                                TextColor="{StaticResource McTextDark}"
+                                VerticalOptions="Center" />
+                            <Image
+                                Grid.Column="2"
+                                Source="icon_chevron_derecha_gris.svg"
+                                WidthRequest="18" HeightRequest="18"
+                                VerticalOptions="Center" />
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ============ Modal Cerrar Sesión (mockup 6: scrim + card, Cancelar/Aceptar) ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="2"
+            IsVisible="{Binding ModalCerrarSesionVisible}"
+            BackgroundColor="{StaticResource McScrimBlack55}"
+            StrokeThickness="0"
+            Padding="0">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CancelarCerrarSesionCommand}" />
+            </Border.GestureRecognizers>
+            <Border
+                StrokeShape="RoundRectangle 12"
+                BackgroundColor="White"
+                StrokeThickness="0"
+                WidthRequest="300"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                Padding="20,18">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="CardModal_Tapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="14">
+                    <Label
+                        Text="Cerrar Sesión"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="#FF5455"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="¿Está seguro de cerrar su sesión?"
+                        FontSize="14"
+                        TextColor="{StaticResource McTextDark}"
+                        HorizontalTextAlignment="Center"
+                        HorizontalOptions="Center" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,4,0,0">
+                        <Label
+                            Grid.Column="0"
+                            Text="Cancelar"
+                            FontSize="14"
+                            TextColor="{StaticResource McGrayText}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CancelarCerrarSesionCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                        <Border
+                            Grid.Column="1"
+                            StrokeShape="RoundRectangle 20"
+                            BackgroundColor="#FF5455"
+                            StrokeThickness="0"
+                            HeightRequest="36"
+                            WidthRequest="110"
+                            HorizontalOptions="Center">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ConfirmarCerrarSesionCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label
+                                Text="Aceptar"
+                                TextColor="White"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </Border>
+
+        <!-- ============ Diálogo Atención: sin impresora enlazada (mockup 2) ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="2"
+            IsVisible="{Binding DialogoSinImpresoraVisible}"
+            BackgroundColor="{StaticResource McScrimBlack55}"
+            StrokeThickness="0"
+            Padding="0">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CerrarDialogoSinImpresoraCommand}" />
+            </Border.GestureRecognizers>
+            <Border
+                StrokeShape="RoundRectangle 12"
+                BackgroundColor="White"
+                StrokeThickness="0"
+                WidthRequest="280"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                Padding="20,18">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="CardModal_Tapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="12">
+                    <Image
+                        Source="icon_atencion_rojo.svg"
+                        WidthRequest="34" HeightRequest="34"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="Atención"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="{StaticResource McTextDark}"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="No se ha enlazado ninguna impresora"
+                        FontSize="14"
+                        TextColor="{StaticResource McGrayText}"
+                        HorizontalTextAlignment="Center"
+                        HorizontalOptions="Center" />
+                    <Border
+                        StrokeShape="RoundRectangle 20"
+                        BackgroundColor="#FF5455"
+                        StrokeThickness="0"
+                        HeightRequest="36"
+                        WidthRequest="130"
+                        HorizontalOptions="Center"
+                        Margin="0,4,0,0">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding CerrarDialogoSinImpresoraCommand}" />
+                        </Border.GestureRecognizers>
+                        <Label
+                            Text="ACEPTAR"
+                            TextColor="White"
+                            FontSize="13"
+                            FontAttributes="Bold"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                    </Border>
+                </VerticalStackLayout>
+            </Border>
+        </Border>
+
+    </Grid>
 
 </ContentPage>
