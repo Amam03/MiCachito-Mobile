@@ -51,15 +51,21 @@ public partial class LoginViewModel : BaseViewModel
 
         try
         {
-            var response = await _authService.LoginAsync(Usuario.Trim(), Password);
+            // Etiqueta del dispositivo para mobile_sesiones (pantalla Cuenta).
+            var response = await _authService.LoginAsync(
+                Usuario.Trim(),
+                Password,
+                DeviceInfo.Current.Name);
 
-            if (response?.Usuario is null || string.IsNullOrEmpty(response.Token))
+            if (response is null
+                || string.IsNullOrEmpty(response.Token)
+                || response.Expendio is null)
             {
                 Mensaje = "No se pudo iniciar sesión. Intente de nuevo.";
                 return;
             }
 
-            await _sessionService.SaveAsync(response, rememberMe: false);
+            await _sessionService.SaveAsync(response, DeviceInfo.Current.Name, rememberMe: false);
             await _navigationService.NavigateToHomeAsync();
         }
         catch (ApiException ex)

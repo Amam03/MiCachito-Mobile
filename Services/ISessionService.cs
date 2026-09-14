@@ -1,12 +1,12 @@
 using MiCachito.Mobile.Models;
-using MiCachito.Mobile.Models.Entities;
 using MiCachito.Mobile.Models.Responses;
 
 namespace MiCachito.Mobile.Services;
 
 /// <summary>
-/// Contrato de la sesión del usuario. La implementación usa SecureStorage.
-/// Los ViewModels nunca tocan SecureStorage directamente; solo dependen de esta interfaz.
+/// Contrato de la sesión del expendio. La implementación usa SecureStorage.
+/// Los ViewModels nunca tocan SecureStorage directamente; solo dependen de
+/// esta interfaz.
 /// </summary>
 public interface ISessionService
 {
@@ -16,9 +16,9 @@ public interface ISessionService
     SessionInfo? CurrentSession { get; }
 
     /// <summary>
-    /// Persiste una sesión a partir de la respuesta de login.
+    /// Persiste una sesión a partir de la respuesta del login mobile.
     /// </summary>
-    Task SaveAsync(LoginResponse loginResponse, bool rememberMe, CancellationToken cancellationToken = default);
+    Task SaveAsync(MobileLoginResponse loginResponse, string? dispositivo, bool rememberMe, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Lee la sesión persistida y la cachea; null si no existe o no es válida.
@@ -26,9 +26,10 @@ public interface ISessionService
     Task<SessionInfo?> LoadAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Actualiza el usuario de la sesión (ej. tras auth/verify) y lo persiste.
+    /// Actualiza expendio/billetero/sesión de la sesión persistida
+    /// (ej. tras api/mobile/auth/verify) y la persiste.
     /// </summary>
-    Task UpdateUsuarioAsync(Usuario usuario, CancellationToken cancellationToken = default);
+    Task UpdateAsync(MobileVerifyResponse verifyResponse, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Borra la sesión persistida y la caché en memoria.

@@ -1,6 +1,6 @@
 # Backend Integration — Mi Cachito Mobile
 
-**Estado:** arquitectura aprobada (2026-09-14). Autenticación Mobile IMPLEMENTADA y probada E2E. Ventas Lotenal, Tiempo Aire y Devoluciones: pendientes de implementación (ver §9).
+**Estado:** Fase 0 (auth) implementada, probada E2E y publicada (2026-09-14). **Fase 1 (app MAUI conectada a `/api/mobile/auth/*`) IMPLEMENTADA y probada E2E en emulador contra Docker real (2026-09-14); pendiente de inspección del usuario para commit.** Ventas Lotenal, Tiempo Aire y Devoluciones: pendientes (ver §9).
 
 Este documento es la **guía oficial** de cómo se integra Mi Cachito Mobile al backend. Cualquier desarrollador o agente de IA que toque el backend por trabajo de Mobile debe leerlo completo antes de modificar código.
 
@@ -115,9 +115,16 @@ Respuestas con el mismo shape que Desktop (`success/data/error/message`), módul
 
 **Independencia verificada E2E:** token Desktop contra API Mobile → 401; token Mobile contra API Desktop → 401; login Desktop sigue OK con la API Mobile desplegada.
 
-### Integración en la app (lado MAUI, pendiente)
+### Integración en la app (lado MAUI) — ✅ HECHA (Fase 1, 2026-09-14)
 
-`AuthService`/`SessionService` actuales apuntan a `auth/login` de Desktop (contrato `{...campos usuario, token}` via `LoginResponseJsonConverter`). Para conectar al flujo mobile: nuevos endpoints en `ApiEndpoints.cs` (clase anidada `Mobile` o re-punto de `Auth`), bearer con el token mobile, y `verify` para restaurar sesión al arranque. No cambiar `LoginResponseJsonConverter` sin mapear el contrato nuevo (`{success, data:{token, expira, expendio, billetero}}`).
+La app ya habla exclusivamente con `/api/mobile/auth/*`:
+
+- `ApiEndpoints.MobileAuth` (login/verify/logout/sesiones/revocar); los endpoints Desktop `ApiEndpoints.Auth` se eliminaron junto con el contrato viejo (`LoginResponse`, `LoginRequest`, `Usuario`/`CedisInfo`/`TiendaInfo`/`RolInfo`, `LoginResponseJsonConverter`, `RefreshTokenAsync` — grep de cero usos antes de borrar).
+- `IAuthService`/`AuthService` → contrato mobile; `SessionService` persiste `SessionInfo` con expendio/billetero/id_sesion/dispositivo.
+- Login envía `dispositivo = DeviceInfo.Current.Name` (aparece así en la lista de sesiones del expendio).
+- Splash: token → `verify` → Home; ApiException (expirada/revocada/rotada) → Clear + Login. Sesión vieja Desktop: verify la rechaza → Login limpio.
+- Cuenta: identidad = `Billetero.NombreCompleto`. Home/Vender: `CargarPermisosVenta()` desde flags del billetero — **mapeo P1 (decisión del usuario 2026-09-14): Tiempo Aire→`tiene_tiempo_aire`, Sorteos Tec→`tiene_prod_digitales`, Lotenal→habilitado por ahora** (el backend NO tiene flag propio para Lotenal; si se necesita per-expendio, cambio separado — sin tocar tablas compartidas).
+- E2E en emulador contra Docker real: login→Home, restauración por verify, logout (revoca SOLO esa sesión), re-login, credenciales malas → "Credenciales incorrectas" sin navegar, permisos Vender correctos por flags, identidad real en Cuenta. Pendiente: inspección del usuario → commit.
 
 ---
 
@@ -252,7 +259,7 @@ Cualquier agente que trabaje en el backend por Mobile:
 
 ## 9. Pendiente para la implementación funcional
 
-1. **Conectar la app MAUI al auth mobile** (ApiEndpoints/AuthService/SessionService apuntan aún a `auth/login` Desktop; ver §3 "Integración en la app").
+1. ~~**Conectar la app MAUI al auth mobile**~~ ✅ Fase 1 HECHA (2026-09-14, ver §3 "Integración en la app"); pendiente solo inspección + commit.
 2. **`VentaService`** — extraer de `VentasController::actionCrear` (precios server-side desde `sorteos.precio_fraccion`, folio robusto) + **`MobileVentasController`** (fracciones sobre billetes asignados; derivar fracciones vendidas de `ventas_detalle`; si no cabe → parar y documentar).
 3. **`DevolucionService`** — extraer de `DevolucionesTiendaController::actionCreate`; **`MobileDevolucionController`** con `id_tienda_origen = NULL` (verificar nulidad en modelo/procesamiento antes; documentar si algo la exige).
 4. **TAE** — `POST /api/mobile/tae` sobre `ventas_electronicas`: validaciones y cálculos (comisión/ISR/fondo ahorro con las reglas del billetero) 100% server-side.

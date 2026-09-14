@@ -14,7 +14,7 @@ internal static class ApiJsonOptions
         PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
         PropertyNameCaseInsensitive = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new ApiErrorConverter(), new LoginResponseJsonConverter() },
+        Converters = { new ApiErrorConverter() },
     };
 
     public static JsonSerializerOptions Default => Options;

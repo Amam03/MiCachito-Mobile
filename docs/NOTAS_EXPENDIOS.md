@@ -95,6 +95,21 @@ NO la pestaña Vender. Implementación (2026-09-11):
 - Al cambiar permisos en Expendios y volver a Vender, `LoadAsync` (OnAppearing)
   recarga y los botones reflejan el cambio al instante.
 
+**Actualización Fase 1 (2026-09-14, integración backend):** la pestaña Vender
+ya NO lee `ExpendiosDemoData`; `CargarPermisosVenta()` toma los flags del
+billetero de la sesión mobile (`datosBilletero()` del login/verify). Mapeo
+decidido con el usuario:
+
+- Tiempo Aire → `tiene_tiempo_aire`
+- Sorteos Tec → `tiene_prod_digitales`
+- Lotenal → habilitado por ahora (el backend NO tiene un flag independiente
+  para Lotenal; si se necesita activar/desactivar Lotenal por expendio, se
+  analizará como cambio separado — sin tocar tablas compartidas).
+
+La pestaña **Expendios** (consulta + administración) sigue con demo data
+hasta su propia integración; el formulario Expendios sigue escribiendo
+`ExpendiosDemoData` local.
+
 ## 8. Pendientes por falta de capturas de referencia
 
 NO se implementaron (ni se inventaron) por falta de mockups:

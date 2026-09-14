@@ -6,11 +6,17 @@ namespace MiCachito.Mobile.Api;
 /// </summary>
 public static class ApiEndpoints
 {
-    public static class Auth
+    /// <summary>
+    /// Autenticación MOBILE (Fase 1): expendios contra billeteros_expendios
+    /// + mobile_sesiones. Únicos endpoints de auth que usa la app.
+    /// Contrato en docs/backend-integracion.md §3.
+    /// </summary>
+    public static class MobileAuth
     {
-        public const string Login = "api/auth/login";
-        public const string Logout = "api/auth/logout";
-        public const string Verify = "api/auth/verify";
-        public const string Refresh = "api/auth/refresh";
+        public const string Login = "api/mobile/auth/login";
+        public const string Verify = "api/mobile/auth/verify";
+        public const string Logout = "api/mobile/auth/logout";
+        public const string Sesiones = "api/mobile/auth/sesiones";
+        public const string RevocarSesion = "api/mobile/auth/sesiones/revocar";
     }
 }

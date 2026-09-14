@@ -1,7 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MiCachito.Mobile.Data;
-using MiCachito.Mobile.Models.Entities;
 using MiCachito.Mobile.Navigation;
 using MiCachito.Mobile.Services;
 
@@ -31,9 +29,8 @@ public partial class HomeViewModel : BaseViewModel
     private string saldo = "$0.00";
 
     // ── Visibilidad de botones por Permisos de Venta (regla spec Expendios §7/§14):
-    // la fuente de verdad es el expendio (PermisosVenta), NO esta pantalla.
-    // Fase UI: se leen del expendio demo del usuario (ExpendiosDemoData);
-    // con backend vendrán de la sesión del expendio activo. ──
+    // la fuente de verdad es el expendio, NO esta pantalla. Desde Fase 1 se leen
+    // de la sesión mobile (datosBilletero del login/verify). ──
 
     /// <summary>True para mostrar el botón Sorteos Tec.</summary>
     [ObservableProperty]
@@ -61,31 +58,38 @@ public partial class HomeViewModel : BaseViewModel
     public async Task LoadAsync()
     {
         var session = _sessionService.CurrentSession ?? await _sessionService.LoadAsync();
-        var usuario = session?.Usuario;
+        var expendio = session?.Expendio;
+        var billetero = session?.Billetero;
 
-        if (usuario is null)
+        if (expendio is null)
         {
             return;
         }
 
-        Username = usuario.Username ?? string.Empty;
-        TipoUsuario = usuario.TipoUsuario ?? string.Empty;
-        Sede = BuildSede(usuario);
+        Username = billetero?.NombreCompleto ?? expendio.Usuario ?? string.Empty;
+        TipoUsuario = "Expendio";
+        Sede = $"Expendio: {expendio.Usuario}";
 
         CargarPermisosVenta();
     }
 
     /// <summary>
-    /// Botones de Vender según los Permisos de Venta del expendio del usuario
-    /// (única fuente de verdad: la configuración hecha en Gestión/Expendios).
-    /// Fase UI: expendio demo (ExpendiosDemoData); sin expendio se mantienen
-    /// los tres visibles (comportamiento previo). Con backend: permisos del
-    /// expendio activo de la sesión.
+    /// Botones de Vender según los Permisos de Venta del expendio autenticado
+    /// (única fuente de verdad: la configuración hecha en Gestión/Expendios
+    /// desde Desktop; llega en el login/verify mobile via datosBilletero()).
+    /// Mapeo decidido con el usuario (2026-09-14):
+    /// - Tiempo Aire -> tiene_tiempo_aire
+    /// - Sorteos Tec -> tiene_prod_digitales
+    /// - Lotenal -> habilitado por ahora (el backend NO tiene flag propio
+    ///   para Lotenal; si se necesita activar/desactivar por expendio se
+    ///   analizará como cambio separado, sin tocar tablas compartidas).
     /// </summary>
     private void CargarPermisosVenta()
     {
-        var expendio = ExpendiosDemoData.ObtenerExpendios().FirstOrDefault();
-        if (expendio is null)
+        var billetero = _sessionService.CurrentSession?.Billetero
+            ?? _sessionService.LoadAsync().GetAwaiter().GetResult()?.Billetero;
+
+        if (billetero is null)
         {
             MuestraSorteosTec = true;
             MuestraTiempoAire = true;
@@ -93,9 +97,9 @@ public partial class HomeViewModel : BaseViewModel
             return;
         }
 
-        MuestraSorteosTec = expendio.Permisos.SorteosTec;
-        MuestraTiempoAire = expendio.Permisos.TiempoAire;
-        MuestraLotenal = expendio.Permisos.Lotenal;
+        MuestraSorteosTec = billetero.TieneProdDigitales == 1;
+        MuestraTiempoAire = billetero.TieneTiempoAire == 1;
+        MuestraLotenal = true;
     }
 
     [RelayCommand]
@@ -196,20 +200,5 @@ public partial class HomeViewModel : BaseViewModel
         {
             IsBusy = false;
         }
-    }
-
-    private static string BuildSede(Usuario usuario)
-    {
-        if (usuario.Cedis is not null)
-        {
-            return $"CEDIS: {usuario.Cedis.NombreCedis}";
-        }
-
-        if (usuario.Tienda is not null)
-        {
-            return $"Tienda: {usuario.Tienda.NombreTienda}";
-        }
-
-        return "Sin sede asignada";
     }
 }

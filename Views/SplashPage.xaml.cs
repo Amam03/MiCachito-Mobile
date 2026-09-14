@@ -6,7 +6,8 @@ namespace MiCachito.Mobile.Views;
 
 /// <summary>
 /// Pantalla de arranque: decide si hay sesión válida (auto-login) o se muestra el login.
-/// Sin token -> Login. Con token -> auth/verify; ok -> Home, error -> borrar token y Login.
+/// Sin token -> Login. Con token -> api/mobile/auth/verify; ok -> Home, error -> borrar
+/// token y Login (sesión expirada, revocada o credenciales rotadas vía CASCADE).
 /// </summary>
 public partial class SplashPage : ContentPage
 {
@@ -55,21 +56,21 @@ public partial class SplashPage : ContentPage
 
         try
         {
-            var usuario = await _authService.VerifyAsync();
+            var verify = await _authService.VerifyAsync();
 
-            if (usuario is null)
+            if (verify?.Expendio is null)
             {
                 await _sessionService.ClearAsync();
                 await _navigationService.NavigateToLoginAsync();
                 return;
             }
 
-            await _sessionService.UpdateUsuarioAsync(usuario);
+            await _sessionService.UpdateAsync(verify);
             await _navigationService.NavigateToHomeAsync();
         }
         catch (ApiException)
         {
-            // Token inválido o expirado: se borra la sesión y se pide login.
+            // Token inválido, expirado o revocado: se borra la sesión y se pide login.
             try
             {
                 await _sessionService.ClearAsync();

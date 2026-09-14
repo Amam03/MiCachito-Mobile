@@ -2,16 +2,20 @@ using System.Text.Json;
 using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Helpers;
 using MiCachito.Mobile.Models;
-using MiCachito.Mobile.Models.Entities;
 using MiCachito.Mobile.Models.Responses;
 using Microsoft.Maui.Storage;
 
 namespace MiCachito.Mobile.Services;
 
 /// <summary>
-/// Persiste la sesión en SecureStorage como un único blob JSON (SessionInfo).
-/// Implementa además <see cref="IAuthTokenProvider"/> para que ApiClient inyecte el token Bearer
-/// sin conocer los detalles de almacenamiento.
+/// Persiste la sesión del expendio en SecureStorage como un único blob JSON
+/// (SessionInfo, shape mobile Fase 1).
+/// Implementa además <see cref="IAuthTokenProvider"/> para que ApiClient
+/// inyecte el token Bearer sin conocer los detalles de almacenamiento.
+/// Migración desde el shape Desktop (pre-Fase 1): el blob viejo deserializa
+/// con Expendio/Billetero vacíos (campos desconocidos se ignoran); su token
+/// Desktop es rechazado por api/mobile/auth/verify y SplashPage descarta la
+/// sesión → Login. Ambos caminos terminan en Login limpio.
 /// </summary>
 public class SessionService : ISessionService, IAuthTokenProvider
 {
@@ -24,14 +28,16 @@ public class SessionService : ISessionService, IAuthTokenProvider
 
     public SessionInfo? CurrentSession => _currentSession;
 
-    public async Task SaveAsync(LoginResponse loginResponse, bool rememberMe, CancellationToken cancellationToken = default)
+    public async Task SaveAsync(MobileLoginResponse loginResponse, string? dispositivo, bool rememberMe, CancellationToken cancellationToken = default)
     {
         var session = new SessionInfo
         {
             AccessToken = loginResponse.Token,
-            Usuario = loginResponse.Usuario,
+            Expendio = loginResponse.Expendio,
+            Billetero = loginResponse.Billetero,
+            Dispositivo = dispositivo,
+            ExpiresAt = loginResponse.Expira,
             LoginAt = DateTime.UtcNow,
-            ExpiresAt = null,
             RememberMe = rememberMe,
         };
 
@@ -58,14 +64,14 @@ public class SessionService : ISessionService, IAuthTokenProvider
         }
         catch (JsonException)
         {
-            // Sesión corrupta o de una versión anterior: se descarta.
+            // Sesión corrupta o de una versión anterior (shape Desktop): se descarta.
             await ClearAsync(cancellationToken).ConfigureAwait(false);
         }
 
         return _currentSession;
     }
 
-    public async Task UpdateUsuarioAsync(Usuario usuario, CancellationToken cancellationToken = default)
+    public async Task UpdateAsync(MobileVerifyResponse verifyResponse, CancellationToken cancellationToken = default)
     {
         var session = await LoadAsync(cancellationToken).ConfigureAwait(false);
         if (session is null)
@@ -73,7 +79,14 @@ public class SessionService : ISessionService, IAuthTokenProvider
             return;
         }
 
-        session.Usuario = usuario;
+        session.Expendio = verifyResponse.Expendio;
+        session.Billetero = verifyResponse.Billetero;
+        if (verifyResponse.Sesion is not null)
+        {
+            session.IdSesion = verifyResponse.Sesion.IdSesion;
+            session.Dispositivo = verifyResponse.Sesion.Dispositivo ?? session.Dispositivo;
+        }
+
         await SaveSessionAsync(session).ConfigureAwait(false);
     }
 

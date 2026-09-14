@@ -86,10 +86,13 @@ public partial class CuentaViewModel : BaseViewModel
         // Versión instalada (fuente real del SO)
         VersionApp = $"v{VersionTracking.CurrentVersion}";
 
-        // Usuario autenticado real
+        // Expendio autenticado real (sesión mobile)
         var session = _sessionService.CurrentSession ?? await _sessionService.LoadAsync();
-        var usuario = session?.Usuario;
-        NombreUsuario = usuario?.Username ?? string.Empty;
+        var expendio = session?.Expendio;
+        var billetero = session?.Billetero;
+        NombreUsuario = billetero?.NombreCompleto
+            ?? expendio?.Usuario
+            ?? string.Empty;
     }
 
     /// <summary>
