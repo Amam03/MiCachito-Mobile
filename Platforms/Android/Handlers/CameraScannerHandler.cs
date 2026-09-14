@@ -40,7 +40,12 @@ public class CameraScannerHandler : ViewHandler<CameraScannerView, PreviewView>
     protected override PreviewView CreatePlatformView()
     {
         // defaults de PreviewView: FillCenter + Performance (TextureView)
-        return new PreviewView(MauiContext?.Context);
+        //
+        // MauiContext nunca es null aqui en la practica (el handler se crea
+        // desde un MauiContext real), pero el tipo es nullable: usar
+        // Application.Context como respaldo tipado evita el CS8604 sin
+        // cambiar el comportamiento.
+        return new PreviewView(MauiContext?.Context ?? global::Android.App.Application.Context);
     }
 
     protected override void ConnectHandler(PreviewView platformView)
@@ -159,7 +164,10 @@ public class CameraScannerHandler : ViewHandler<CameraScannerView, PreviewView>
 
         try
         {
-            _provider = (ProcessCameraProvider)futuro.Get();
+            // futuro.Get() es [return: NotNull] en el binding (SIEMPRE devuelve
+            // instancia o lanza); el cast explicito documentado aqui evita el
+            // CS8600 sin cambiar la semantica del catch.
+            _provider = (ProcessCameraProvider)futuro.Get()!;
         }
         catch (System.Exception ex)
         {
@@ -184,11 +192,13 @@ public class CameraScannerHandler : ViewHandler<CameraScannerView, PreviewView>
 
         // defaults de ImageAnalysis: KEEP_ONLY_LATEST + ~640x480
         _analysis = new ImageAnalysis.Builder().Build();
-        _analysis.SetAnalyzer(ContextCompat.GetMainExecutor(context), _analyzer);
+        // GetMainExecutor devuelve IExecutor? segun el binding pero NUNCA null
+        // con un context valido (garantizado por el guard de ConnectHandler).
+        _analysis.SetAnalyzer(ContextCompat.GetMainExecutor(context)!, _analyzer);
 
         _preview = new Preview.Builder().Build();
         _preview.SetSurfaceProvider(
-            ContextCompat.GetMainExecutor(context),
+            ContextCompat.GetMainExecutor(context)!,
             PlatformView.SurfaceProvider);
 
         var lifecycleOwner = MauiPlatform.CurrentActivity as ILifecycleOwner;
@@ -198,7 +208,9 @@ public class CameraScannerHandler : ViewHandler<CameraScannerView, PreviewView>
             return;
         }
 
-        _camera = _provider.BindToLifecycle(
+        // _provider se asigno arriba (o salimos por return): el flujo garantiza
+        // non-null aqui, pero el compilador no lo infiere a traves del try/catch.
+        _camera = _provider!.BindToLifecycle(
             lifecycleOwner,
             CameraSelector.DefaultBackCamera,
             _preview,

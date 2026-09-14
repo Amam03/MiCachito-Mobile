@@ -11,6 +11,10 @@
     <Color x:Key="McGreenLight">#5DE089</Color>
     <Color x:Key="McFieldBg">#FAFAFA</Color>
     <Color x:Key="McDivider">#E4E4E4</Color>
+    <Color x:Key="McDividerGrafica">#E3E3E3</Color>
+    <Color x:Key="McGrayHint">#9E9E9E</Color>
+    <Color x:Key="McFabShadow">#80707070</Color>
+    <Color x:Key="McTabInternoPleca">#3A4DBC</Color>
     <Color x:Key="McPlaceholder">#818181</Color>
     <Color x:Key="McTextDark">#1A1A1A</Color>
 

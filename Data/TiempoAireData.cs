@@ -7,6 +7,10 @@ namespace MiCachito.Mobile.Data;
 /// Fuente central de datos estáticos para Tiempo Aire (UI-only).
 /// Contiene los 34 proveedores con sus montos disponibles.
 /// Cuando exista el endpoint del backend, se reemplazará por una llamada API.
+/// PENDIENTE (agosto-2026): ~7 marcas (freedompop, bait, weex, mi_movil, etc.)
+/// reutilizan logo_telcel como placeholder por falta de su propio SVG;
+/// si el catálogo real del backend trae esas marcas, asignar sus logos
+/// (cfe_bienestar/unefon/yobicel.svg ya existen sin proveedor asignado).
 /// </summary>
 public static class TiempoAireData
 {

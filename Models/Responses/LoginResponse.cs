@@ -5,7 +5,7 @@ namespace MiCachito.Mobile.Models.Responses;
 /// <summary>
 /// Resultado de POST auth/login.
 /// El backend responde con un objeto plano: todos los campos del usuario más "token".
-/// <see cref="LoginResponseJsonConverter"/> separa el objeto plano en Usuario y Token.
+/// <see cref="MiCachito.Mobile.Api.LoginResponseJsonConverter"/> separa el objeto plano en Usuario y Token.
 /// </summary>
 public class LoginResponse
 {

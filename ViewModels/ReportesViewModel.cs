@@ -320,6 +320,7 @@ public partial class ReportesViewModel : BaseViewModel
         OnPropertyChanged(nameof(HayReporte));
         OnPropertyChanged(nameof(SinReporte));
         OnPropertyChanged(nameof(SinSorteos));
+        OnPropertyChanged(nameof(FabDescargaEcVisible));
         foreach (string n in new[]
         {
             nameof(FondoDeAhorro), nameof(Fideicomiso), nameof(Pagares),
@@ -733,6 +734,11 @@ public partial class ReportesViewModel : BaseViewModel
     {
         OnPropertyChanged(nameof(AvisoFondoVisible));
         OnPropertyChanged(nameof(AvisoFacVisible));
+    }
+
+    partial void OnReporteDescargadoChanged(bool value)
+    {
+        OnPropertyChanged(nameof(FabPdfEcVisible));
     }
 
     /// <summary>Cambia de pestaña desde el tab bar interno.</summary>

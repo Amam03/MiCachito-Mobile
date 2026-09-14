@@ -54,3 +54,22 @@ equivalencia (1/5/20).
   aplicada, etc.) — la lista actual no muestra estado.
 - GUARDAR con 0 capturas está permitido en UI (decisión aprobada);
   el backend debe decidir si lo rechaza.
+
+## Tira de Liquidación — pendiente por falta de capturas
+
+La tarjeta "Tira de Liquidación" de Gestión (Views/GestionPage.xaml,
+sección 9, líneas ~358-387) está implementada DESHABILITADA (Opacity 0.45,
+sin navegación) porque NO existen mockups de referencia. No se inventó
+ningún contenido.
+
+Falta definir (al llegar las capturas):
+
+- Mockup de la consulta: filtros, rango de fechas, formato de la lista.
+- Contenido del documento/tira: encabezados, columnas, totales, folio.
+- Reglas de negocio: relación exacta con las devoluciones registradas
+  (¿qué movimientos entran?), totales por tipo, permiso requerido.
+- Flujo de impresión (reutilizar ImpresoraService) o PDF.
+
+Al llegar las referencias: habilitar la tarjeta, crear la página
+(patrón MVVM + RegisterRoute + DI como el resto de Gestión) y conectar
+con DevolucionService.

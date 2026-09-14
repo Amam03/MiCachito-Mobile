@@ -3,7 +3,7 @@ namespace MiCachito.Mobile.Models.Common;
 /// <summary>
 /// Representa un error de validación del backend dentro del campo "errors".
 /// El backend Yii2 envía errores como diccionario { campo: ["mensaje"] } o arreglo de strings;
-/// <see cref="ApiErrorConverter"/> normaliza ambos formatos.
+/// <see cref="MiCachito.Mobile.Api.ApiErrorConverter"/> normaliza ambos formatos.
 /// </summary>
 public class ApiError
 {

@@ -37,6 +37,13 @@ public partial class DetallePagoViewModel : ObservableObject, IQueryAttributable
 
     public ReciboPago? Recibo => _recibo;
 
+    // Propiedades PLANAS (patrón pantalla-9): el source-gen de bindings
+    // compilados no admite paths sobre entidad nullable sin CS8603.
+    public string FolioTexto => _recibo?.FolioTexto ?? string.Empty;
+    public string TotalTexto => _recibo?.TotalTexto ?? string.Empty;
+    public string FechaTexto => _recibo?.FechaTexto ?? string.Empty;
+    public IReadOnlyList<MovimientoPago> Desglose => _recibo?.Desglose ?? Array.Empty<MovimientoPago>();
+
     public string Title => "Detalles de Pago";
 
     /// <summary>True cuando hay un recibo cargado (controla el FAB).</summary>
@@ -66,6 +73,10 @@ public partial class DetallePagoViewModel : ObservableObject, IQueryAttributable
         _recibo = _recibos.ObtenerPorFolio(folio);
         OnPropertyChanged(nameof(Recibo));
         OnPropertyChanged(nameof(HayRecibo));
+        OnPropertyChanged(nameof(FolioTexto));
+        OnPropertyChanged(nameof(TotalTexto));
+        OnPropertyChanged(nameof(FechaTexto));
+        OnPropertyChanged(nameof(Desglose));
         Descargando = false;
         DescargaExitosa = false;
     }

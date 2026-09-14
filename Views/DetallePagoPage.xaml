@@ -44,15 +44,15 @@
 
             <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" Margin="4,4,4,0">
                 <Label Grid.Row="0" Grid.Column="0"
-                       Text="{Binding Recibo.FolioTexto}"
+                       Text="{Binding FolioTexto}"
                        FontSize="15" FontAttributes="Bold" TextColor="White"
                        HorizontalOptions="Start" />
                 <Label Grid.Row="0" Grid.Column="1"
-                       Text="{Binding Recibo.TotalTexto}"
+                       Text="{Binding TotalTexto}"
                        FontSize="15" FontAttributes="Bold" TextColor="White"
                        HorizontalOptions="End" />
                 <Label Grid.Row="1" Grid.Column="0"
-                       Text="{Binding Recibo.FechaTexto}"
+                       Text="{Binding FechaTexto}"
                        FontSize="13" TextColor="#D8D4F9"
                        HorizontalOptions="Start" />
                 <Label Grid.Row="1" Grid.Column="1"
@@ -67,7 +67,7 @@
 
             <ScrollView Grid.Row="0">
                 <VerticalStackLayout Padding="12,12,12,102" Spacing="10">
-                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Recibo.Desglose}" Spacing="10">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Desglose}" Spacing="10">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="entities:MovimientoPago">
                                 <Border

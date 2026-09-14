@@ -120,9 +120,9 @@ public partial class DetalleVentaViewModel : BaseViewModel
         {
             string rutaPdf = await _pdf.GenerarAsync(Movimiento);
             string resultado = await _impresora.ImprimirAsync(rutaPdf, "Ticket de Venta");
-            if (Application.Current?.MainPage is not null)
+            if (Application.Current is not null && Application.Current.Windows.Count > 0)
             {
-                await Application.Current.MainPage.DisplayAlert("Imprimir", resultado, "Aceptar");
+                await Application.Current.Windows[0].Page!.DisplayAlertAsync("Imprimir", resultado, "Aceptar");
             }
         }
         finally

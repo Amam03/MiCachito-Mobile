@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
+    xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
     x:Class="MiCachito.Mobile.Views.ReportesPage"
     x:DataType="vm:ReportesViewModel"
     BackgroundColor="{StaticResource McPageBg}"
@@ -78,20 +79,20 @@
                         Padding="14,12"
                         Margin="0,4,0,0">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Resumen de saldo" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Text="Resumen de saldo" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
                             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
-                                <Label Grid.Row="0" Grid.Column="0" Text="Fondo de Ahorro:" FontSize="13" TextColor="#1A1A1A" />
-                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding FondoDeAhorro, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                                <Label Grid.Row="1" Grid.Column="0" Text="Fideicomiso:" FontSize="13" TextColor="#1A1A1A" />
-                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Fideicomiso, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                                <Label Grid.Row="2" Grid.Column="0" Text="Pagarés:" FontSize="13" TextColor="#1A1A1A" />
-                                <Label Grid.Row="2" Grid.Column="1" Text="{Binding Pagares, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                                <Label Grid.Row="3" Grid.Column="0" Text="Bolsa Electrónica:" FontSize="13" TextColor="#1A1A1A" />
-                                <Label Grid.Row="3" Grid.Column="1" Text="{Binding BolsaElectronica, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                                <Label Grid.Row="4" Grid.Column="0" Text="Garantía Total:" FontSize="13" TextColor="#1A1A1A" />
-                                <Label Grid.Row="4" Grid.Column="1" Text="{Binding GarantiaTotal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                                <Label Grid.Row="5" Grid.Column="0" Text="Capacidad de Crédito:" FontSize="13" TextColor="#1A1A1A" />
-                                <Label Grid.Row="5" Grid.Column="1" Text="{Binding CapacidadDeCredito, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                                <Label Grid.Row="0" Grid.Column="0" Text="Fondo de Ahorro:" FontSize="13" TextColor="{StaticResource McTextDark}" />
+                                <Label Grid.Row="0" Grid.Column="1" Text="{Binding FondoDeAhorro, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                                <Label Grid.Row="1" Grid.Column="0" Text="Fideicomiso:" FontSize="13" TextColor="{StaticResource McTextDark}" />
+                                <Label Grid.Row="1" Grid.Column="1" Text="{Binding Fideicomiso, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                                <Label Grid.Row="2" Grid.Column="0" Text="Pagarés:" FontSize="13" TextColor="{StaticResource McTextDark}" />
+                                <Label Grid.Row="2" Grid.Column="1" Text="{Binding Pagares, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                                <Label Grid.Row="3" Grid.Column="0" Text="Bolsa Electrónica:" FontSize="13" TextColor="{StaticResource McTextDark}" />
+                                <Label Grid.Row="3" Grid.Column="1" Text="{Binding BolsaElectronica, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                                <Label Grid.Row="4" Grid.Column="0" Text="Garantía Total:" FontSize="13" TextColor="{StaticResource McTextDark}" />
+                                <Label Grid.Row="4" Grid.Column="1" Text="{Binding GarantiaTotal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                                <Label Grid.Row="5" Grid.Column="0" Text="Capacidad de Crédito:" FontSize="13" TextColor="{StaticResource McTextDark}" />
+                                <Label Grid.Row="5" Grid.Column="1" Text="{Binding CapacidadDeCredito, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
                             </Grid>
                         </VerticalStackLayout>
                     </Border>
@@ -104,11 +105,11 @@
                         StrokeThickness="0"
                         Padding="14,12">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Sorteos" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Text="Sorteos" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
                             <Label
                                 Text="Sin registros"
                                 FontSize="13"
-                                TextColor="#9E9E9E"
+                                TextColor="{StaticResource McGrayHint}"
                                 IsVisible="{Binding SinSorteos}" />
                         </VerticalStackLayout>
                     </Border>
@@ -121,14 +122,14 @@
                         StrokeThickness="0"
                         Padding="14,12">
                         <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto">
-                            <Label Grid.Row="0" Grid.Column="0" Text="Vencido Total:" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                            <Label Grid.Row="0" Grid.Column="1" Text="{Binding VencidoTotal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                            <Label Grid.Row="1" Grid.Column="0" Text="Consigna Total:" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding ConsignaTotal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                            <Label Grid.Row="2" Grid.Column="0" Text="Pagos Total:" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                            <Label Grid.Row="2" Grid.Column="1" Text="{Binding PagosTotal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                            <Label Grid.Row="3" Grid.Column="0" Text="Total Final:" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                            <Label Grid.Row="3" Grid.Column="1" Text="{Binding TotalFinal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Grid.Row="0" Grid.Column="0" Text="Vencido Total:" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                            <Label Grid.Row="0" Grid.Column="1" Text="{Binding VencidoTotal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                            <Label Grid.Row="1" Grid.Column="0" Text="Consigna Total:" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding ConsignaTotal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                            <Label Grid.Row="2" Grid.Column="0" Text="Pagos Total:" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                            <Label Grid.Row="2" Grid.Column="1" Text="{Binding PagosTotal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                            <Label Grid.Row="3" Grid.Column="0" Text="Total Final:" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                            <Label Grid.Row="3" Grid.Column="1" Text="{Binding TotalFinal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
                         </Grid>
                     </Border>
 
@@ -149,7 +150,7 @@
                             <TapGestureRecognizer Command="{Binding AbrirModalFechasCommand}" />
                         </Grid.GestureRecognizers>
                         <VerticalStackLayout Grid.Column="0" Spacing="4">
-                            <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
                             <Label Text="Indicar Periodo" FontSize="13" TextColor="{StaticResource McPrimaryMorado}" />
                         </VerticalStackLayout>
                         <Image
@@ -166,7 +167,7 @@
                         <VerticalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding AbrirModalFechasCommand}" />
                         </VerticalStackLayout.GestureRecognizers>
-                        <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
+                        <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
                         <Label Text="{Binding FechaDesdeLarga}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McPrimaryMorado}" />
                         <Label Text="{Binding FechaHastaLarga}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McPrimaryMorado}" />
                     </VerticalStackLayout>
@@ -178,15 +179,15 @@
                         HeightRequest="140"
                         Margin="8,6,8,0">
                         <!-- Cuadrícula horizontal tenue -->
-                        <BoxView Color="#E3E3E3" HeightRequest="1" VerticalOptions="Start" />
-                        <BoxView Color="#E3E3E3" HeightRequest="1" VerticalOptions="Center" />
-                        <BoxView Color="#E3E3E3" HeightRequest="1" VerticalOptions="End" />
+                        <BoxView Color="{StaticResource McDividerGrafica}" HeightRequest="1" VerticalOptions="Start" />
+                        <BoxView Color="{StaticResource McDividerGrafica}" HeightRequest="1" VerticalOptions="Center" />
+                        <BoxView Color="{StaticResource McDividerGrafica}" HeightRequest="1" VerticalOptions="End" />
                         <!-- Cuadrícula vertical tenue -->
-                        <BoxView Color="#E3E3E3" WidthRequest="1" HorizontalOptions="Start" />
-                        <BoxView Color="#E3E3E3" WidthRequest="1" HorizontalOptions="Center" />
-                        <BoxView Color="#E3E3E3" WidthRequest="1" HorizontalOptions="End" />
+                        <BoxView Color="{StaticResource McDividerGrafica}" WidthRequest="1" HorizontalOptions="Start" />
+                        <BoxView Color="{StaticResource McDividerGrafica}" WidthRequest="1" HorizontalOptions="Center" />
+                        <BoxView Color="{StaticResource McDividerGrafica}" WidthRequest="1" HorizontalOptions="End" />
                         <!-- Serie en cero: línea azul plana sobre la base -->
-                        <BoxView Color="#3A4DBC" HeightRequest="2" VerticalOptions="End" />
+                        <BoxView Color="{StaticResource McTabInternoPleca}" HeightRequest="2" VerticalOptions="End" />
                     </Grid>
 
                     <!-- Resumen de saldos (flat sobre el fondo, como el mockup 9.2) -->
@@ -195,14 +196,14 @@
                         ColumnDefinitions="*,Auto"
                         RowDefinitions="Auto,Auto,Auto,Auto"
                         Margin="8,10,8,0">
-                        <Label Grid.Row="0" Grid.Column="0" Text="Saldo inicial:" FontSize="13" TextColor="#1A1A1A" />
-                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding FaSaldoInicial, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                        <Label Grid.Row="1" Grid.Column="0" Text="Depósitos:" FontSize="13" TextColor="#1A1A1A" />
-                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding FaDepositos, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                        <Label Grid.Row="2" Grid.Column="0" Text="Retiros:" FontSize="13" TextColor="#1A1A1A" />
-                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding FaRetiros, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
-                        <Label Grid.Row="3" Grid.Column="0" Text="Saldo final:" FontSize="13" TextColor="#1A1A1A" />
-                        <Label Grid.Row="3" Grid.Column="1" Text="{Binding FaSaldoFinal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                        <Label Grid.Row="0" Grid.Column="0" Text="Saldo inicial:" FontSize="13" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding FaSaldoInicial, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="1" Grid.Column="0" Text="Depósitos:" FontSize="13" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding FaDepositos, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="2" Grid.Column="0" Text="Retiros:" FontSize="13" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding FaRetiros, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="3" Grid.Column="0" Text="Saldo final:" FontSize="13" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="{Binding FaSaldoFinal, StringFormat='$ {0:N2}'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
                     </Grid>
 
                 </VerticalStackLayout>
@@ -222,7 +223,7 @@
                             <TapGestureRecognizer Command="{Binding AbrirModalFechasCommand}" />
                         </Grid.GestureRecognizers>
                         <VerticalStackLayout Grid.Column="0" Spacing="4">
-                            <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
+                            <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
                             <Label Text="Indicar Periodo" FontSize="13" TextColor="{StaticResource McPrimaryMorado}" />
                         </VerticalStackLayout>
                         <Image
@@ -239,7 +240,7 @@
                         <VerticalStackLayout.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding AbrirModalFechasCommand}" />
                         </VerticalStackLayout.GestureRecognizers>
-                        <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="#1A1A1A" />
+                        <Label Text="Periodo" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
                         <Label Text="{Binding FacDesdeLarga}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McPrimaryMorado}" />
                         <Label Text="{Binding FacHastaLarga}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McPrimaryMorado}" />
                     </VerticalStackLayout>
@@ -250,9 +251,9 @@
                         Spacing="2"
                         Margin="8,10,8,0"
                         HorizontalOptions="Center">
-                        <Label Text="Total" FontSize="13" TextColor="#1A1A1A" HorizontalOptions="Center" />
-                        <Label Text="{Binding FacTotal, StringFormat='$ {0:N2}'}" FontSize="22" FontAttributes="Bold" TextColor="#1A1A1A" HorizontalOptions="Center" />
-                        <Label Text="{Binding FacPorcentajePrincipal, StringFormat='{0:0.0}%'}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" HorizontalOptions="Center" />
+                        <Label Text="Total" FontSize="13" TextColor="{StaticResource McTextDark}" HorizontalOptions="Center" />
+                        <Label Text="{Binding FacTotal, StringFormat='$ {0:N2}'}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" HorizontalOptions="Center" />
+                        <Label Text="{Binding FacPorcentajePrincipal, StringFormat='{0:0.0}%'}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" HorizontalOptions="Center" />
                     </VerticalStackLayout>
 
                     <!-- Gráfica circular por tipo de sorteo (proporciones dinámicas) -->
@@ -264,14 +265,47 @@
                         HorizontalOptions="Center"
                         Margin="8,4,8,0" />
 
-                    <!-- Leyenda: indicador de color + nombre, monto y porcentaje (dinámicos) -->
+                    <!-- Leyenda: indicador de color + nombre, monto y porcentaje (Bindables, sin code-behind) -->
                     <FlexLayout
+                        BindableLayout.ItemsSource="{Binding FacCategorias}"
                         IsVisible="{Binding FacConsultado}"
                         Direction="Row"
                         Wrap="Wrap"
                         JustifyContent="Center"
-                        Margin="8,2,8,0"
-                        x:Name="LeyendaFacturacion" />
+                        Margin="8,2,8,0">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="entities:CategoriaFacturacion">
+                                <HorizontalStackLayout>
+                                    <Border
+                                        StrokeShape="RoundRectangle 6"
+                                        BackgroundColor="{Binding ColorHex}"
+                                        StrokeThickness="0"
+                                        WidthRequest="14"
+                                        HeightRequest="14"
+                                        VerticalOptions="Center" />
+                                    <Label
+                                        Text="{Binding Nombre}"
+                                        FontSize="13"
+                                        FontAttributes="Bold"
+                                        TextColor="{StaticResource McTextDark}"
+                                        VerticalOptions="Center"
+                                        Margin="6,0,10,0" />
+                                    <Label
+                                        Text="{Binding Monto, StringFormat='$ {0:N2}'}"
+                                        FontSize="13"
+                                        TextColor="{StaticResource McTextDark}"
+                                        VerticalOptions="Center"
+                                        Margin="0,0,10,0" />
+                                    <Label
+                                        Text="{Binding Porcentaje, StringFormat='{0:0.0}%'}"
+                                        FontSize="13"
+                                        TextColor="{StaticResource McGrayText}"
+                                        VerticalOptions="Center"
+                                        Margin="0,0,16,0" />
+                                </HorizontalStackLayout>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
 
                 </VerticalStackLayout>
             </ScrollView>
@@ -280,7 +314,7 @@
             <Border
                 IsVisible="{Binding AvisoFondoVisible}"
                 StrokeThickness="0"
-                BackgroundColor="#4CB050"
+                BackgroundColor="{StaticResource McGreenAccept}"
                 VerticalOptions="End"
                 Padding="14,10"
                 SemanticProperties.Description="Aviso descarga Fondo de Ahorro">
@@ -296,7 +330,7 @@
             <Border
                 IsVisible="{Binding AvisoFacVisible}"
                 StrokeThickness="0"
-                BackgroundColor="#4CB050"
+                BackgroundColor="{StaticResource McGreenAccept}"
                 VerticalOptions="End"
                 Padding="14,10"
                 SemanticProperties.Description="Aviso descarga Facturación">
@@ -428,7 +462,7 @@
         <Border
             Grid.Row="2"
             StrokeThickness="0"
-            BackgroundColor="#FFFFFF"
+            BackgroundColor="{StaticResource White}"
             Stroke="Transparent">
             <Grid ColumnDefinitions="*,*,*">
 
@@ -488,7 +522,7 @@
         <Border
             Grid.Row="0" Grid.RowSpan="3"
             IsVisible="{Binding ModalFechasVisible}"
-            BackgroundColor="#80707070"
+            BackgroundColor="{StaticResource McFabShadow}"
             StrokeThickness="0"
             Padding="0">
             <Border.GestureRecognizers>
@@ -524,8 +558,8 @@
                             <TapGestureRecognizer Command="{Binding ElegirDesdeCommand}" />
                         </Grid.GestureRecognizers>
                         <VerticalStackLayout Grid.Column="0" Spacing="3">
-                            <Label Text="Desde" FontSize="11" TextColor="#757575" />
-                            <Label Text="{Binding ModalDesdeTexto}" FontSize="14" TextColor="#1A1A1A" />
+                            <Label Text="Desde" FontSize="11" TextColor="{StaticResource McGrayText}" />
+                            <Label Text="{Binding ModalDesdeTexto}" FontSize="14" TextColor="{StaticResource McTextDark}" />
                         </VerticalStackLayout>
                         <Image
                             Grid.Column="1"
@@ -545,8 +579,8 @@
                             <TapGestureRecognizer Command="{Binding ElegirHastaCommand}" />
                         </Grid.GestureRecognizers>
                         <VerticalStackLayout Grid.Column="0" Spacing="3">
-                            <Label Text="Hasta" FontSize="11" TextColor="#757575" />
-                            <Label Text="{Binding ModalHastaTexto}" FontSize="14" TextColor="#1A1A1A" />
+                            <Label Text="Hasta" FontSize="11" TextColor="{StaticResource McGrayText}" />
+                            <Label Text="{Binding ModalHastaTexto}" FontSize="14" TextColor="{StaticResource McTextDark}" />
                         </VerticalStackLayout>
                         <Image
                             Grid.Column="1"
@@ -585,7 +619,7 @@
         <Border
             Grid.Row="0" Grid.RowSpan="3"
             IsVisible="{Binding Procesando}"
-            BackgroundColor="#80707070"
+            BackgroundColor="{StaticResource McFabShadow}"
             StrokeThickness="0"
             Padding="0">
             <VerticalStackLayout
@@ -606,7 +640,7 @@
         <Border
             Grid.Row="0" Grid.RowSpan="3"
             IsVisible="{Binding Descargando}"
-            BackgroundColor="#80707070"
+            BackgroundColor="{StaticResource McFabShadow}"
             StrokeThickness="0"
             Padding="0">
             <VerticalStackLayout
