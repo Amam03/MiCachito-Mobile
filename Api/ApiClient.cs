@@ -30,6 +30,9 @@ public class ApiClient : IApiClient
     public async Task<T?> PostAsync<T>(string path, object? body = null, CancellationToken cancellationToken = default)
         => await SendAsync<T>(HttpMethod.Post, path, body, cancellationToken).ConfigureAwait(false);
 
+    public async Task<T?> PutAsync<T>(string path, object? body = null, CancellationToken cancellationToken = default)
+        => await SendAsync<T>(HttpMethod.Put, path, body, cancellationToken).ConfigureAwait(false);
+
     private async Task<T?> SendAsync<T>(HttpMethod method, string path, object? body, CancellationToken cancellationToken)
     {
         using var request = new HttpRequestMessage(method, path);

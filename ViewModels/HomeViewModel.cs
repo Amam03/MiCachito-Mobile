@@ -77,12 +77,11 @@ public partial class HomeViewModel : BaseViewModel
     /// Botones de Vender según los Permisos de Venta del expendio autenticado
     /// (única fuente de verdad: la configuración hecha en Gestión/Expendios
     /// desde Desktop; llega en el login/verify mobile via datosBilletero()).
-    /// Mapeo decidido con el usuario (2026-09-14):
+    /// Mapeo decidido con el usuario (2026-09-14, actualizado 2026-09-16):
     /// - Tiempo Aire -> tiene_tiempo_aire
     /// - Sorteos Tec -> tiene_prod_digitales
-    /// - Lotenal -> habilitado por ahora (el backend NO tiene flag propio
-    ///   para Lotenal; si se necesita activar/desactivar por expendio se
-    ///   analizará como cambio separado, sin tocar tablas compartidas).
+    /// - Lotenal -> tiene_lotenal (columna nueva aprobada 2026-09-16,
+    ///   DEFAULT 1: los billeteros existentes conservan el botón visible).
     /// </summary>
     private void CargarPermisosVenta()
     {
@@ -99,7 +98,7 @@ public partial class HomeViewModel : BaseViewModel
 
         MuestraSorteosTec = billetero.TieneProdDigitales == 1;
         MuestraTiempoAire = billetero.TieneTiempoAire == 1;
-        MuestraLotenal = true;
+        MuestraLotenal = billetero.TieneLotenal == 1;
     }
 
     [RelayCommand]

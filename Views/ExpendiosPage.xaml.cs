@@ -26,9 +26,9 @@ public partial class ExpendiosPage : ContentPage
         // Intencionalmente vacío: solo consume el gesto.
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        _vm.AlAparecer();
+        await _vm.AlAparecerAsync();
     }
 }

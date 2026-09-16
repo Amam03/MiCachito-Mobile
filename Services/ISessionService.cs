@@ -1,4 +1,5 @@
 using MiCachito.Mobile.Models;
+using MiCachito.Mobile.Models.Entities;
 using MiCachito.Mobile.Models.Responses;
 
 namespace MiCachito.Mobile.Services;
@@ -30,6 +31,13 @@ public interface ISessionService
     /// (ej. tras api/mobile/auth/verify) y la persiste.
     /// </summary>
     Task UpdateAsync(MobileVerifyResponse verifyResponse, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Actualiza SOLO el billetero de la sesión persistida (ej. tras
+    /// consultar/guardar Permisos de Venta) y la persiste. La pestaña
+    /// Vender recarga estos flags en cada OnAppearing.
+    /// </summary>
+    Task UpdateBilleteroAsync(BilleteroMobile billetero, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Borra la sesión persistida y la caché en memoria.

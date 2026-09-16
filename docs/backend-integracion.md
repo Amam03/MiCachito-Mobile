@@ -123,7 +123,7 @@ La app ya habla exclusivamente con `/api/mobile/auth/*`:
 - `IAuthService`/`AuthService` → contrato mobile; `SessionService` persiste `SessionInfo` con expendio/billetero/id_sesion/dispositivo.
 - Login envía `dispositivo = DeviceInfo.Current.Name` (aparece así en la lista de sesiones del expendio).
 - Splash: token → `verify` → Home; ApiException (expirada/revocada/rotada) → Clear + Login. Sesión vieja Desktop: verify la rechaza → Login limpio.
-- Cuenta: identidad = `Billetero.NombreCompleto`. Home/Vender: `CargarPermisosVenta()` desde flags del billetero — **mapeo P1 (decisión del usuario 2026-09-14): Tiempo Aire→`tiene_tiempo_aire`, Sorteos Tec→`tiene_prod_digitales`, Lotenal→habilitado por ahora** (el backend NO tiene flag propio para Lotenal; si se necesita per-expendio, cambio separado — sin tocar tablas compartidas).
+- Cuenta: identidad = `Billetero.NombreCompleto`. Home/Vender: `CargarPermisosVenta()` desde flags del billetero — **mapeo (decisión del usuario 2026-09-14, actualizada 2026-09-16): Tiempo Aire→`tiene_tiempo_aire`, Sorteos Tec→`tiene_prod_digitales`, Lotenal→`tiene_lotenal`** (columna nueva m260916_000001, DEFAULT 1 — los billeteros existentes conservan el botón visible; editable desde el formulario Expendios mobile).
 - E2E en emulador contra Docker real: login→Home, restauración por verify, logout (revoca SOLO esa sesión), re-login, credenciales malas → "Credenciales incorrectas" sin navegar, permisos Vender correctos por flags, identidad real en Cuenta. Pendiente: inspección del usuario → commit.
 
 ---
@@ -135,10 +135,10 @@ Principio: **Mobile no llama endpoints Desktop autenticados** (el Bearer de `mob
 | Módulo | Endpoint | Tipo | Reutiliza existente | Específico Mobile |
 |---|---|---|---|---|
 | auth | `POST /api/mobile/auth/login` | ✅ hecho | `billeteros_expendios` (tabla), bcrypt | flujo+token propios |
-| auth | `GET /api/mobile/auth/verify` | ✅ hecho | — | sesión mobile |
-| auth | `POST /api/mobile/auth/logout` | ✅ hecho | — | revocación individual |
-| auth | `GET /api/mobile/auth/sesiones` | ✅ hecho | — | pantalla Cuenta |
-| auth | `POST /api/mobile/auth/sesiones/revocar` | ✅ hecho | — | pantalla Cuenta |
+| auth | `POST /api/mobile/auth/verify` | ✅ hecho | `mobile_sesiones` | refresca perfil+billetero en cada arranque |
+| auth | `POST /api/mobile/auth/logout` / `sesiones` / `sesiones/revocar` | ✅ hecho | `mobile_sesiones` | revocación de sesión/dispositivo |
+| expendios | `GET /api/mobile/expendios` | ✅ hecho (2026-09-16) | `billeteros_expendios` + `billeteros` (lectura) | lista el CONJUNTO de expendios del billetero de la sesión + estado compartido de permisos |
+| expendios | `PUT /api/mobile/expendios/<id_expendio>/permisos` | ✅ hecho (2026-09-16) | `billeteros` (UPDATE de `tiene_prod_digitales`/`tiene_tiempo_aire`/`tiene_lotenal`) | permisos por billetero, compartidos por todo el conjunto; id del path solo se valida como pertenencia al conjunto (mismo `id_billetero`), el UPDATE siempre fija `WHERE id_billetero = getIdBilleteroActual()` |
 | catálogo | `GET /api/mobile/sorteos` | pendiente | modelo `Sorteos` (misma query que `SorteosController::actionIndex`) | thin: sin permisos Desktop, sin `?id_cedis` |
 | catálogo | `GET /api/mobile/sorteos/{id}` | pendiente | modelo `Sorteos` | thin |
 | premios | `POST /api/premios/consultar` | **reuso directo** | endpoint público (sin auth, como Sr. Billetero) | nada — Mobile ya lo puede llamar |

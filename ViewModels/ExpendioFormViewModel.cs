@@ -1,229 +1,239 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MiCachito.Mobile.Data;
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
+using MiCachito.Mobile.Navigation;
+using MiCachito.Mobile.Services;
 
 namespace MiCachito.Mobile.ViewModels;
 
 /// <summary>
-/// VM del formulario de Expendio (mockups 5 y 6): MISMA estructura visual para
-/// Actualizar (carga datos del expendio, botón verde "Actualizar") y Crear
-/// (campos vacíos, botón verde "Guardar"). Incluye la sección Permisos de
-/// Venta, que es la fuente de verdad de qué productos se venden en la pestaña
-/// Ventas (spec §9/§14 — no duplicar esa configuración en Ventas).
-/// Fase SOLO INTERFAZ: los cambios se aplican en memoria (lista del módulo),
-/// SIN endpoints ni persistencia — el contrato del backend no existe aún.
+/// VM del formulario de Expendio (mockups 5/6): modo Actualizar SOLO
+/// Permisos de Venta (Sorteos Tec / Tiempo Aire). La identidad del expendio
+/// (usuario/titular/domicilio) la administra Desktop (cont-cedis/clientes):
+/// aquí se muestra en SOLO LECTURA. No hay modo Crear desde Mobile.
+///
+/// Los permisos son COMPARTIDOS a nivel billetero (billeteros.
+/// tiene_prod_digitales / tiene_tiempo_aire): el formulario muestra el
+/// estado del conjunto y Guardar lo envía por PUT
+/// api/mobile/expendios/{id}/permisos; la respuesta actualiza la sesión y
+/// la pestaña Vender refleja los botones al volver (OnAppearing).
+///
+/// Lotería Nacional NO tiene checkbox: sin flag backend, siempre visible
+/// en Vender (decisión 2026-09-14, sin tocar Lotenal).
 /// </summary>
 [QueryProperty(nameof(ExpendioIdStr), "expendioId")]
 [QueryProperty(nameof(ModoStr), "modo")]
 public partial class ExpendioFormViewModel : BaseViewModel
 {
-    /// <summary>Expendio en edición (null en modo Crear).</summary>
-    private Expendio? _original;
+    /// <summary>Expendio (credencial) en edición, del conjunto de la sesión.</summary>
+    private ExpendioItem? _expendio;
 
-    /// <summary>Copia de trabajo editada por el formulario.</summary>
-    private Expendio _edicion = new();
+    private readonly IExpendiosService _expendiosService;
+    private readonly ISessionService _sessionService;
+    private readonly INavigationService _navigationService;
 
-    /// <summary>True en modo Actualizar; False en modo Crear.</summary>
+    /// <summary>Título del header ("Actualizar Expendio").</summary>
     [ObservableProperty]
-    private bool _modoActualizar;
+    private string _titulo = "Actualizar Expendio";
 
-    /// <summary>Título del header ("Actualizar Expendio" / "Crear Expendio").</summary>
+    /// <summary>Texto del botón verde final ("Actualizar").</summary>
     [ObservableProperty]
-    private string _titulo = "Crear Expendio";
+    private string _textoBoton = "Actualizar";
 
-    /// <summary>Texto del botón verde final ("Actualizar" / "Guardar").</summary>
+    /// <summary>True mientras viaja el PUT (deshabilita el botón).</summary>
     [ObservableProperty]
-    private string _textoBoton = "Guardar";
+    private bool _guardando;
 
-    // ── Campos del formulario (bindings de Entry) ──
-
-    [ObservableProperty]
-    private string _alias = string.Empty;
-
-    [ObservableProperty]
-    private string _nombre = string.Empty;
+    // ── Identidad del expendio (SOLO LECTURA; la administra Desktop) ──
 
     [ObservableProperty]
     private string _usuario = string.Empty;
 
     [ObservableProperty]
-    private string _contrasena = string.Empty;
+    private string _titular = string.Empty;
 
     [ObservableProperty]
     private string _domicilio = string.Empty;
 
-    /// <summary>True para ocultar la contraseña (toggle del icono ojo).</summary>
+    // ── Permisos de Venta (compartidos a nivel billetero) ──
+
+    /// <summary>Permiso Sorteos Tec (tiene_prod_digitales).</summary>
     [ObservableProperty]
-    private bool _ocultarContrasena = true;
+    private bool _sorteosTec;
 
-    // ── Avisos de validación (patrón NuevoDeposito) ──
-
+    /// <summary>Permiso Tiempo Aire (tiene_tiempo_aire).</summary>
     [ObservableProperty]
-    private bool _avisoAlias;
+    private bool _tiempoAire;
 
+    /// <summary>Permiso Lotería Nacional (tiene_lotenal).</summary>
     [ObservableProperty]
-    private bool _avisoNombre;
+    private bool _lotenal;
 
-    [ObservableProperty]
-    private bool _avisoUsuario;
+    /// <summary>Negaciones (checkboxes vacíos, sin converters).</summary>
+    public bool NoSorteosTec => !SorteosTec;
+    public bool NoTiempoAire => !TiempoAire;
+    public bool NoLotenal => !Lotenal;
 
-    [ObservableProperty]
-    private bool _avisoContrasena;
+    partial void OnSorteosTecChanged(bool value) => OnPropertyChanged(nameof(NoSorteosTec));
+    partial void OnTiempoAireChanged(bool value) => OnPropertyChanged(nameof(NoTiempoAire));
+    partial void OnLotenalChanged(bool value) => OnPropertyChanged(nameof(NoLotenal));
 
-    [ObservableProperty]
-    private bool _avisoDomicilio;
+    /// <summary>True si el botón Actualizar está habilitado.</summary>
+    public bool PuedeGuardar => !Guardando;
 
-    public ExpendioFormViewModel()
+    /// <summary>Opacidad del botón Actualizar (0.5 mientras viaja el PUT).</summary>
+    public float OpacidadGuardar => PuedeGuardar ? 1f : 0.5f;
+
+    partial void OnGuardandoChanged(bool value)
     {
+        OnPropertyChanged(nameof(PuedeGuardar));
+        OnPropertyChanged(nameof(OpacidadGuardar));
+    }
+
+    public ExpendioFormViewModel(
+        IExpendiosService expendiosService,
+        ISessionService sessionService,
+        INavigationService navigationService)
+    {
+        _expendiosService = expendiosService;
+        _sessionService = sessionService;
+        _navigationService = navigationService;
         Title = "Expendio";
     }
 
-    /// <summary>Id del expendio recibido vía navegación Shell (solo modo Actualizar).</summary>
+    /// <summary>Id del expendio recibido vía navegación Shell.</summary>
     public string? ExpendioIdStr { get; set; }
 
-    /// <summary>Modo recibido vía navegación Shell ("actualizar" / "crear").</summary>
+    /// <summary>Modo recibido vía navegación Shell ("actualizar").</summary>
     public string? ModoStr { get; set; }
 
     /// <summary>
-    /// Carga inicial: resuelve el modo, y en Actualizar carga los datos del
-    /// expendio elegido sobre la copia de trabajo. Llamado desde OnAppearing
-    /// (patrón [QueryProperty] del proyecto: la query llega antes que el
-    /// BindingContext aplicado).
+    /// Carga inicial: resuelve el expendio de la sesión (por id de navegación)
+    /// y fija los checkboxes desde el estado COMPARTIDO del billetero. El
+    /// formulario se abre desde cualquier tarjeta del conjunto; el estado
+    /// mostrado es el mismo (permisos por billetero, no por expendio).
+    /// Llamado desde OnAppearing (patrón [QueryProperty] del proyecto).
     /// </summary>
     public void AlAparecer()
     {
-        int id = 0;
-        bool actualizar = ModoStr == "actualizar"
-            && int.TryParse(ExpendioIdStr, out id);
+        int id = int.TryParse(ExpendioIdStr, out id) ? id : 0;
 
-        if (actualizar)
+        _expendio = null;
+        foreach (ExpendioItem e in ExpendiosViewModel.ExpendiosCompartidos)
         {
-            _original = ExpendiosDemoData.ObtenerExpendios()
-                .FirstOrDefault(e => e.Id == id);
-            if (_original is null)
+            if (e.IdExpendio == id)
             {
-                // Id inexistente: caer a Crear (no crashea).
-                actualizar = false;
+                _expendio = e;
+                break;
             }
         }
 
-        ModoActualizar = actualizar;
-        Titulo = actualizar ? "Actualizar Expendio" : "Crear Expendio";
-        TextoBoton = actualizar ? "Actualizar" : "Guardar";
+        // Estado compartido de permisos: siempre desde el billetero de la
+        // sesión (refrescado por el GET de la pestaña Expendios).
+        var billetero = _sessionService.CurrentSession?.Billetero;
+        SorteosTec = billetero?.TieneProdDigitales == 1;
+        TiempoAire = billetero?.TieneTiempoAire == 1;
+        Lotenal = billetero?.TieneLotenal == 1;
+
+        Usuario = _expendio?.Usuario ?? string.Empty;
+        Titular = _expendio?.Titular ?? string.Empty;
+        Domicilio = _expendio?.Domicilio ?? string.Empty;
+
+        OnPropertyChanged(nameof(Usuario));
+        OnPropertyChanged(nameof(Titular));
+        OnPropertyChanged(nameof(Domicilio));
+        OnPropertyChanged(nameof(NoSorteosTec));
+        OnPropertyChanged(nameof(NoTiempoAire));
+        OnPropertyChanged(nameof(NoLotenal));
+
+        Titulo = "Actualizar Expendio";
+        TextoBoton = "Actualizar";
         Title = Titulo;
-
-        _edicion = _original?.Copia() ?? new Expendio();
-        // CRÍTICO: _edicion es una instancia NUEVA; sin esta notificación los
-        // bindings compilados (Permisos.X) seguirían apuntando a la instancia
-        // anterior y los checkboxes no responderían (bug corregido 2026-09-11).
-        OnPropertyChanged(nameof(Permisos));
-        Alias = _edicion.Alias;
-        Nombre = _edicion.Nombre;
-        Usuario = _edicion.Usuario;
-        Contrasena = _edicion.Contrasena;
-        Domicilio = _edicion.Domicilio;
-        OcultarContrasena = true;
     }
 
-    /// <summary>Permisos de venta del expendio en edición (checkboxes del formulario).</summary>
-    public PermisosVenta Permisos => _edicion.Permisos;
-
-    /// <summary>True si el botón Actualizar/Guardar está habilitado.</summary>
-    public bool PuedeGuardar => true;
-
-    /// <summary>Alterna mostrar/ocultar la contraseña (icono ojo del campo).</summary>
+    /// <summary>Alterna el permiso Sorteos Tec (checkbox).</summary>
     [RelayCommand]
-    private void AlternarContrasena()
-    {
-        OcultarContrasena = !OcultarContrasena;
-    }
+    private void AlternarSorteosTec() => SorteosTec = !SorteosTec;
 
-    /// <summary>Alterna el permiso Sorteos Tec (checkbox de la fila).</summary>
+    /// <summary>Alterna el permiso Tiempo Aire (checkbox).</summary>
     [RelayCommand]
-    private void AlternarSorteosTec()
-    {
-        _edicion.Permisos.SorteosTec = !_edicion.Permisos.SorteosTec;
-    }
+    private void AlternarTiempoAire() => TiempoAire = !TiempoAire;
 
-    /// <summary>Alterna el permiso Tiempo Aire (checkbox de la fila).</summary>
+    /// <summary>Alterna el permiso Lotenal (checkbox).</summary>
     [RelayCommand]
-    private void AlternarTiempoAire()
-    {
-        _edicion.Permisos.TiempoAire = !_edicion.Permisos.TiempoAire;
-    }
-
-    /// <summary>Alterna el permiso Lotenal (checkbox de la fila).</summary>
-    [RelayCommand]
-    private void AlternarLotenal()
-    {
-        _edicion.Permisos.Lotenal = !_edicion.Permisos.Lotenal;
-    }
-
-    /// <summary>Regresa a la lista de expendios sin cambios (flecha del header).</summary>
-    [RelayCommand]
-    private Task CancelarAsync()
-    {
-        if (Shell.Current is null)
-        {
-            return Task.CompletedTask;
-        }
-
-        return Shell.Current.GoToAsync("..");
-    }
+    private void AlternarLotenal() => Lotenal = !Lotenal;
 
     /// <summary>
-    /// Aplica el formulario: valida los campos (mantiene los valores introducidos),
-    /// vuelca la copia de trabajo sobre el expendio (Actualizar) o da de alta uno
-    /// nuevo con Id provisional (Crear) y regresa a la lista. En Crear con un
-    /// nombre de usuario DIFERENTE al actual se considera un nuevo usuario
-    /// (spec §13, escenario B) — la relación queda documentada en docs.
+    /// Guardar: PUT api/mobile/expendios/{id}/permisos con los flags del
+    /// formulario. La respuesta trae el billetero actualizado: se escribe
+    /// en la sesión (SessionService) para que la pestaña Vender refleje
+    /// los botones al volver SIN reiniciar la app. Errores: 401 → Login
+    /// (patrón Splash), otros → alerta sin perder la captura.
     /// </summary>
     [RelayCommand]
     private async Task GuardarAsync()
     {
-        // Validación: marca los campos vacíos y NO limpia lo capturado.
-        AvisoAlias = string.IsNullOrWhiteSpace(Alias);
-        AvisoNombre = string.IsNullOrWhiteSpace(Nombre);
-        AvisoUsuario = string.IsNullOrWhiteSpace(Usuario);
-        AvisoContrasena = string.IsNullOrWhiteSpace(Contrasena);
-        AvisoDomicilio = string.IsNullOrWhiteSpace(Domicilio);
-
-        if (AvisoAlias || AvisoNombre || AvisoUsuario || AvisoContrasena || AvisoDomicilio)
+        if (Guardando || _expendio is null)
         {
             return;
         }
 
-        _edicion.Alias = Alias.Trim();
-        _edicion.Nombre = Nombre.Trim();
-        _edicion.Usuario = Usuario.Trim();
-        _edicion.Contrasena = Contrasena;
-        _edicion.Domicilio = Domicilio.Trim();
-
-        if (ModoActualizar && _original is not null)
+        Guardando = true;
+        try
         {
-            // Actualizar: mantiene permisos y refleja el cambio en la lista dinámica.
-            _original.Alias = _edicion.Alias;
-            _original.Nombre = _edicion.Nombre;
-            _original.Usuario = _edicion.Usuario;
-            _original.Contrasena = _edicion.Contrasena;
-            _original.Domicilio = _edicion.Domicilio;
-            _original.Permisos.SorteosTec = _edicion.Permisos.SorteosTec;
-            _original.Permisos.TiempoAire = _edicion.Permisos.TiempoAire;
-            _original.Permisos.Lotenal = _edicion.Permisos.Lotenal;
-        }
-        else
-        {
-            // Crear: alta en memoria con Id provisional (backend pendiente).
-            // Escenario A: mismo usuario => el usuario queda con N expendios.
-            // Escenario B: usuario distinto => nuevo usuario relacionado al creador.
-            _edicion.Id = ExpendiosDemoData.SiguienteId();
-            ExpendiosDemoData.Agregar(_edicion);
-        }
+            var respuesta = await _expendiosService.ActualizarPermisosAsync(
+                _expendio.IdExpendio,
+                SorteosTec ? 1 : 0,
+                TiempoAire ? 1 : 0,
+                Lotenal ? 1 : 0);
 
+            if (respuesta?.Billetero is not null)
+            {
+                await _sessionService.UpdateBilleteroAsync(respuesta.Billetero);
+            }
+
+            if (Shell.Current is not null)
+            {
+                await Shell.Current.GoToAsync("..");
+            }
+        }
+        catch (ApiException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                await _sessionService.ClearAsync();
+                await _navigationService.NavigateToLoginAsync();
+                return;
+            }
+            await AlertarAsync(ex.ServerMessage ?? "No fue posible actualizar los permisos.");
+        }
+        catch (Exception)
+        {
+            await AlertarAsync("No fue posible conectar con el servidor.");
+        }
+        finally
+        {
+            Guardando = false;
+            OnPropertyChanged(nameof(PuedeGuardar));
+        }
+    }
+
+    /// <summary>Volver sin cambios (flecha del header).</summary>
+    [RelayCommand]
+    private async Task CancelarAsync()
+    {
         if (Shell.Current is not null)
         {
             await Shell.Current.GoToAsync("..");
+        }
+    }
+
+    private static async Task AlertarAsync(string mensaje)
+    {
+        if (Application.Current is not null && Application.Current.Windows.Count > 0)
+        {
+            await Application.Current.Windows[0].Page!.DisplayAlertAsync("Expendios", mensaje, "OK");
         }
     }
 }

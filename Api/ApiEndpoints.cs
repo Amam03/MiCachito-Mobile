@@ -19,4 +19,18 @@ public static class ApiEndpoints
         public const string Sesiones = "api/mobile/auth/sesiones";
         public const string RevocarSesion = "api/mobile/auth/sesiones/revocar";
     }
+
+    /// <summary>
+    /// Expendios MOBILE: conjunto de expendios del billetero autenticado +
+    /// Permisos de Venta compartidos a nivel billetero (2026-09-16).
+    /// </summary>
+    public static class MobileExpendios
+    {
+        /// <summary>GET: lista del conjunto + estado compartido de permisos.</summary>
+        public const string Expendios = "api/mobile/expendios";
+
+        /// <summary>PUT: actualizar permisos del propio billetero vía un
+        /// expendio del conjunto. {0} = id_expendio.</summary>
+        public const string Permisos = "api/mobile/expendios/{0}/permisos";
+    }
 }

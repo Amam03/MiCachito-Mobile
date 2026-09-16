@@ -59,61 +59,15 @@
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Padding="18,6,18,20" Spacing="0">
 
-                <!-- Campo: Alias -->
-                <Grid RowDefinitions="Auto,1" Padding="0,14">
-                    <Grid Row="0">
-                        <Entry
-                            Text="{Binding Alias}"
-                            Placeholder="Alias"
-                            PlaceholderColor="{StaticResource McPlaceholder}"
-                            FontSize="16"
-                            TextColor="{StaticResource McTextDark}"
-                            MaxLength="40"
-                            ReturnType="Next"
-                            ClearButtonVisibility="Never"
-                            BackgroundColor="Transparent" />
-                    </Grid>
-                    <BoxView
-                        Grid.Row="1"
-                        Color="{StaticResource McDivider}"
-                        HeightRequest="1"
-                        Margin="0,10,0,0" />
-                </Grid>
+                <!-- Nota: la identidad del expendio la administra Desktop
+                     (cont-cedis/clientes); en Mobile es SOLO LECTURA. -->
                 <Label
-                    IsVisible="{Binding AvisoAlias}"
-                    Text="Captura el alias"
+                    Text="La identidad del expendio se administra desde la oficina (CEDIS)."
                     FontSize="12"
-                    TextColor="#C40000"
-                    Padding="0,4,0,2" />
+                    TextColor="{StaticResource McGrayText}"
+                    Padding="0,10,0,2" />
 
-                <!-- Campo: Nombre -->
-                <Grid RowDefinitions="Auto,1" Padding="0,14">
-                    <Grid Row="0">
-                        <Entry
-                            Text="{Binding Nombre}"
-                            Placeholder="Nombre"
-                            PlaceholderColor="{StaticResource McPlaceholder}"
-                            FontSize="16"
-                            TextColor="{StaticResource McTextDark}"
-                            MaxLength="80"
-                            ReturnType="Next"
-                            ClearButtonVisibility="Never"
-                            BackgroundColor="Transparent" />
-                    </Grid>
-                    <BoxView
-                        Grid.Row="1"
-                        Color="{StaticResource McDivider}"
-                        HeightRequest="1"
-                        Margin="0,10,0,0" />
-                </Grid>
-                <Label
-                    IsVisible="{Binding AvisoNombre}"
-                    Text="Captura el nombre del titular"
-                    FontSize="12"
-                    TextColor="#C40000"
-                    Padding="0,4,0,2" />
-
-                <!-- Campo: Usuario -->
+                <!-- Campo: Usuario (solo lectura) -->
                 <Grid RowDefinitions="Auto,1" Padding="0,14">
                     <Grid Row="0">
                         <Entry
@@ -121,10 +75,9 @@
                             Placeholder="Usuario"
                             PlaceholderColor="{StaticResource McPlaceholder}"
                             FontSize="16"
-                            TextColor="{StaticResource McTextDark}"
+                            TextColor="{StaticResource McTextBody}"
                             MaxLength="40"
-                            ReturnType="Next"
-                            IsSpellCheckEnabled="False"
+                            IsReadOnly="True"
                             ClearButtonVisibility="Never"
                             BackgroundColor="Transparent" />
                     </Grid>
@@ -134,44 +87,20 @@
                         HeightRequest="1"
                         Margin="0,10,0,0" />
                 </Grid>
-                <Label
-                    IsVisible="{Binding AvisoUsuario}"
-                    Text="Captura el usuario"
-                    FontSize="12"
-                    TextColor="#C40000"
-                    Padding="0,4,0,2" />
 
-                <!-- Campo: Contraseña (protegida, toggle mostrar/ocultar) -->
+                <!-- Campo: Titular (solo lectura) -->
                 <Grid RowDefinitions="Auto,1" Padding="0,14">
-                    <Grid Row="0" ColumnDefinitions="*,Auto">
+                    <Grid Row="0">
                         <Entry
-                            Grid.Column="0"
-                            Text="{Binding Contrasena}"
-                            IsPassword="{Binding OcultarContrasena}"
-                            Placeholder="Contraseña"
+                            Text="{Binding Titular}"
+                            Placeholder="Titular"
                             PlaceholderColor="{StaticResource McPlaceholder}"
                             FontSize="16"
-                            TextColor="{StaticResource McTextDark}"
-                            MaxLength="40"
-                            ReturnType="Next"
+                            TextColor="{StaticResource McTextBody}"
+                            MaxLength="80"
+                            IsReadOnly="True"
                             ClearButtonVisibility="Never"
                             BackgroundColor="Transparent" />
-                        <Image
-                            Grid.Column="1"
-                            Source="icon_ojo_tachado_gris.svg"
-                            WidthRequest="22" HeightRequest="22"
-                            VerticalOptions="Center"
-                            Margin="8,0,0,0"
-                            SemanticProperties.Description="Mostrar u ocultar contraseña">
-                            <Image.Triggers>
-                                <DataTrigger TargetType="Image" Binding="{Binding OcultarContrasena}" Value="False">
-                                    <Setter Property="Source" Value="icon_ojo_gris.svg" />
-                                </DataTrigger>
-                            </Image.Triggers>
-                            <Image.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding AlternarContrasenaCommand}" />
-                            </Image.GestureRecognizers>
-                        </Image>
                     </Grid>
                     <BoxView
                         Grid.Row="1"
@@ -179,14 +108,8 @@
                         HeightRequest="1"
                         Margin="0,10,0,0" />
                 </Grid>
-                <Label
-                    IsVisible="{Binding AvisoContrasena}"
-                    Text="Captura la contraseña"
-                    FontSize="12"
-                    TextColor="#C40000"
-                    Padding="0,4,0,2" />
 
-                <!-- Campo: Domicilio -->
+                <!-- Campo: Domicilio (solo lectura) -->
                 <Grid RowDefinitions="Auto,1" Padding="0,14">
                     <Grid Row="0">
                         <Entry
@@ -194,9 +117,9 @@
                             Placeholder="Domicilio"
                             PlaceholderColor="{StaticResource McPlaceholder}"
                             FontSize="16"
-                            TextColor="{StaticResource McTextDark}"
+                            TextColor="{StaticResource McTextBody}"
                             MaxLength="120"
-                            ReturnType="Done"
+                            IsReadOnly="True"
                             ClearButtonVisibility="Never"
                             BackgroundColor="Transparent" />
                     </Grid>
@@ -206,12 +129,6 @@
                         HeightRequest="1"
                         Margin="0,10,0,0" />
                 </Grid>
-                <Label
-                    IsVisible="{Binding AvisoDomicilio}"
-                    Text="Captura el domicilio"
-                    FontSize="12"
-                    TextColor="#C40000"
-                    Padding="0,4,0,2" />
 
                 <!-- ============ Sección: Permisos de Venta ============ -->
                 <Label
@@ -220,6 +137,12 @@
                     FontAttributes="Bold"
                     TextColor="{StaticResource McTextDark}"
                     Padding="0,22,0,6" />
+
+                <Label
+                    Text="Los permisos aplican a todos los expendios del mismo titular."
+                    FontSize="12"
+                    TextColor="{StaticResource McGrayText}"
+                    Padding="0,0,0,4" />
 
                 <!-- Sorteos Tec -->
                 <Grid RowDefinitions="Auto,1" Padding="0,12">
@@ -241,13 +164,13 @@
                             VerticalOptions="Center" />
                         <Image
                             Grid.Column="2"
-                            IsVisible="{Binding Permisos.SorteosTec}"
+                            IsVisible="{Binding SorteosTec}"
                             Source="icon_caja_marcada_indigo.svg"
                             WidthRequest="24" HeightRequest="24"
                             VerticalOptions="Center" />
                         <Image
                             Grid.Column="2"
-                            IsVisible="{Binding Permisos.NoSorteosTec}"
+                            IsVisible="{Binding NoSorteosTec}"
                             Source="icon_caja_vacia_gris.svg"
                             WidthRequest="24" HeightRequest="24"
                             VerticalOptions="Center" />
@@ -279,13 +202,13 @@
                             VerticalOptions="Center" />
                         <Image
                             Grid.Column="2"
-                            IsVisible="{Binding Permisos.TiempoAire}"
+                            IsVisible="{Binding TiempoAire}"
                             Source="icon_caja_marcada_indigo.svg"
                             WidthRequest="24" HeightRequest="24"
                             VerticalOptions="Center" />
                         <Image
                             Grid.Column="2"
-                            IsVisible="{Binding Permisos.NoTiempoAire}"
+                            IsVisible="{Binding NoTiempoAire}"
                             Source="icon_caja_vacia_gris.svg"
                             WidthRequest="24" HeightRequest="24"
                             VerticalOptions="Center" />
@@ -317,13 +240,13 @@
                             VerticalOptions="Center" />
                         <Image
                             Grid.Column="2"
-                            IsVisible="{Binding Permisos.Lotenal}"
+                            IsVisible="{Binding Lotenal}"
                             Source="icon_caja_marcada_indigo.svg"
                             WidthRequest="24" HeightRequest="24"
                             VerticalOptions="Center" />
                         <Image
                             Grid.Column="2"
-                            IsVisible="{Binding Permisos.NoLotenal}"
+                            IsVisible="{Binding NoLotenal}"
                             Source="icon_caja_vacia_gris.svg"
                             WidthRequest="24" HeightRequest="24"
                             VerticalOptions="Center" />
@@ -338,7 +261,7 @@
             </VerticalStackLayout>
         </ScrollView>
 
-        <!-- ============ Botón verde Actualizar/Guardar (mockups 5/6) ============ -->
+        <!-- ============ Botón verde Actualizar (mockups 5/6) ============ -->
         <Border
             Grid.Row="2"
             StrokeShape="RoundRectangle 8"
@@ -346,7 +269,8 @@
             StrokeThickness="0"
             HeightRequest="48"
             Margin="18,0,18,16"
-            SemanticProperties.Description="Aplicar expendio">
+            Opacity="{Binding OpacidadGuardar}"
+            SemanticProperties.Description="Aplicar permisos">
             <Border.GestureRecognizers>
                 <TapGestureRecognizer Command="{Binding GuardarCommand}" />
             </Border.GestureRecognizers>

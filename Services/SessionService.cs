@@ -2,6 +2,7 @@ using System.Text.Json;
 using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Helpers;
 using MiCachito.Mobile.Models;
+using MiCachito.Mobile.Models.Entities;
 using MiCachito.Mobile.Models.Responses;
 using Microsoft.Maui.Storage;
 
@@ -87,6 +88,19 @@ public class SessionService : ISessionService, IAuthTokenProvider
             session.Dispositivo = verifyResponse.Sesion.Dispositivo ?? session.Dispositivo;
         }
 
+        await SaveSessionAsync(session).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc />
+    public async Task UpdateBilleteroAsync(BilleteroMobile billetero, CancellationToken cancellationToken = default)
+    {
+        var session = await LoadAsync(cancellationToken).ConfigureAwait(false);
+        if (session is null)
+        {
+            return;
+        }
+
+        session.Billetero = billetero;
         await SaveSessionAsync(session).ConfigureAwait(false);
     }
 

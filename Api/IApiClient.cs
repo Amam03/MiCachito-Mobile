@@ -17,4 +17,10 @@ public interface IApiClient
     /// Ejecuta una petición POST con cuerpo JSON opcional y deserializa el campo "data".
     /// </summary>
     Task<T?> PostAsync<T>(string path, object? body = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Ejecuta una petición PUT con cuerpo JSON y deserializa el campo "data".
+    /// Mismo contrato que GET/POST (envelope + ApiException).
+    /// </summary>
+    Task<T?> PutAsync<T>(string path, object? body = null, CancellationToken cancellationToken = default);
 }

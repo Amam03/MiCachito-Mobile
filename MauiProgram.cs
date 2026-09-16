@@ -32,6 +32,7 @@ namespace MiCachito.Mobile
             });
 
             builder.Services.AddTransient<IAuthService, AuthService>();
+            builder.Services.AddTransient<IExpendiosService, ExpendiosService>();
 
             builder.Services.AddSingleton<SessionService>();
             builder.Services.AddSingleton<ISessionService>(sp => sp.GetRequiredService<SessionService>());

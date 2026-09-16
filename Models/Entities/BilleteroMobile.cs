@@ -2,10 +2,11 @@ namespace MiCachito.Mobile.Models.Entities;
 
 /// <summary>
 /// Billetero del expendio autenticado. Coincide con datosBilletero() del
-/// AuthController mobile (backend-integracion.md §3): perfil + Permisos de
-/// Venta (tiene_tiempo_aire / tiene_prod_digitales) + reglas comerciales.
-/// Los decimales llegan como string SQL ("12.50") y se conservan tal cual
-/// para mostrarlos; parseo numérico solo si se necesita calcular.
+/// backend mobile (backend-integracion.md §3): perfil + Permisos de Venta
+/// (tiene_tiempo_aire / tiene_prod_digitales / tiene_lotenal) + reglas
+/// comerciales. Los decimales llegan como string SQL ("12.50") y se
+/// conservan tal cual para mostrarlos; parseo numérico solo si se necesita
+/// calcular.
 /// </summary>
 public class BilleteroMobile
 {
@@ -22,6 +23,9 @@ public class BilleteroMobile
 
     /// <summary>Permiso de venta Sorteos Tec (Permisos de Venta).</summary>
     public int TieneProdDigitales { get; set; }
+
+    /// <summary>Permiso de venta Lotería Nacional (Permisos de Venta).</summary>
+    public int TieneLotenal { get; set; }
 
     public string? ComisionTiempoAire { get; set; }
 

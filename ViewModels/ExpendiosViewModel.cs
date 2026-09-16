@@ -1,21 +1,40 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MiCachito.Mobile.Data;
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
+using MiCachito.Mobile.Navigation;
+using MiCachito.Mobile.Services;
 
 namespace MiCachito.Mobile.ViewModels;
 
 /// <summary>
 /// VM de Expendios (mockups Expendios 1-4): pestaña 1 = Consulta de registros
 /// (periodo + modal fechas/expendios + estado Sin Registros), pestaña 2 =
-/// Administración de expendios (tarjetas + FAB crear). El encabezado replica
-/// el de Gestión (saldo global).
-/// Fase SOLO INTERFAZ: sin registros en la consulta (directriz del spec; los
-/// resultados reales llegarán con el backend).
+/// Administración de expendios (tarjetas + form de Permisos de Venta).
+/// El encabezado replica el de Gestión (saldo global).
+///
+/// Integración backend (2026-09-16): las tarjetas vienen de GET
+/// api/mobile/expendios = conjunto de expendios (credenciales) del MISMO
+/// billetero de la sesión; el GET también refresca el estado compartido de
+/// permisos en la sesión (para Vender). No hay FAB Crear: las credenciales
+/// las administra Desktop (cont-cedis/clientes); desde Mobile SOLO se
+/// actualizan Permisos de Venta (nivel billetero).
+/// La Consulta de registros sigue SIN backend (estado vacío, fase posterior).
 /// </summary>
 public partial class ExpendiosViewModel : BaseViewModel
 {
+    /// <summary>
+    /// Catálogo compartido del conjunto de expendios (mismas instancias para
+    /// tarjetas, modal de consulta y form — patrón catálogo estático del
+    /// proyecto). Lo llena el GET de esta VM y lo lee ExpendioFormViewModel.
+    /// </summary>
+    public static readonly ObservableCollection<ExpendioItem> ExpendiosCompartidos = [];
+
+    private readonly IExpendiosService _expendiosService;
+    private readonly ISessionService _sessionService;
+    private readonly INavigationService _navigationService;
+
     /// <summary>Saldo global del encabezado (mismo valor que Gestión: "$0.00").</summary>
     [ObservableProperty]
     private string _saldo = "$0.00";
@@ -31,6 +50,10 @@ public partial class ExpendiosViewModel : BaseViewModel
     /// <summary>True cuando el modal "Seleccionar Fechas" está abierto.</summary>
     [ObservableProperty]
     private bool _modalFechasVisible;
+
+    /// <summary>True mientras carga el GET del conjunto (primera carga).</summary>
+    [ObservableProperty]
+    private bool _cargando;
 
     /// <summary>Fecha Desde de la consulta (por defecto: fecha actual, no fija).</summary>
     [ObservableProperty]
@@ -48,50 +71,86 @@ public partial class ExpendiosViewModel : BaseViewModel
     [ObservableProperty]
     private string _hastaTexto = string.Empty;
 
-    /// <summary>
-    /// Expendios del usuario actual (lista dinámica: 1 o N según su relación).
-    /// Mantiene las MISMAS instancias del catálogo compartido; tras crear uno
-    /// nuevo desde el formulario, <see cref="AlAparecer"/> re-sincroniza.
-    /// </summary>
-    public ObservableCollection<Expendio> Expendios { get; } = [];
+    /// <summary>Expendios del conjunto (bind de tarjetas y modal de consulta).</summary>
+    public ObservableCollection<ExpendioItem> Expendios => ExpendiosCompartidos;
 
-    public ExpendiosViewModel()
+    public ExpendiosViewModel(
+        IExpendiosService expendiosService,
+        ISessionService sessionService,
+        INavigationService navigationService)
     {
+        _expendiosService = expendiosService;
+        _sessionService = sessionService;
+        _navigationService = navigationService;
         Title = "Expendios";
-        SincronizarExpendios();
         DesdeTexto = FechaDesde.ToString("dd/MM/yyyy");
         HastaTexto = FechaHasta.ToString("dd/MM/yyyy");
     }
 
     /// <summary>
-    /// Re-sincroniza la colección observable con el catálogo compartido (mantiene
-    /// las instancias existentes, agrega las nuevas y quita las eliminadas).
-    /// Llamado al aparecer la página (patrón AlAparecer del proyecto) para que
-    /// la lista refleje lo creado/actualizado en el formulario.
+    /// Al aparecer: recarga el conjunto desde el backend (tarjetas + estado
+    /// compartido de permisos) y notifica las derivadas del modal. Si el GET
+    /// trae un billetero distinto al de sesión, refresca la sesión (así la
+    /// pestaña Vender y el form siempre ven el estado más reciente).
     /// </summary>
-    public void AlAparecer()
+    public async Task AlAparecerAsync()
     {
-        SincronizarExpendios();
         OnPropertyChanged(nameof(PuedeConsultar));
         OnPropertyChanged(nameof(OpacidadConsultar));
+        await CargarExpendiosAsync();
     }
 
-    private void SincronizarExpendios()
+    private async Task CargarExpendiosAsync()
     {
-        foreach (Expendio e in ExpendiosDemoData.ObtenerExpendios())
+        if (Cargando)
         {
-            if (Expendios.All(x => x.Id != e.Id))
+            return;
+        }
+
+        Cargando = true;
+        try
+        {
+            var respuesta = await _expendiosService.ObtenerAsync();
+
+            ExpendiosCompartidos.Clear();
+            if (respuesta?.Expendios is not null)
             {
-                Expendios.Add(e);
-                e.PropertyChanged += (s, args) =>
+                foreach (var item in respuesta.Expendios)
                 {
-                    if (args.PropertyName == nameof(Expendio.SeleccionadoConsulta))
-                    {
-                        OnPropertyChanged(nameof(PuedeConsultar));
-                        OnPropertyChanged(nameof(OpacidadConsultar));
-                    }
-                };
+                    ExpendiosCompartidos.Add(item);
+                }
             }
+
+            // Refrescar el estado compartido de permisos en la sesión.
+            if (respuesta?.Billetero is not null)
+            {
+                var actual = _sessionService.CurrentSession?.Billetero;
+                if (actual is null
+                    || actual.TieneProdDigitales != respuesta.Billetero.TieneProdDigitales
+                    || actual.TieneTiempoAire != respuesta.Billetero.TieneTiempoAire)
+                {
+                    await _sessionService.UpdateBilleteroAsync(respuesta.Billetero);
+                }
+            }
+
+            OnPropertyChanged(nameof(PuedeConsultar));
+            OnPropertyChanged(nameof(OpacidadConsultar));
+        }
+        catch (ApiException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                await _sessionService.ClearAsync();
+                await _navigationService.NavigateToLoginAsync();
+            }
+        }
+        catch (Exception)
+        {
+            // Sin conexión: se conservan las tarjetas del último GET exitoso.
+        }
+        finally
+        {
+            Cargando = false;
         }
     }
 
@@ -164,7 +223,7 @@ public partial class ExpendiosViewModel : BaseViewModel
 
     /// <summary>Alterna la marca de un expendio en el modal de consulta.</summary>
     [RelayCommand]
-    private void AlternarExpendio(Expendio expendio)
+    private void AlternarExpendio(ExpendioItem expendio)
     {
         expendio.SeleccionadoConsulta = !expendio.SeleccionadoConsulta;
     }
@@ -206,8 +265,8 @@ public partial class ExpendiosViewModel : BaseViewModel
     /// <summary>
     /// Consulta de registros: valida el rango (Desde ≤ Hasta), considera los
     /// expendios marcados y muestra "Procesando..." (~1.5 s). Fase actual:
-    /// SIN registros (estado vacío "Sin Registros" hasta que exista contrato
-    /// del backend y capturas de referencia).
+    /// SIN backend (estado vacío "Sin Registros" hasta que exista contrato
+    /// y capturas de referencia).
     /// </summary>
     [RelayCommand]
     private async Task ConsultarAsync()
@@ -232,7 +291,7 @@ public partial class ExpendiosViewModel : BaseViewModel
         try
         {
             // Estructura para la consulta real (backend pendiente): rango + expendios marcados.
-            List<Expendio> seleccionados = Expendios.Where(e => e.SeleccionadoConsulta).ToList();
+            List<ExpendioItem> seleccionados = Expendios.Where(e => e.SeleccionadoConsulta).ToList();
             await Task.Delay(1500);
             // Resultado de la fase UI: estado vacío "Sin Registros" (mockup 3).
         }
@@ -257,9 +316,9 @@ public partial class ExpendiosViewModel : BaseViewModel
         }
     }
 
-    /// <summary>Navega a Actualizar Expendio con los datos del expendio elegido.</summary>
+    /// <summary>Navega a Actualizar Expendio (Permisos de Venta) del expendio elegido.</summary>
     [RelayCommand]
-    private Task EditarAsync(Expendio expendio)
+    private Task EditarAsync(ExpendioItem expendio)
     {
         if (Shell.Current is null)
         {
@@ -267,18 +326,6 @@ public partial class ExpendiosViewModel : BaseViewModel
         }
 
         return Shell.Current.GoToAsync(
-            $"{nameof(Views.ExpendioFormPage)}?expendioId={expendio.Id}&modo=actualizar");
-    }
-
-    /// <summary>Navega a Crear Expendio (botón flotante +).</summary>
-    [RelayCommand]
-    private Task CrearAsync()
-    {
-        if (Shell.Current is null)
-        {
-            return Task.CompletedTask;
-        }
-
-        return Shell.Current.GoToAsync($"{nameof(Views.ExpendioFormPage)}?modo=crear");
+            $"{nameof(Views.ExpendioFormPage)}?expendioId={expendio.IdExpendio}&modo=actualizar");
     }
 }

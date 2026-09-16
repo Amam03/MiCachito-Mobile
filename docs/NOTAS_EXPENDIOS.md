@@ -69,7 +69,9 @@ distinción A/B se decide por el nombre de usuario capturado en Crear
 Expendio. La UI ya recolecta Usuario+Contraseña por expendio para ambos
 casos.
 
-## 6. Permisos de Venta (sección del formulario)
+## 6. Permisos de Venta (sección del formulario) — ✅ IMPLEMENTADO (2026-09-16)
+
+Los checkboxes Sorteos Tec / Tiempo Aire / Lotenal se persisten por **vía real**: `PUT /api/mobile/expendios/<id>/permisos` escribe `billeteros.tiene_prod_digitales` / `tiene_tiempo_aire` / `tiene_lotenal` (permisos por BILLETERO, compartidos por todo el conjunto de expendios). El formulario funciona en modo solo-permisos: identidad del expendio en solo-lectura (la administra Desktop), sin FAB Crear. `GET /api/mobile/expendios` alimenta las tarjetas de Administración y refresca el `Billetero` de la sesión; tras guardar, `SessionService.UpdateBilleteroAsync` actualiza la sesión y Vender refleja el cambio al volver (OnAppearing → CargarPermisosVenta).
 
 Dentro de Actualizar/Crear Expendio, sección **Permisos de Venta** con tres
 checkboxes: **Sorteos Tec** (icono dado), **Tiempo Aire** (icono chip/SIM),
@@ -102,9 +104,9 @@ decidido con el usuario:
 
 - Tiempo Aire → `tiene_tiempo_aire`
 - Sorteos Tec → `tiene_prod_digitales`
-- Lotenal → habilitado por ahora (el backend NO tiene un flag independiente
-  para Lotenal; si se necesita activar/desactivar Lotenal por expendio, se
-  analizará como cambio separado — sin tocar tablas compartidas).
+- Lotenal → `tiene_lotenal` (columna nueva m260916_000001, aprobada
+  2026-09-16, DEFAULT 1: los billeteros existentes conservan el botón;
+  editable desde el formulario Expendios junto a los otros dos).
 
 La pestaña **Expendios** (consulta + administración) sigue con demo data
 hasta su propia integración; el formulario Expendios sigue escribiendo
