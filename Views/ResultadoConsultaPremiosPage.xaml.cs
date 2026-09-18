@@ -13,9 +13,17 @@ public partial class ResultadoConsultaPremiosPage : ContentPage
         BindingContext = viewModel;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        _viewModel.AlAparecer();
+        try
+        {
+            await _viewModel.AlAparecerAsync();
+        }
+        catch
+        {
+            // El VM ya maneja sus propios estados de error; esto solo evita
+            // que una excepción no controlada rompa la navegación.
+        }
     }
 }

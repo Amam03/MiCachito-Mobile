@@ -93,6 +93,21 @@
                             FontAttributes="Bold"
                             FontFamily="OpenSansSemibold"
                             HorizontalTextAlignment="Center" />
+                        <Label
+                            Text="{Binding SubtituloResultado}"
+                            TextColor="#757575"
+                            FontSize="13"
+                            HorizontalTextAlignment="Center"
+                            IsVisible="{Binding HaySubtitulo}"
+                            Margin="0,-6,0,0" />
+                        <Label
+                            Text="{Binding DetalleMontos}"
+                            TextColor="#424242"
+                            FontSize="15"
+                            FontAttributes="Bold"
+                            HorizontalTextAlignment="Center"
+                            IsVisible="{Binding HayMontos}"
+                            Margin="0,0,0,12" />
                     </VerticalStackLayout>
                 </Border>
 

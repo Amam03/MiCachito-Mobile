@@ -161,6 +161,16 @@ public static class BilleteParser
         {
             string numeroBillete = SinCerosIzquierda(bloqueEmisor[14..19]);
             string serie = bloqueEmisor[19..21];
+            string subCodigo = bloqueEmisor[21..24];
+
+            // Regla de dominio (2026-09-18): SOLO Zodiaco/Zodiaco Especial
+            // usan signo; Mayor/Superior/Especial/Magno usan serie numerica.
+            // Un 35 con subcodigo de Zodiaco es un error de captura.
+            if (SorteoIdentificador.EsSubcodigoZodiaco(subCodigo))
+            {
+                return null;
+            }
+
             return new BilleteParseado
             {
                 CodigoCompleto = cadena,
@@ -168,7 +178,7 @@ public static class BilleteParser
                 NumeroBillete = numeroBillete,
                 Serie = serie,
                 SerieSabana = int.Parse(serie) * 1000,
-                SubCodigo = bloqueEmisor[21..24],
+                SubCodigo = subCodigo,
                 Fraccion = fraccionInt,
                 Vigesimo = fraccionInt,
                 DigitoVerificacion = digitoVerificacion,
@@ -185,6 +195,19 @@ public static class BilleteParser
             return null;
         }
         string signoNombre = SerieASigno[signoCodigo];
+
+        string subCodigoZodiaco = bloqueEmisor[20..23];
+
+        // Regla de dominio (2026-09-18): un 34 con subcodigo de edicion con
+        // SERIE (Mayor/Superior/Especial/Magno) es un error de captura —
+        // p. ej. un Mayor al que se le perdio un digito: su serie se leeria
+        // como signo y mostraria "Signo TAURO" en un sorteo que no es Zodiaco.
+        if (SorteoIdentificador.EsSubcodigoConSerie(subCodigoZodiaco))
+        {
+            return null;
+        }
+
+        string signoNombreFinal = signoNombre;
         return new BilleteParseado
         {
             CodigoCompleto = cadena,
@@ -192,9 +215,9 @@ public static class BilleteParser
             NumeroBillete = billeteZodiaco,
             Serie = null,
             SerieSabana = int.Parse(signoCodigo) * 1000,
-            SubCodigo = bloqueEmisor[20..23],
+            SubCodigo = subCodigoZodiaco,
             SignoCodigo = signoCodigo,
-            SignoNombre = signoNombre,
+            SignoNombre = signoNombreFinal,
             Fraccion = fraccionInt,
             Vigesimo = fraccionInt,
             DigitoVerificacion = digitoVerificacion,

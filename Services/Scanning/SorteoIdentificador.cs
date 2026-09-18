@@ -101,4 +101,42 @@ public static class SorteoIdentificador
 
         return null;
     }
+
+    /// <summary>
+    /// True si el subcodigo corresponde a una edicion de Zodiaco / Zodiaco
+    /// Especial (formato de 34 digitos con SIGNO, sin serie numerica).
+    /// Regla de dominio (correccion 2026-09-18): SOLO estos sorteos usan signo.
+    /// </summary>
+    public static bool EsSubcodigoZodiaco(string sub)
+    {
+        if (SubcodigosSorteos.TryGetValue(sub, out var info))
+        {
+            if (info.Clave is "zodiaco" or "zodiaco_especial")
+            {
+                return true;
+            }
+        }
+        return EdicionesCotejadas.TryGetValue(sub, out var ed)
+            && ed.Clave is "zodiaco" or "zodiaco_especial";
+    }
+
+    /// <summary>
+    /// True si el subcodigo corresponde a una edicion con SERIE numerica
+    /// (Mayor / Superior / Especial / Magno: formato de 35 digitos).
+    /// Un codigo de 34 digitos con este subcodigo es un error de captura
+    /// (p. ej. un Mayor al que se le perdio un digito y su serie se leyo
+    /// como signo), no un Zodiaco.
+    /// </summary>
+    public static bool EsSubcodigoConSerie(string sub)
+    {
+        if (SubcodigosSorteos.TryGetValue(sub, out var info))
+        {
+            if (info.Clave is not ("zodiaco" or "zodiaco_especial"))
+            {
+                return true;
+            }
+        }
+        return EdicionesCotejadas.TryGetValue(sub, out var ed)
+            && ed.Clave is not ("zodiaco" or "zodiaco_especial");
+    }
 }

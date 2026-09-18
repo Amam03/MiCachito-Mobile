@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
 using MiCachito.Mobile.Services;
 using MiCachito.Mobile.Services.Scanning;
@@ -123,7 +124,19 @@ public partial class EscanearBoletosViewModel : BaseViewModel
         Aviso = string.Empty;
         CodigoManual = string.Empty;
 
-        (ResultadoPremio resultado, string detalle) = _consultaService.Consultar(parseado);
+        // Consulta real al backend (POST /api/mobile/premios/consultar).
+        // El resultado decide el dialogo Premio/Reintegro/NoPremio y los
+        // montos reales del boleto capturado.
+        RespuestaPremioApi r;
+        try
+        {
+            r = await _consultaService.ConsultarAsync(parseado);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or IOException or ApiException)
+        {
+            Aviso = "Sin conexion al servidor. Verifica la red e intenta de nuevo.";
+            return;
+        }
 
         SorteoInfo? sorteo = SorteoIdentificador.Identificar(parseado);
         string nombreSorteo = sorteo?.Nombre ?? "Loteria Nacional";
@@ -134,7 +147,7 @@ public partial class EscanearBoletosViewModel : BaseViewModel
 
         _boletoPendiente = new BoletoCapturado
         {
-            Tipo = resultado == ResultadoPremio.TienePremio
+            Tipo = r.Resultado == "GANADOR"
                 ? TipoCapturaBoleto.Premio
                 : TipoCapturaBoleto.Reintegro,
             CodigoCompleto = parseado.CodigoCompleto,
@@ -144,15 +157,15 @@ public partial class EscanearBoletosViewModel : BaseViewModel
                 ? (parseado.SignoNombre ?? "-")
                 : (parseado.Serie ?? "-"),
             Vig = parseado.Fraccion is int fr ? $"{fr:00}" : "-",
-            Valor = resultado == ResultadoPremio.Reintegro
-                ? PremiosReintegrosService.ValorReintegroEjemplo
+            Valor = r.Resultado == "GANADOR" ? r.PremioCachito
+                : r.Resultado == "REINTEGRO" ? r.Reintegro
                 : 0m,
         };
 
-        (MensajeDialogo, ColorAceptar) = resultado switch
+        (MensajeDialogo, ColorAceptar) = r.Resultado switch
         {
-            ResultadoPremio.TienePremio => ("EL CACHITO TIENE PREMIO", "#4CB050"),
-            ResultadoPremio.Reintegro => ("EL CACHITO TIENE REINTEGRO", "#FEC400"),
+            "GANADOR" => ("EL CACHITO TIENE PREMIO", "#4CB050"),
+            "REINTEGRO" => ("EL CACHITO TIENE REINTEGRO", "#FEC400"),
             _ => ("EL CACHITO NO TIENE PREMIO", "#FF5353"),
         };
 

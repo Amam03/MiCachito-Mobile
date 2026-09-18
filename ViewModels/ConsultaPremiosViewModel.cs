@@ -12,8 +12,6 @@ namespace MiCachito.Mobile.ViewModels;
 /// </summary>
 public partial class ConsultaPremiosViewModel : BaseViewModel
 {
-    private readonly ConsultaPremiosService _consultaService;
-
     /// <summary>Codigo tecleado a mano (via de prueba en emulador).</summary>
     [ObservableProperty]
     private string codigoManual = string.Empty;
@@ -34,9 +32,8 @@ public partial class ConsultaPremiosViewModel : BaseViewModel
     [ObservableProperty]
     private bool linternaEncendida;
 
-    public ConsultaPremiosViewModel(ConsultaPremiosService consultaService)
+    public ConsultaPremiosViewModel()
     {
-        _consultaService = consultaService;
         Title = "Consulta de Premios";
     }
 
@@ -86,7 +83,8 @@ public partial class ConsultaPremiosViewModel : BaseViewModel
         // quedar listo para capturar otro boleto sin arrastrar el codigo previo.
         CodigoManual = string.Empty;
 
-        _ = _consultaService.Consultar(parseado);
+        // La consulta al backend ocurre en la pantalla 2.1 (ResultadoConsultaPremios),
+        // no aqui: asi el escaner queda libre para el siguiente boleto.
 
         if (Shell.Current is not null)
         {
