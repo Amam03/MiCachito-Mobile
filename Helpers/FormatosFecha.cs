@@ -30,4 +30,21 @@ public static class FormatosFecha
     /// <summary>Fecha y hora para pantalla: "28-octubre-2025 09:30" (12 h).</summary>
     public static string FechaHoraLarga(DateTime fecha, TimeSpan hora) =>
         $"{FechaLarga(fecha)} {hora:hh\\:mm}";
+
+    /// <summary>
+    /// Parsea la fecha que envía el backend a DateOnly. Acepta tanto
+    /// "yyyy-MM-dd" como el datetime de MySQL "yyyy-MM-dd HH:mm:ss" —
+    /// DateOnly.TryParse RECHAZA el datetime completo (bug real Recibos
+    /// de Pago, auditoría 2026-09-21) y la UI mostraba la string cruda
+    /// "2026-06-03 00:00:00" (y el PDF caía a la fecha de hoy).
+    /// </summary>
+    public static bool TryParseFechaBackend(string? cruda, out DateOnly fecha)
+    {
+        if (DateTime.TryParse(cruda, Cultura, DateTimeStyles.None, out DateTime completa))
+        {
+            fecha = DateOnly.FromDateTime(completa);
+            return true;
+        }
+        return DateOnly.TryParse(cruda, Cultura, DateTimeStyles.None, out fecha);
+    }
 }

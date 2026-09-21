@@ -4,3 +4,6 @@ obj/
 
 *.user
 *.suo
+
+# Planes de trabajo del agente (locales, no van al repo)
+.hermes/

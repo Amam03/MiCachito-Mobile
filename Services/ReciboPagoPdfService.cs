@@ -107,7 +107,7 @@ public class ReciboPagoPdfService
         y = TablaConEncabezadoRojo(
             canvas,
             titulo: "Documentos Pagados",
-            filas: recibo.DocumentosPagados.Select(d => (d.Referencia, d.MontoAbsTexto)).ToList(),
+            filas: recibo.DocumentosPagadosEfectivos.Select(d => (d.Referencia, d.MontoAbsTexto)).ToList(),
             totalEtiqueta: "Total Documentos:",
             totalTexto: recibo.TotalDocumentos.FormatoMoneda(),
             y: y,
@@ -122,7 +122,7 @@ public class ReciboPagoPdfService
         y = TablaConEncabezadoRojo(
             canvas,
             titulo: "Formas de Pago",
-            filas: recibo.FormasPago.Select(f => (f.Forma, f.Monto.FormatoMoneda())).ToList(),
+            filas: recibo.FormasPagoEfectivas.Select(f => (f.Forma, f.Monto.FormatoMoneda())).ToList(),
             totalEtiqueta: "Total:",
             totalTexto: recibo.Total.FormatoMoneda(),
             y: y,

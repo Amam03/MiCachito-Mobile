@@ -43,52 +43,107 @@
             </Grid>
         </VerticalStackLayout>
 
-        <!-- ============ Lista de recibos ============ -->
+        <!-- ============ Contenido: lista (mockup 8: sin bloque de crédito —
+             la referencia no lo muestra) ============ -->
         <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="12" Spacing="10" BindableLayout.ItemsSource="{Binding Recibos}">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="entities:ReciboPago">
-                        <Border
-                            StrokeShape="RoundRectangle 10"
-                            BackgroundColor="White"
-                            StrokeThickness="0"
-                            Padding="14,12"
-                            Margin="0,0,0,2">
-                            <Border.Shadow>
-                                <Shadow Brush="Gray" Radius="2" Opacity="0.15" />
-                            </Border.Shadow>
-                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
-                                <Label
-                                    Grid.Row="0" Grid.Column="0"
-                                    Text="{Binding FolioTexto}"
-                                    FontSize="15"
-                                    FontAttributes="Bold"
-                                    TextColor="#1A1A1A" />
-                                <Label
-                                    Grid.Row="1" Grid.Column="0"
-                                    Text="{Binding FechaTexto}"
-                                    FontSize="13"
-                                    TextColor="#666666" />
-                                <Grid Grid.Row="2" Grid.Column="0" ColumnDefinitions="Auto,Auto">
-                                    <Label Grid.Column="0" Text="Total: " FontSize="13" TextColor="#666666" />
-                                    <Label Grid.Column="1" Text="{Binding TotalTexto}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+            <VerticalStackLayout Padding="12" Spacing="10">
+
+                <!-- Error de carga (sin conexión / HTTP); no borra lo ya cargado -->
+                <Border
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="White"
+                    StrokeThickness="0"
+                    Padding="14,12"
+                    IsVisible="{Binding HayError}">
+                    <Label
+                        Text="{Binding MensajeError}"
+                        FontSize="13"
+                        TextColor="#EE534F" />
+                </Border>
+
+                <!-- Estado vacío -->
+                <Border
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="White"
+                    StrokeThickness="0"
+                    Padding="14,18"
+                    IsVisible="{Binding EstaVacio}">
+                    <Label
+                        Text="{Binding MensajeVacio}"
+                        FontSize="14"
+                        TextColor="#666666"
+                        HorizontalOptions="Center" />
+                </Border>
+
+                <!-- Lista de recibos (cards, mockup 8) -->
+                <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding Recibos}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="entities:ReciboPagoItemApi">
+                            <Border
+                                StrokeShape="RoundRectangle 10"
+                                BackgroundColor="White"
+                                StrokeThickness="0"
+                                Padding="14,12"
+                                Margin="0,0,0,2">
+                                <Border.Shadow>
+                                    <Shadow Brush="Gray" Radius="2" Opacity="0.15" />
+                                </Border.Shadow>
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto">
+                                    <Label
+                                        Grid.Row="0" Grid.Column="0"
+                                        Text="{Binding FolioFicha}"
+                                        FontSize="15"
+                                        FontAttributes="Bold"
+                                        TextColor="#1A1A1A" />
+                                    <Label
+                                        Grid.Row="1" Grid.Column="0"
+                                        Text="{Binding FechaTexto}"
+                                        FontSize="13"
+                                        TextColor="#666666" />
+                                    <Grid Grid.Row="2" Grid.Column="0" ColumnDefinitions="Auto,Auto">
+                                        <Label Grid.Column="0" Text="Total: " FontSize="13" TextColor="#666666" />
+                                        <Label Grid.Column="1" Text="{Binding MontoTexto}" FontSize="13" FontAttributes="Bold" TextColor="#1A1A1A" />
+                                    </Grid>
+                                    <!-- Check verde: aplicado por Caja -->
+                                    <Image
+                                        Grid.Row="0" Grid.RowSpan="3" Grid.Column="1"
+                                        Source="icon_check_confirmacion.svg"
+                                        WidthRequest="22" HeightRequest="22"
+                                        VerticalOptions="Center" />
                                 </Grid>
-                                <!-- Check verde de confirmación (mockup 8) -->
-                                <Image
-                                    Grid.Row="0" Grid.RowSpan="3" Grid.Column="1"
-                                    Source="icon_check_confirmacion.svg"
-                                    WidthRequest="22" HeightRequest="22"
-                                    VerticalOptions="Center" />
-                            </Grid>
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecibosPagoViewModel}}, Path=SeleccionarReciboCommand}"
-                                                      CommandParameter="{Binding .}" />
-                            </Border.GestureRecognizers>
-                        </Border>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:RecibosPagoViewModel}}, Path=SeleccionarReciboCommand}"
+                                                          CommandParameter="{Binding .}" />
+                                </Border.GestureRecognizers>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
             </VerticalStackLayout>
         </ScrollView>
+
+        <!-- ============ Overlay "Cargando..." (patrón premios) ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="2"
+            IsVisible="{Binding Cargando}"
+            BackgroundColor="#80000000"
+            StrokeThickness="0"
+            Padding="0"
+            InputTransparent="False">
+            <VerticalStackLayout
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Spacing="14">
+                <ActivityIndicator IsRunning="True" Color="White" WidthRequest="40" HeightRequest="40" />
+                <Label
+                    Text="Cargando..."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Border>
 
     </Grid>
 

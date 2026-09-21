@@ -1,35 +1,43 @@
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
 
 namespace MiCachito.Mobile.Services;
 
 /// <summary>
-/// Estado en memoria del flujo Recibos de Pago (mockups 8.x de Gestión).
-/// Fase solo-interfaz: UN único registro temporal para validar el flujo
-/// (patrón Premios y Reintegros 3.x); los datos del mockup son solo
-/// referencia visual. Fuente real: backend (docs/NOTAS_RECIBOS_PAGO.md).
+/// Recibos de Pago del billetero contra la API real (/api/mobile/pagos/*).
+///
+/// El backend devuelve únicamente fichas_pago con estatus 'aplicado' (ya
+/// aplicadas por Caja desde Escritorio); pendientes/rechazadas/canceladas
+/// NO son recibos. Todo queda acotado al billetero de la sesión (token).
+///
+/// Lanza ApiException en errores HTTP; la red caída llega como
+/// HttpRequestException/TaskCanceled — el VM la captura y muestra
+/// "sin conexión" sin inventar datos.
 /// </summary>
 public class RecibosPagoService
 {
-    private readonly ReciboPago _temporal = new()
+    private const string RutaRecibos = "api/mobile/pagos/recibos";
+    private const string RutaRecibo = "api/mobile/pagos/recibo";
+
+    private readonly IApiClient _api;
+
+    public RecibosPagoService(IApiClient api)
     {
-        // TEMPORAL — datos del mockup 8.1/8.3 para probar el flujo.
-        Folio = 41868,
-        Fecha = new DateTime(2025, 10, 28),
-        Total = 4280m,
-        Cliente = "MAURICIO LOPEZ GONZALEZ",
-        Cedis = "CEDIS PBL",
-        Desglose = new List<MovimientoPago>
-        {
-            new() { Descripcion = "Lotería Nacional", Referencia = "Lotería Nacional", Monto = 1420m },
-            new() { Descripcion = "Efectivo", Referencia = "EFECTIVO", Monto = 2860m },
-            new() { Descripcion = "FACTURA LN", Referencia = "SUPERIOR 2862 - FOLIO 27373", Monto = -3656.50m },
-            new() { Descripcion = "FACTURA LN", Referencia = "ZODIACO ESPECIAL 1724 - FOLIO 27429", Monto = -623.50m },
-        },
-    };
+        _api = api;
+    }
 
-    /// <summary>Recibos en orden cronológico inverso (mockup 8).</summary>
-    public IReadOnlyList<ReciboPago> Recibos() => new[] { _temporal };
+    /// <summary>Lista de recibos aplicados, cronológico inverso (mockup 8).</summary>
+    public async Task<List<ReciboPagoItemApi>> CargarRecibosAsync(CancellationToken cancellationToken = default)
+    {
+        List<ReciboPagoItemApi>? items = await _api.GetAsync<List<ReciboPagoItemApi>>(RutaRecibos, cancellationToken)
+            .ConfigureAwait(false);
+        return items ?? new List<ReciboPagoItemApi>();
+    }
 
-    /// <summary>Busca un recibo por folio.</summary>
-    public ReciboPago? ObtenerPorFolio(int folio) => Recibos().FirstOrDefault(r => r.Folio == folio);
+    /// <summary>Detalle de un recibo (mockups 8.1/8.3): ficha + desglose + documentos pagados.</summary>
+    public async Task<ReciboPagoDetalleApi?> ObtenerDetalleAsync(long idFichaPago, CancellationToken cancellationToken = default)
+    {
+        return await _api.GetAsync<ReciboPagoDetalleApi>($"{RutaRecibo}/{idFichaPago}", cancellationToken)
+            .ConfigureAwait(false);
+    }
 }
