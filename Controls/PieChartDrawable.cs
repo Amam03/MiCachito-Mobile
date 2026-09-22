@@ -7,12 +7,24 @@ namespace MiCachito.Mobile.Controls;
 /// ICanvas nativo de MAUI (GraphicsView): segmentos proporcionales al
 /// monto de cada categoría y el porcentaje DENTRO de cada segmento
 /// (cálculo dinámico, nunca fijo). Sin paquetes externos.
+///
+/// FASE 3 (fix 2026-09-22): FillArc/DrawArc de ICanvas renderizan MAL
+/// estos arcos en Android (verificado por análisis de píxeles: con
+/// segmentos Mayor 6.1% / Zodiaco 3.0% / Mi Sueño 90.9% el resultado
+/// era un círculo COMPLETO rosa — el slice de 327° no pintaba nada y
+/// uno pequeño cubría todo). Las rebanadas se dibujan ahora como PATHS
+/// POLIGONALES: el arco se muestrea punto por punto (paso 1.5°) y se
+/// rellena con FillPath — la geometría queda bajo nuestro control y es
+/// inmune a la semántica del adapter de plataforma.
 /// </summary>
 public class PieChartDrawable : IDrawable
 {
     /// <summary>Segmentos a dibujar (nombre, color, porcentaje 0-100).</summary>
     public IReadOnlyList<(string Nombre, string ColorHex, double Porcentaje)> Segmentos { get; set; } =
         Array.Empty<(string, string, double)>();
+
+    /// <summary>Paso de muestreo del arco en grados (1.5° ≈ error de cuerda &lt; 0.1 px a r=280).</summary>
+    private const float Paso = 1.5f;
 
     public void Draw(ICanvas canvas, RectF dirtyRect)
     {
@@ -35,12 +47,13 @@ public class PieChartDrawable : IDrawable
                 continue;
             }
 
+            PathF rebanada = ConstruirRebanada(cx, cy, radio, inicio, inicio + barrido);
+            canvas.FillColor = Color.FromArgb(colorHex);
+            canvas.FillPath(rebanada);
+            // Borde blanco entre rebanadas (separador del mockup).
             canvas.StrokeColor = Colors.White;
             canvas.StrokeSize = 2f;
-            canvas.FillColor = Color.FromArgb(colorHex);
-            float fin = inicio + barrido;
-            canvas.FillArc(cx - radio, cy - radio, radio * 2f, radio * 2f, inicio, fin, true);
-            canvas.DrawArc(cx - radio, cy - radio, radio * 2f, radio * 2f, inicio, fin, true, false);
+            canvas.DrawPath(rebanada);
             inicio += barrido;
         }
 
@@ -66,6 +79,27 @@ public class PieChartDrawable : IDrawable
             }
             inicio += barrido;
         }
+    }
+
+    /// <summary>
+    /// Construye la rebanada (centro → arco muestreado → cierre) como
+    /// path poligonal. Convención de ángulos: 0° = derecha, positivo en
+    /// sentido horario (y crece hacia abajo), -90° = 12 h.
+    /// </summary>
+    private static PathF ConstruirRebanada(float cx, float cy, float radio, float desde, float hasta)
+    {
+        var path = new PathF();
+        path.MoveTo(cx, cy);
+        for (float a = desde; a < hasta; a += Paso)
+        {
+            float rad = a * MathF.PI / 180f;
+            path.LineTo(cx + MathF.Cos(rad) * radio, cy + MathF.Sin(rad) * radio);
+        }
+        // Punto final exacto del arco (evita el escalón del último paso).
+        float radFin = hasta * MathF.PI / 180f;
+        path.LineTo(cx + MathF.Cos(radFin) * radio, cy + MathF.Sin(radFin) * radio);
+        path.Close();
+        return path;
     }
 
     /// <summary>Porcentaje con 1 decimal ("48.7%").</summary>

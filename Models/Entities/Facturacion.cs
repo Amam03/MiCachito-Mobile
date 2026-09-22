@@ -3,10 +3,11 @@ using System.Collections.ObjectModel;
 namespace MiCachito.Mobile.Models.Entities;
 
 /// <summary>
-/// Reporte de Facturación (pestaña 3 de Reportes, mockups 9.3).
-/// Contiene los registros FILTRADOS por el periodo elegido y la
-/// agrupación por categoría con porcentajes calculados. Los totales
-/// son dinámicos (derivados de los registros) — nunca fijos.
+/// Reporte de Facturación (pestaña 3 de Reportes, mockups 9.3) construido
+/// con los datos reales de GET api/mobile/reportes/facturacion: registros
+/// del periodo (una fila por fecha|sorteo, en dinero) y agrupación por
+/// CATEGORÍA con porcentajes calculados. Los totales son dinámicos
+/// (derivados de los registros) — nunca fijos.
 /// </summary>
 public class Facturacion
 {
@@ -16,10 +17,13 @@ public class Facturacion
     /// <summary>Fin del periodo seleccionado por el usuario.</summary>
     public DateTime FechaFin { get; set; }
 
-    /// <summary>Nombre del vendedor/agente (vendrá de la sesión real).</summary>
+    /// <summary>Nombre del vendedor (billetero de la sesión, del endpoint).</summary>
     public string Vendedor { get; set; } = string.Empty;
 
-    /// <summary>Registros del periodo (filtrados de la fuente local).</summary>
+    /// <summary>Porcentaje de comisión del billetero (del endpoint; la ganancia ya viene calculada).</summary>
+    public decimal ComisionPct { get; set; }
+
+    /// <summary>Registros del periodo (una fila por fecha|sorteo, del backend).</summary>
     public ObservableCollection<RegistroFacturacion> Registros { get; } = new();
 
     /// <summary>Agrupación por categoría con montos y porcentajes calculados.</summary>
@@ -30,5 +34,5 @@ public class Facturacion
 
     /// <summary>Subtotal de una categoría (columna Venta).</summary>
     public decimal Subtotal(string categoria) =>
-        Registros.Where(r => r.Sorteo == categoria).Sum(r => r.Venta);
+        Registros.Where(r => r.Categoria == categoria).Sum(r => r.Venta);
 }

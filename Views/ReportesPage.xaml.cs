@@ -8,6 +8,7 @@ public partial class ReportesPage : ContentPage
 {
     private readonly ReportesViewModel _vm;
     private readonly PieChartDrawable _pieDrawable = new();
+    private readonly LineaSaldoDrawable _faDrawable = new();
 
     public ReportesPage(ReportesViewModel vm)
     {
@@ -17,6 +18,12 @@ public partial class ReportesPage : ContentPage
 
         PieFacturacion.Drawable = _pieDrawable;
         _vm.PieSolicitaRedibujo += (s, e) => ActualizarPie();
+
+        // FASE 2: gráfica de Fondo de Ahorro con la serie real de saldo
+        // acumulado del periodo (GraphicsView + drawable, patrón del pie).
+        GraficaFondoAhorro.Drawable = _faDrawable;
+        _vm.GraficaFaSolicitaRedibujo += (s, e) => ActualizarGraficaFa();
+        ActualizarGraficaFa();
     }
 
     /// <summary>
@@ -36,5 +43,16 @@ public partial class ReportesPage : ContentPage
     {
         _pieDrawable.Segmentos = _vm.FacSegmentos;
         PieFacturacion.Invalidate();
+    }
+
+    /// <summary>
+    /// FASE 2: refresca la gráfica de Fondo de Ahorro con la serie de
+    /// saldo acumulado actual del periodo.
+    /// </summary>
+    private void ActualizarGraficaFa()
+    {
+        _faDrawable.Puntos = _vm.FaSerieSaldo;
+        _faDrawable.SaldoInicial = _vm.FaSaldoInicial;
+        GraficaFondoAhorro.Invalidate();
     }
 }

@@ -1,64 +1,68 @@
 # Notas — Facturación (pestaña 3 de Reportes, mockups 9.3)
 
-Fase: SOLO INTERFAZ/LOCAL (2026-09-09). Sin backend, API ni BD.
+Fase: INTEGRACIÓN CON BACKEND (FASE 3, 2026-09-22). Endpoint real:
+GET `api/mobile/reportes/facturacion?fecha_inicio&fecha_fin` (contrato
+Fase 1 backend, mockup 9.3 en DINERO).
 
 ## Qué está implementado
 
 - Campo Periodo ("Indicar Periodo" + calendario) → modal "Seleccionar
   Fechas" COMPARTIDO con Fondo de Ahorro (bifurca por pestaña activa;
   cada pestaña conserva sus propias fechas).
-- Tras Consultar: periodo real ("08-septiembre-2026 /
-  09-septiembre-2026"), bloque Total facturado + % principal, pie chart
-  (GraphicsView + ICanvas nativo, sin paquetes) con % dentro de cada
-  segmento, y leyenda (indicador de color + nombre + monto + %).
+- Tras Consultar: periodo real, bloque Total facturado + % principal,
+  pie chart (GraphicsView + ICanvas) con % dentro de cada segmento, y
+  leyenda (BindableLayout) — AGRUPACIÓN POR CATEGORÍA (producto real:
+  Mayor/Zodiaco/Mi Sueño...), monto = columna Venta, % calculado.
+- Overlay "Procesando...." durante la consulta (ConsultandoFac) y
+  manejo de errores igual que Fondo de Ahorro: TaskCanceled/
+  HttpRequest → "sin conexión"; ApiException → mensaje del backend;
+  el modal NO cierra en error (aviso rojo reintentable, bifurcado por
+  pestaña: ModalHayError/ModalMensajeError).
+- Respuesta vacía (rango sin registros): consulta exitosa, total
+  $0.00, pie sin segmentos (GraphicsView vacío) y leyenda vacía —
+  sin inventar datos.
 - FAB descarga → overlay "Descargando...." → PDF real
   facturacion-<fecha-fin>.pdf en Descargas (MediaStore) → aviso verde
-  "Facturación guardada en la carpeta de Descargas" + FAB PDF (visor).
+  + FAB PDF (visor).
 - PDF: logo, "Reporte de Facturación", "Del [inicio] al [fin]" real,
-  Vendedor "—", una sección por categoría (barra roja con nombre +
-  encabezado rojo Fecha|Sorteo|Entrega|Devolución|Venta|Ganancia +
-  filas + subtotal dinámico), barra Total general, pie institucional
-  con "Fecha de Impresión" (fecha/hora real de generación).
+  Vendedor REAL del endpoint + línea de Comisión (comision_pct), una
+  sección por categoría (barra roja nombre + encabezado rojo
+  Fecha|Sorteo|Entrega|Devolución|Venta|Ganancia + filas + subtotal
+  dinámico), barra Total general, pie institucional con "Fecha de
+  Impresión" — con PAGINACIÓN real (secciones largas saltan a página
+  nueva por sección y por fila; el pie institucional va solo en la
+  última página).
 
-## Datos TEMPORALES de prueba (sustituir por backend)
+## Datos reales (endpoints Fase 1, billetero de la sesión)
 
-FacturacionService mantiene en MEMORIA 2 registros para validar el
-flujo (directriz del usuario, spec 9.3 §3/§13):
-
-- Mayor — 08/09/2026 — Entrega $1,500.00 / Devolución $264.50 /
-  Venta $1,235.50 / Ganancia $92.66
-- Superior — 09/09/2026 — Entrega $900.00 / Devolución $135.80 /
-  Venta $764.20 / Ganancia $57.32
-
-Estos registros NO son seeds, NO van a BD ni backend y NO son mocks
-permanentes: existen solo para comprobar pie/porcentajes/leyenda/
-detalle/PDF con más de una categoría y validar el FILTRO REAL por
-rango (p. ej. consultando solo 09/09: Mayor desaparece, el pie queda
-100% Superior, total $764.20 y el PDF trae una sola sección). Al
-conectar el backend se sustituye ObtenerAsync por la consulta real.
+- `vendedor`: nombre_completo del billetero (PDF); la pantalla 9.3 NO
+  muestra vendedor (solo el PDF), igual que FA con su titular.
+- `comision_pct`: porcentaje del billetero (solo informativo en el
+  PDF; la ganancia YA viene calculada del backend — la app NO
+  recalcula lógica de negocio).
+- `registros`: una fila por (fecha, sorteo) en dinero — SORTEO es la
+  ETIQUETA de la fila (formato "numero_recepcion - nombre_sorteo", p.
+  ej. "041753 - Sorteo 041753"; TEC sin numero → solo el nombre) y
+  CATEGORÍA el
+  PRODUCTO que agrupa pie/leyenda/secciones del PDF (el mock de fase
+  interfaz agrupaba por Sorteo; el contrato real los separa).
+- Registros sin fecha se descartan (no se inventa fila); categoría
+  vacía → "N/A" (convención del propio backend).
 
 ## Reglas de esta fase (directrices del usuario)
 
 - Totales, subtotales, porcentajes y proporciones del pie CALCULADOS
-  dinámicamente desde los registros filtrados — nunca escritos a mano
-  ni copiados de la imagen.
-- Los montos de prueba son propios, NO los de la imagen ($10,339.13
-  etc. son solo referencia visual).
-- "Monto" de categoría/total = columna Venta (la ganancia solo va en
-  el PDF); % principal = categoría con mayor venta.
+  dinámicamente desde los registros — nunca escritos a mano.
+- "Monto" de categoría/total = columna Venta; % principal = categoría
+  con mayor venta.
 - Colores del pie por categoría (Mayor #FFB600, Superior #4D9D2E,
-  Zodiaco #ED40A9, Especial #0278D7) tomados del mockup como ESTILO.
+  Zodiaco #ED40A9, Especial #0278D7) del mockup como ESTILO; categorías
+  fuera del mapa (p. ej. "Mi Sueño") usan el gris de fallback
+  preexistente — no se inventan colores.
 - Desde ≤ Hasta (Consultar ignora rangos inválidos).
 
-## Pendientes para conectar backend (NO implementar aún)
+## Pendientes
 
-1. Endpoint de facturación por rango: registros (Fecha, Sorteo,
-   Entrega, Devolución, Venta, Ganancia) → FacturacionService.
-   ObtenerAsync(inicio, fin) es el punto único.
-2. Vendedor real (sesión) → campo Vendedor (hoy "—" en el PDF).
-3. Catálogo real de categorías/tipos de sorteo y sus colores de
-   presentación (el mapa actual cubre Mayor/Superior/Zodiaco/Especial).
-4. Regla de negocio de Ganancia (el 7.5% de los datos de prueba es
-   solo coherencia interna de los datos temporales).
-5. Paginación del PDF cuando el periodo traiga muchas categorías/filas
-   (hoy una página).
+- Catálogo real de colores por categoría si el usuario define más
+  (hoy: 4 del mockup + fallback gris).
+- F5 (pruebas y regresión) al cierre de las fases.
