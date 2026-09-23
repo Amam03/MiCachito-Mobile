@@ -12,8 +12,8 @@
 
     <ContentPage.Resources>
         <!-- Tarjeta de sorteo del Estado de Cuenta (mockup 9.1 "Reporte
-             Generado"): bloque Cantidad + nombre/fecha arriba, pares
-             Vencido/Consigna y Pagos/Total abajo. -->
+             Generado"): bloque Cantidad + nombre/fecha arriba, un
+             renglón por total (Vencido/Consigna/Pagos/Total) abajo. -->
         <DataTemplate x:Key="PlantillaSorteoEc" x:DataType="entities:SorteoEstadoCuenta">
             <Border
                 StrokeShape="RoundRectangle 8"
@@ -49,15 +49,17 @@
                             FontAttributes="Bold"
                             TextColor="{StaticResource McTextDark}" />
                     </Grid>
-                    <Grid ColumnDefinitions="*,Auto,24,Auto" RowDefinitions="Auto,Auto">
+                    <!-- Un renglón por total (orden de la tabla EC:
+                         Vencido, Consigna, Pagos, Total). -->
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6" Margin="0,4,0,0">
                         <Label Grid.Row="0" Grid.Column="0" Text="Vencido:" FontSize="12" TextColor="{StaticResource McTextDark}" />
                         <Label Grid.Row="0" Grid.Column="1" Text="{Binding Vencido, StringFormat='$ {0:N2}'}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
-                        <Label Grid.Row="0" Grid.Column="2" Text="Total:" FontSize="12" TextColor="{StaticResource McTextDark}" />
-                        <Label Grid.Row="0" Grid.Column="3" Text="{Binding Total, StringFormat='$ {0:N2}'}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
                         <Label Grid.Row="1" Grid.Column="0" Text="Consigna:" FontSize="12" TextColor="{StaticResource McTextDark}" />
                         <Label Grid.Row="1" Grid.Column="1" Text="{Binding Consigna, StringFormat='$ {0:N2}'}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
-                        <Label Grid.Row="1" Grid.Column="2" Text="Pagos:" FontSize="12" TextColor="{StaticResource McTextDark}" />
-                        <Label Grid.Row="1" Grid.Column="3" Text="{Binding Pagos, StringFormat='$ {0:N2}'}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="2" Grid.Column="0" Text="Pagos:" FontSize="12" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding Pagos, StringFormat='$ {0:N2}'}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="3" Grid.Column="0" Text="Total:" FontSize="12" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="{Binding Total, StringFormat='$ {0:N2}'}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
@@ -184,9 +186,9 @@
                                 IsVisible="{Binding SinSorteos}" />
 
                         <!-- Tarjetas por sorteo (mockup 9.1 "Reporte Generado"):
-                             bloque Cantidad + nombre/fecha, dos filas de pares
-                             Vencido/Consigna y Pagos/Total. Filas reales del
-                             endpoint (solo consignaciones, semántica Fase 1). -->
+                             bloque Cantidad + nombre/fecha, un renglón por
+                             total. Filas reales del endpoint (solo
+                             consignaciones, semántica Fase 1). -->
                         <VerticalStackLayout
                             BindableLayout.ItemsSource="{Binding SorteosEc}"
                             BindableLayout.ItemTemplate="{StaticResource PlantillaSorteoEc}">
