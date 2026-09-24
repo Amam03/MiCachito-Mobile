@@ -39,7 +39,10 @@ public class FacturacionPdfService
 
         using var archivo = new SKFileWStream(ruta);
         using var documento = SKDocument.CreatePdf(archivo);
-        using SKCanvas canvas = documento.BeginPage(Ancho, Alto);
+        // FASE 3: el PDF pagina con los datos reales — el canvas se renueva
+        // por página (BeginPage) y NO se dispone con using (cada página la
+        // destruye EndPage; el documento se cierra con Close).
+        SKCanvas canvas = documento.BeginPage(Ancho, Alto);
 
         using var fuenteNormal = new SKPaint
         {
@@ -95,42 +98,56 @@ public class FacturacionPdfService
         DibujarCentrado(canvas, fuenteNegrita, $"Del {desde} al {hasta}", y);
         y += 22f;
 
-        // ── Datos del vendedor ────────────────────────────────────────
+        // ── Datos del vendedor (FASE 3: reales del endpoint) ──────────
         DibujarTexto(canvas, fuenteNegrita, $"Vendedor: {Vacio(reporte.Vendedor)}", 34f, y);
+        y += Linea;
+        DibujarTexto(canvas, fuenteNormal, $"Comisión: {reporte.ComisionPct:0.##}%", 34f, y);
         y += Linea + 12f;
 
-        // ── Sección por categoría (dinámica según los registros) ─────
+        // ── Sección por categoría (dinámica; pagina con datos reales) ─
         foreach (CategoriaFacturacion categoria in reporte.Categorias)
         {
+            // Alto estimado de la sección completa: barra + encabezado +
+            // filas + subtotal — si no cabe, página nueva ANTES de empezar.
+            int filas = reporte.Registros.Count(r => r.Categoria == categoria.Nombre);
+            float altoSeccion = 16f + 6f + 16f + 6f + (filas * Linea) + 6f + 16f + 12f;
+            if (y + altoSeccion > Alto - 140f)
+            {
+                NuevaPagina(documento, ref canvas, ref y);
+            }
+
             // Barra de título de la categoría
             using var barraCategoria = new SKPaint { Color = RojoPie, Style = SKPaintStyle.Fill };
             canvas.DrawRect(SKRect.Create(34f, y, Ancho - 68f, 16f), barraCategoria);
             DibujarTexto(canvas, fuenteBlancaNegrita, categoria.Nombre, 40f, y + 11.5f);
             y += 16f + 6f;
 
-            // Encabezado de columnas
-            y = TablaCategoria(canvas, reporte, categoria.Nombre, y, fuenteNormal, fuenteBlancaNegrita);
-            if (y > Alto - 140f)
-            {
-                // Los datos reales paginarán; en esta fase las 2 filas caben.
-                break;
-            }
+            // Encabezado + filas (página nueva por fila si la categoría es larga)
+            y = TablaCategoria(documento, ref canvas, reporte, categoria.Nombre, y, fuenteNormal, fuenteBlancaNegrita);
 
             // Subtotal de la categoría (dinámico)
             y += 6f;
+            if (y + 16f > Alto - 140f)
+            {
+                NuevaPagina(documento, ref canvas, ref y);
+            }
             using var barraSubtotal = new SKPaint { Color = RojoPie, Style = SKPaintStyle.Fill };
             canvas.DrawRect(SKRect.Create(34f, y, Ancho - 68f, 16f), barraSubtotal);
             DibujarDerecha(canvas, fuenteBlancaNegrita, $"Subtotal {categoria.Nombre}: {Moneda(categoria.Monto)}", Ancho - 40f, y + 11.5f);
             y += 16f + 12f;
         }
 
-        // ── Barra roja de Total general (dinámico) ────────────────────
+        // ── Barra roja de Total general (dinámico; respeta el pie) ─────
+        if (y + 20f > Alto - 140f)
+        {
+            NuevaPagina(documento, ref canvas, ref y);
+        }
         using var barraTotal = new SKPaint { Color = RojoPie, Style = SKPaintStyle.Fill };
         canvas.DrawRect(SKRect.Create(34f, y, Ancho - 68f, 20f), barraTotal);
         DibujarTexto(canvas, fuenteBlancaNegrita, "Total:", 40f, y + 14f);
         DibujarDerecha(canvas, fuenteBlancaNegrita, Moneda(reporte.TotalFacturado), Ancho - 40f, y + 14f);
 
-        // ── Pie con fondo rojo + Fecha de Impresión ───────────────────
+        // ── Pie con fondo rojo + Fecha de Impresión (página final) ────
         using var fondoPie = new SKPaint { Color = RojoPie, Style = SKPaintStyle.Fill };
         canvas.DrawRect(SKRect.Create(0f, Alto - 74f, Ancho, 74f), fondoPie);
 
@@ -150,10 +167,12 @@ public class FacturacionPdfService
     }
 
     /// <summary>
-    /// Dibuja el encabezado rojo de columnas y las filas de la categoría.
+    /// Dibuja el encabezado rojo de columnas y las filas de la categoría
+    /// (FASE 3: paginación por fila con los datos reales).
     /// </summary>
     private static float TablaCategoria(
-        SKCanvas canvas,
+        SKDocument documento,
+        ref SKCanvas canvas,
         Facturacion reporte,
         string categoria,
         float y,
@@ -182,8 +201,12 @@ public class FacturacionPdfService
 
         y += 16f + 6f;
 
-        foreach (RegistroFacturacion r in reporte.Registros.Where(r => r.Sorteo == categoria))
+        foreach (RegistroFacturacion r in reporte.Registros.Where(r => r.Categoria == categoria))
         {
+            if (y + Linea > Alto - 140f)
+            {
+                NuevaPagina(documento, ref canvas, ref y);
+            }
             DibujarTexto(canvas, fuenteNormal, r.Fecha.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), xs[0], y);
             DibujarTexto(canvas, fuenteNormal, r.Sorteo, xs[1], y);
             DibujarDerecha(canvas, fuenteNormal, Moneda(r.Entrega), xs[2] + 55f, y);
@@ -194,6 +217,18 @@ public class FacturacionPdfService
         }
 
         return y;
+    }
+
+    /// <summary>
+    /// FASE 3: cierra la página actual y abre una nueva con el margen
+    /// superior estándar (el pie institucional se dibuja solo en la
+    /// página final; las intermedias quedan limpias).
+    /// </summary>
+    private static void NuevaPagina(SKDocument documento, ref SKCanvas canvas, ref float y)
+    {
+        documento.EndPage();
+        canvas = documento.BeginPage(Ancho, Alto);
+        y = 20f;
     }
 
     /// <summary>Fecha en formato de pantalla: "09-septiembre-2026".</summary>

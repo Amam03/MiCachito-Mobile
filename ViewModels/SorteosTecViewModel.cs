@@ -42,6 +42,21 @@ public partial class SorteosTecViewModel : BaseViewModel
     }
 
     /// <summary>
+    /// Retrocede al Home (flecha del header): la página se abre con
+    /// GoToAsync relativo desde el Home, pop de un nivel.
+    /// </summary>
+    [RelayCommand]
+    private Task GoBackAsync()
+    {
+        if (Shell.Current is not null)
+        {
+            return Shell.Current.GoToAsync("..");
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
     /// Al tocar una tarjeta: navega a la pantalla de billetes del sorteo.
     /// </summary>
     [RelayCommand]

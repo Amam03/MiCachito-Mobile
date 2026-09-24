@@ -7,11 +7,13 @@ namespace MiCachito.Mobile.Services;
 /// <summary>
 /// Genera el PDF "Estado de Cuenta Informativo" (mockup 9.1 contenido
 /// pdf) con SkiaSharp 1.57, reutilizando estructura/helpers de
-/// ReciboPagoPdfService: página carta 612×792, logo Mi Cachito,
-/// título, datos del vendedor a la izquierda y tabla resumen a la
-/// derecha (todo $0.00), tabla principal de sorteos con encabezado
-/// rojo #F44336 (7 columnas, VACÍA en esta fase), totales y pie con
-/// fondo rojo #E53935 institucional.
+/// ReciboPagoPdfService: página carta 612×792, logo Mi Cachito, título,
+/// datos del vendedor a la izquierda y tabla resumen a la derecha,
+/// tabla principal de sorteos con encabezado rojo #F44336 (7 columnas)
+/// y PAGINACIÓN real (los sorteos que no caben pasan a página nueva),
+/// totales y pie con fondo rojo #E53935 institucional.
+/// FASE 4 (2026-09-22): datos REALES del endpoint (Vendedor/Plaza del
+/// billetero de la sesión, conceptos y filas solo-consignación).
 /// </summary>
 public class EstadoDeCuentaPdfService
 {
@@ -39,44 +41,34 @@ public class EstadoDeCuentaPdfService
 
         using var archivo = new SKFileWStream(ruta);
         using var documento = SKDocument.CreatePdf(archivo);
-        using SKCanvas canvas = documento.BeginPage(Ancho, Alto);
-
-        using var fuenteNormal = new SKPaint
-        {
-            Color = SKColors.Black,
-            TextSize = 9.5f,
-            IsAntialias = true,
-        };
-        using var fuenteNegrita = new SKPaint
-        {
-            Color = SKColors.Black,
-            TextSize = 9.5f,
-            IsAntialias = true,
-            Typeface = SKTypeface.FromFamilyName(null, SKTypefaceStyle.Bold),
-        };
-        using var fuenteTitulo = new SKPaint
-        {
-            Color = SKColors.Black,
-            TextSize = 14f,
-            IsAntialias = true,
-            Typeface = SKTypeface.FromFamilyName(null, SKTypefaceStyle.Bold),
-        };
-        using var fuenteBlanca = new SKPaint
-        {
-            Color = SKColors.White,
-            TextSize = 8.5f,
-            IsAntialias = true,
-        };
-        using var fuenteBlancaNegrita = new SKPaint
-        {
-            Color = SKColors.White,
-            TextSize = 8.5f,
-            IsAntialias = true,
-            Typeface = SKTypeface.FromFamilyName(null, SKTypefaceStyle.Bold),
-        };
-
+        // El canvas de BeginPage NO se dispone con using (cada EndPage
+        // destruye la página; el documento se cierra con Close) — mismo
+        // pitfall documentado de FacturacionPdfService.
+        SKCanvas canvas = documento.BeginPage(Ancho, Alto);
         float y = 20f;
 
+        using var fuenteNormal = Fuente(SKColors.Black, 9.5f, false);
+        using var fuenteNegrita = Fuente(SKColors.Black, 9.5f, true);
+        using var fuenteTitulo = Fuente(SKColors.Black, 14f, true);
+        using var fuenteBlanca = Fuente(SKColors.White, 8.5f, false);
+        using var fuenteBlancaNegrita = Fuente(SKColors.White, 8.5f, true);
+
+        y = DibujarEncabezado(canvas, estado, y, fuenteTitulo, fuenteNegrita, fuenteNormal);
+        y = TablaSorteos(documento, ref canvas, estado, y, fuenteNormal, fuenteNegrita, fuenteBlancaNegrita);
+        y = DibujarTotales(documento, ref canvas, estado, y, fuenteNegrita);
+        DibujarPie(canvas, fuenteBlancaNegrita, fuenteBlanca);
+
+        documento.EndPage();
+        documento.Close();
+
+        return Task.FromResult(ruta);
+    }
+
+    /// <summary>Logo + título + datos del vendedor (izq.) + tabla resumen (der.).</summary>
+    private static float DibujarEncabezado(
+        SKCanvas canvas, EstadoCuenta estado, float y,
+        SKPaint fuenteTitulo, SKPaint fuenteNegrita, SKPaint fuenteNormal)
+    {
         // ── Logo Mi Cachito ───────────────────────────────────────────
         using SKBitmap? logo = CargarLogo();
         if (logo is not null)
@@ -100,7 +92,6 @@ public class EstadoDeCuentaPdfService
         DibujarTexto(canvas, fuenteNormal, $"Plaza: {estado.Plaza}", 34f, yIzq);
         yIzq += Linea;
 
-        // Tabla resumen a la derecha (valores en cero en esta fase)
         float xResumen = 330f;
         float yRes = y;
         DibujarTexto(canvas, fuenteNegrita, "Concepto", xResumen, yRes);
@@ -113,36 +104,7 @@ public class EstadoDeCuentaPdfService
             yRes += Linea;
         }
 
-        y = Math.Max(yIzq, yRes) + 12f;
-
-        // ── Tabla principal de sorteos (encabezado rojo, 7 columnas) ──
-        y = TablaSorteos(canvas, estado, y, fuenteNormal, fuenteNegrita, fuenteBlancaNegrita);
-
-        // ── Totales generales ─────────────────────────────────────────
-        y += 4f;
-        DibujarDerecha(canvas, fuenteNegrita, $"Vencido: {Moneda(estado.VencidoTotal)}", Ancho - 36f, y);
-        y += Linea;
-        DibujarDerecha(canvas, fuenteNegrita, $"Consigna: {Moneda(estado.ConsignaTotal)}", Ancho - 36f, y);
-        y += Linea;
-        DibujarDerecha(canvas, fuenteNegrita, $"Pagos: {Moneda(estado.PagosTotal)}", Ancho - 36f, y);
-        y += Linea;
-        DibujarDerecha(canvas, fuenteNegrita, $"Total: {Moneda(estado.TotalFinal)}", Ancho - 36f, y);
-
-        // ── Pie con fondo rojo (mismo institucional de Recibos) ───────
-        using var fondoPie = new SKPaint { Color = RojoPie, Style = SKPaintStyle.Fill };
-        canvas.DrawRect(SKRect.Create(0f, Alto - 74f, Ancho, 74f), fondoPie);
-
-        float yPie = Alto - 48f;
-        DibujarCentrado(canvas, fuenteBlancaNegrita, "Comercializadora de la Suerte S.A de C.V", yPie);
-        yPie += Linea;
-        DibujarCentrado(canvas, fuenteBlanca, "Calle Segunda Ote. Sur, Col. Centro, C.P. 29000, Tuxtla Gutiérrez, Chis.", yPie);
-        yPie += Linea;
-        DibujarCentrado(canvas, fuenteBlanca, "Teléfono: (961) 6120235", yPie);
-
-        documento.EndPage();
-        documento.Close();
-
-        return Task.FromResult(ruta);
+        return Math.Max(yIzq, yRes) + 12f;
     }
 
     /// <summary>Filas del bloque resumen (izquierda del PDF y pantalla).</summary>
@@ -159,25 +121,65 @@ public class EstadoDeCuentaPdfService
     /// <summary>
     /// Dibuja la tabla principal: barra de encabezado roja con las 7
     /// columnas (Sorteo, Fecha, Cantidad, Vencido, Consigna, Pagos,
-    /// Total) y las filas de sorteos. En esta fase la tabla está VACÍA
-    /// (sin registros) — se dibuja solo el encabezado.
+    /// Total) y las filas de sorteos con PAGINACIÓN por fila (la que
+    /// no cabe pasa a página nueva con encabezado repetido).
+    /// FASE 4: filas reales del endpoint (solo consignaciones).
     /// </summary>
     private static float TablaSorteos(
-        SKCanvas canvas,
+        SKDocument documento,
+        ref SKCanvas canvas,
         EstadoCuenta estado,
         float y,
         SKPaint fuenteNormal,
         SKPaint fuenteNegrita,
         SKPaint fuenteBlancaNegrita)
     {
-        // Barra de encabezado roja
+        // Columnas: Sorteo | Fecha | Cantidad | Vencido | Consigna | Pagos | Total
+        float[] xs = { 36f, 250f, 320f, 380f, 440f, 500f, Ancho - 36f };
+
+        bool sinEncabezado = true;
+        foreach (SorteoEstadoCuenta s in estado.Sorteos)
+        {
+            if (sinEncabezado || y + Linea > Alto - 140f)
+            {
+                if (!sinEncabezado)
+                {
+                    NuevaPagina(documento, ref canvas, ref y);
+                }
+                DibujarEncabezadoTabla(canvas, xs, y, fuenteBlancaNegrita);
+                y += 16f + 8f;
+                sinEncabezado = false;
+            }
+
+            DibujarTexto(canvas, fuenteNegrita, s.Sorteo, xs[0], y);
+            DibujarTexto(canvas, fuenteNormal, s.Fecha.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), xs[1], y);
+            DibujarDerecha(canvas, fuenteNormal, s.Cantidad.ToString(CultureInfo.CurrentCulture), xs[2] + 30f, y);
+            DibujarDerecha(canvas, fuenteNormal, Moneda(s.Vencido), xs[3] + 40f, y);
+            DibujarDerecha(canvas, fuenteNormal, Moneda(s.Consigna), xs[4] + 40f, y);
+            DibujarDerecha(canvas, fuenteNormal, Moneda(s.Pagos), xs[5] + 40f, y);
+            DibujarDerecha(canvas, fuenteNegrita, Moneda(s.Total), xs[6], y);
+            y += Linea;
+        }
+
+        // Sin sorteos: solo el encabezado (respaldo, p. ej. billetero
+        // sin consignaciones vivas).
+        if (sinEncabezado)
+        {
+            DibujarEncabezadoTabla(canvas, xs, y, fuenteBlancaNegrita);
+            y += 16f + 8f;
+        }
+
+        return y;
+    }
+
+    /// <summary>Barra de encabezado roja con los 7 títulos (repetida por página).</summary>
+    private static void DibujarEncabezadoTabla(SKCanvas canvas, float[] xs, float y, SKPaint fuenteBlancaNegrita)
+    {
         using var barra = new SKPaint { Color = RojoTabla, Style = SKPaintStyle.Fill };
         using var borde = new SKPaint { Color = SKColors.Black, Style = SKPaintStyle.Stroke, StrokeWidth = 1f };
         canvas.DrawRect(SKRect.Create(34f, y, Ancho - 68f, 16f), barra);
         canvas.DrawRect(SKRect.Create(34f, y, Ancho - 68f, 16f), borde);
 
-        // Columnas: Sorteo | Fecha | Cantidad | Vencido | Consigna | Pagos | Total
-        float[] xs = { 36f, 250f, 320f, 380f, 440f, 500f, Ancho - 36f };
         string[] titulos = { "Sorteo", "Fecha", "Cantidad", "Vencido", "Consigna", "Pagos", "Total" };
         for (int i = 0; i < titulos.Length; i++)
         {
@@ -190,24 +192,61 @@ public class EstadoDeCuentaPdfService
                 DibujarTexto(canvas, fuenteBlancaNegrita, titulos[i], xs[i], y + 11.5f);
             }
         }
-
-        y += 16f + 8f;
-
-        // Filas de sorteos (VACÍA en esta fase)
-        foreach (SorteoEstadoCuenta s in estado.Sorteos)
-        {
-            DibujarTexto(canvas, fuenteNegrita, s.Sorteo, xs[0], y);
-            DibujarTexto(canvas, fuenteNormal, s.Fecha.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), xs[1], y);
-            DibujarDerecha(canvas, fuenteNormal, s.Cantidad.ToString(CultureInfo.CurrentCulture), xs[2] + 30f, y);
-            DibujarDerecha(canvas, fuenteNormal, Moneda(s.Vencido), xs[3] + 40f, y);
-            DibujarDerecha(canvas, fuenteNormal, Moneda(s.Consigna), xs[4] + 40f, y);
-            DibujarDerecha(canvas, fuenteNormal, Moneda(s.Pagos), xs[5] + 40f, y);
-            DibujarDerecha(canvas, fuenteNegrita, Moneda(s.Total), xs[6], y);
-            y += Linea;
-        }
-
-        return y;
     }
+
+    /// <summary>Totales generales al pie de la tabla (Vencido/Consigna/Pagos/Total).</summary>
+    private static float DibujarTotales(
+        SKDocument documento, ref SKCanvas canvas, EstadoCuenta estado, float y, SKPaint fuenteNegrita)
+    {
+        y += 4f;
+        if (y + Linea * 5f > Alto - 74f)
+        {
+            NuevaPagina(documento, ref canvas, ref y);
+        }
+        DibujarDerecha(canvas, fuenteNegrita, $"Vencido: {Moneda(estado.VencidoTotal)}", Ancho - 36f, y);
+        y += Linea;
+        DibujarDerecha(canvas, fuenteNegrita, $"Consigna: {Moneda(estado.ConsignaTotal)}", Ancho - 36f, y);
+        y += Linea;
+        DibujarDerecha(canvas, fuenteNegrita, $"Pagos: {Moneda(estado.PagosTotal)}", Ancho - 36f, y);
+        y += Linea;
+        DibujarDerecha(canvas, fuenteNegrita, $"Total: {Moneda(estado.TotalFinal)}", Ancho - 36f, y);
+        return y + Linea;
+    }
+
+    /// <summary>Pie con fondo rojo institucional (solo en la página final).</summary>
+    private static void DibujarPie(SKCanvas canvas, SKPaint fuenteBlancaNegrita, SKPaint fuenteBlanca)
+    {
+        using var fondoPie = new SKPaint { Color = RojoPie, Style = SKPaintStyle.Fill };
+        canvas.DrawRect(SKRect.Create(0f, Alto - 74f, Ancho, 74f), fondoPie);
+
+        float yPie = Alto - 48f;
+        DibujarCentrado(canvas, fuenteBlancaNegrita, "Comercializadora de la Suerte S.A de C.V", yPie);
+        yPie += Linea;
+        DibujarCentrado(canvas, fuenteBlanca, "Calle Segunda Ote. Sur, Col. Centro, C.P. 29000, Tuxtla Gutiérrez, Chis.", yPie);
+        yPie += Linea;
+        DibujarCentrado(canvas, fuenteBlanca, "Teléfono: (961) 6120235", yPie);
+    }
+
+    /// <summary>
+    /// FASE 4: cierra la página actual y abre una nueva con margen
+    /// superior estándar; el pie institucional se dibuja solo en la
+    /// página final.
+    /// </summary>
+    private static void NuevaPagina(SKDocument documento, ref SKCanvas canvas, ref float y)
+    {
+        documento.EndPage();
+        canvas = documento.BeginPage(Ancho, Alto);
+        y = 30f;
+    }
+
+    /// <summary>Factoría de fuentes (evita repetir el inicializador).</summary>
+    private static SKPaint Fuente(SKColor color, float tamano, bool negrita) => new()
+    {
+        Color = color,
+        TextSize = tamano,
+        IsAntialias = true,
+        Typeface = negrita ? SKTypeface.FromFamilyName(null, SKTypefaceStyle.Bold) : null,
+    };
 
     /// <summary>Decimal formateado como moneda: "$ 0.00".</summary>
     private static string Moneda(decimal v) =>

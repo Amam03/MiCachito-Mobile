@@ -10,6 +10,62 @@
     NavigationPage.HasNavigationBar="False"
     Shell.NavBarIsVisible="False">
 
+    <ContentPage.Resources>
+        <!-- Tarjeta de sorteo del Estado de Cuenta (mockup 9.1 "Reporte
+             Generado"): bloque Cantidad + nombre/fecha arriba, un
+             renglón por total (Vencido/Consigna/Pagos/Total) abajo. -->
+        <DataTemplate x:Key="PlantillaSorteoEc" x:DataType="entities:SorteoEstadoCuenta">
+            <Border
+                StrokeShape="RoundRectangle 8"
+                BackgroundColor="{StaticResource McPageBg}"
+                StrokeThickness="0"
+                Padding="12,10"
+                Margin="0,2,0,4">
+                <VerticalStackLayout Spacing="4">
+                    <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto">
+                        <Label
+                            Grid.Row="0" Grid.Column="0"
+                            Text="Cantidad"
+                            FontSize="12"
+                            TextColor="{StaticResource McGrayHint}"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Row="0" Grid.Column="1"
+                            Text="{Binding Sorteo}"
+                            FontSize="14"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource McTextDark}"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Row="0" Grid.Column="2"
+                            Text="{Binding FechaLarga}"
+                            FontSize="12"
+                            TextColor="{StaticResource McGrayHint}"
+                            VerticalOptions="Center" />
+                        <Label
+                            Grid.Row="1" Grid.Column="0"
+                            Text="{Binding Cantidad, StringFormat='{0}'}"
+                            FontSize="13"
+                            FontAttributes="Bold"
+                            TextColor="{StaticResource McTextDark}" />
+                    </Grid>
+                    <!-- Un renglón por total (orden de la tabla EC:
+                         Vencido, Consigna, Pagos, Total). -->
+                    <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="6" Margin="0,4,0,0">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Vencido:" FontSize="12" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding Vencido, StringFormat='$ {0:N2}'}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="1" Grid.Column="0" Text="Consigna:" FontSize="12" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding Consigna, StringFormat='$ {0:N2}'}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="2" Grid.Column="0" Text="Pagos:" FontSize="12" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding Pagos, StringFormat='$ {0:N2}'}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="3" Grid.Column="0" Text="Total:" FontSize="12" TextColor="{StaticResource McTextDark}" />
+                        <Label Grid.Row="3" Grid.Column="1" Text="{Binding Total, StringFormat='$ {0:N2}'}" FontSize="12" FontAttributes="Bold" TextColor="{StaticResource McTextDark}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </DataTemplate>
+    </ContentPage.Resources>
+
     <Grid RowDefinitions="Auto,*,Auto" Padding="0">
 
         <!-- ============ Header azul (patrón Gestión) ============ -->
@@ -70,6 +126,23 @@
                             VerticalOptions="Center" />
                     </Border>
 
+                    <!-- Aviso rojo de error de generación (reintentable: el
+                         botón sigue visible para volver a intentar). -->
+                    <Border
+                        IsVisible="{Binding HayErrorEc}"
+                        StrokeShape="RoundRectangle 8"
+                        BackgroundColor="{StaticResource McError}"
+                        StrokeThickness="0"
+                        Padding="12,10"
+                        Margin="20,12,20,0">
+                        <Label
+                            Text="{Binding MensajeErrorEc}"
+                            TextColor="White"
+                            FontSize="12"
+                            HorizontalOptions="Center"
+                            HorizontalTextAlignment="Center" />
+                    </Border>
+
                     <!-- Reporte generado: resumen de saldo -->
                     <Border
                         IsVisible="{Binding HayReporte}"
@@ -111,6 +184,15 @@
                                 FontSize="13"
                                 TextColor="{StaticResource McGrayHint}"
                                 IsVisible="{Binding SinSorteos}" />
+
+                        <!-- Tarjetas por sorteo (mockup 9.1 "Reporte Generado"):
+                             bloque Cantidad + nombre/fecha, un renglón por
+                             total. Filas reales del endpoint (solo
+                             consignaciones, semántica Fase 1). -->
+                        <VerticalStackLayout
+                            BindableLayout.ItemsSource="{Binding SorteosEc}"
+                            BindableLayout.ItemTemplate="{StaticResource PlantillaSorteoEc}">
+                        </VerticalStackLayout>
                         </VerticalStackLayout>
                     </Border>
 
@@ -172,23 +254,15 @@
                         <Label Text="{Binding FechaHastaLarga}" FontSize="13" FontAttributes="Bold" TextColor="{StaticResource McPrimaryMorado}" />
                     </VerticalStackLayout>
 
-                    <!-- Gráfica de rendimiento: estado SIN datos (línea base en $0.00 + cuadrícula tenue).
-                         La serie real se dibujará aquí cuando existan movimientos. -->
-                    <Grid
+                    <!-- Gráfica de rendimiento: serie real de SALDO ACUMULADO del
+                         periodo (línea azul #3A4DBC + área lavanda #CACEE7 sobre la
+                         cuadrícula tenue, según mockup 9.2). Estado sin datos =
+                         cuadrícula + línea base (drawable con serie vacía). -->
+                    <GraphicsView
+                        x:Name="GraficaFondoAhorro"
                         IsVisible="{Binding FondoConsultado}"
                         HeightRequest="140"
-                        Margin="8,6,8,0">
-                        <!-- Cuadrícula horizontal tenue -->
-                        <BoxView Color="{StaticResource McDividerGrafica}" HeightRequest="1" VerticalOptions="Start" />
-                        <BoxView Color="{StaticResource McDividerGrafica}" HeightRequest="1" VerticalOptions="Center" />
-                        <BoxView Color="{StaticResource McDividerGrafica}" HeightRequest="1" VerticalOptions="End" />
-                        <!-- Cuadrícula vertical tenue -->
-                        <BoxView Color="{StaticResource McDividerGrafica}" WidthRequest="1" HorizontalOptions="Start" />
-                        <BoxView Color="{StaticResource McDividerGrafica}" WidthRequest="1" HorizontalOptions="Center" />
-                        <BoxView Color="{StaticResource McDividerGrafica}" WidthRequest="1" HorizontalOptions="End" />
-                        <!-- Serie en cero: línea azul plana sobre la base -->
-                        <BoxView Color="{StaticResource McTabInternoPleca}" HeightRequest="2" VerticalOptions="End" />
-                    </Grid>
+                        Margin="8,6,8,0" />
 
                     <!-- Resumen de saldos (flat sobre el fondo, como el mockup 9.2) -->
                     <Grid
@@ -611,6 +685,21 @@
                             VerticalOptions="Center" />
                     </Border>
 
+                    <!-- Aviso rojo de error de consulta (modal abierto para reintentar) -->
+                    <Border
+                        IsVisible="{Binding ModalHayError}"
+                        StrokeShape="RoundRectangle 8"
+                        BackgroundColor="{StaticResource McError}"
+                        StrokeThickness="0"
+                        Padding="12,10">
+                        <Label
+                            Text="{Binding ModalMensajeError}"
+                            TextColor="White"
+                            FontSize="12"
+                            HorizontalOptions="Center"
+                            HorizontalTextAlignment="Center" />
+                    </Border>
+
                 </VerticalStackLayout>
             </Border>
         </Border>
@@ -621,6 +710,50 @@
             IsVisible="{Binding Procesando}"
             BackgroundColor="{StaticResource McFabShadow}"
             StrokeThickness="0"
+            Padding="0">
+            <VerticalStackLayout
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Spacing="14">
+                <ActivityIndicator IsRunning="True" Color="White" WidthRequest="40" HeightRequest="40" />
+                <Label
+                    Text="Procesando...."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ============ Overlay Consultando (Fondo de Ahorro) ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="3"
+            IsVisible="{Binding ConsultandoFondo}"
+            BackgroundColor="{StaticResource McFabShadow}"
+            StrokeThickness="0"
+            InputTransparent="False"
+            Padding="0">
+            <VerticalStackLayout
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Spacing="14">
+                <ActivityIndicator IsRunning="True" Color="White" WidthRequest="40" HeightRequest="40" />
+                <Label
+                    Text="Procesando...."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ============ Overlay Consultando (Facturación) ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="3"
+            IsVisible="{Binding ConsultandoFac}"
+            BackgroundColor="{StaticResource McFabShadow}"
+            StrokeThickness="0"
+            InputTransparent="False"
             Padding="0">
             <VerticalStackLayout
                 HorizontalOptions="Center"

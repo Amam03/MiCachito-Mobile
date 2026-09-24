@@ -1,24 +1,31 @@
+using MiCachito.Mobile.Api;
+using MiCachito.Mobile.Helpers;
 using MiCachito.Mobile.Models.Entities;
 
 namespace MiCachito.Mobile.Services;
 
 /// <summary>
-/// Fuente del reporte de Facturación (pestaña 3 de Reportes).
+/// Fuente del reporte de Facturación (pestaña 3 de Reportes, mockup
+/// 9.3) contra la API real: GET api/mobile/reportes/facturacion con el
+/// rango del modal "Seleccionar Fechas". Todo queda acotado al billetero
+/// de la sesión (token); el endpoint no acepta ids del cliente.
 ///
-/// TEMPORAL para validación de UI/flujo (directriz del usuario, mockups
-/// 9.3): mantiene en MEMORIA 2 registros de prueba con fechas desde el
-/// 08/09/2026 para poder comprobar el pie, porcentajes, leyenda, detalle
-/// y PDF con más de una categoría. NO son seeds, NO van a BD, NO son
-/// mocks permanentes — al conectar el backend este servicio se sustituye
-/// por la consulta real (docs/NOTAS_FACTURACION.md).
-///
-/// El filtro por rango es REAL: solo los registros cuya fecha cae dentro
-/// del periodo aparecen en el reporte; totales, agrupación y porcentajes
-/// se calculan dinámicamente a partir de los registros filtrados.
+/// El backend ya entrega venta y ganancia calculadas (ganancia = venta ×
+/// comisión real del billetero); este servicio SOLO mapea y agrupa por
+/// categoría para el pie/leyenda (monto y % de la columna Venta) — no
+/// duplica lógica de negocio. Lanza ApiException en errores HTTP; la red
+/// caída llega como HttpRequestException/TaskCanceled — el VM la captura
+/// y muestra "sin conexión" sin inventar datos.
 /// </summary>
 public class FacturacionService
 {
-    /// <summary>Colores de presentación por categoría (mockup 9.3).</summary>
+    private const string Ruta = "api/mobile/reportes/facturacion";
+
+    /// <summary>
+    /// Colores de presentación por categoría (mockup 9.3 — estilo, no
+    /// dato). Las categorías fuera del mockup usan el gris de fallback
+    /// preexistente; no se inventan colores nuevos.
+    /// </summary>
     private static readonly Dictionary<string, string> Colores = new()
     {
         ["Mayor"] = "#FFB600",
@@ -27,52 +34,62 @@ public class FacturacionService
         ["Especial"] = "#0278D7",
     };
 
-    /// <summary>
-    /// Registros locales de prueba (solo en memoria, fechas ≥ 08/09/2026).
-    /// Montos coherentes: Devolución = Entrega − Venta; Ganancia = 7.5% de la venta.
-    /// </summary>
-    private static readonly List<RegistroFacturacion> RegistrosPrueba = new()
+    private readonly IApiClient _api;
+
+    public FacturacionService(IApiClient api)
     {
-        new RegistroFacturacion
-        {
-            Fecha = new DateTime(2026, 9, 8),
-            Sorteo = "Mayor",
-            Entrega = 1500.00m,
-            Devolucion = 264.50m,
-            Venta = 1235.50m,
-            Ganancia = 92.66m,
-        },
-        new RegistroFacturacion
-        {
-            Fecha = new DateTime(2026, 9, 9),
-            Sorteo = "Superior",
-            Entrega = 900.00m,
-            Devolucion = 135.80m,
-            Venta = 764.20m,
-            Ganancia = 57.32m,
-        },
-    };
+        _api = api;
+    }
 
     /// <summary>
-    /// Construye el reporte del periodo: filtra los registros por fecha
-    /// (REAL) y agrupa por categoría con monto y porcentaje calculados.
+    /// Consulta la facturación del periodo y construye el reporte:
+    /// registros en orden cronológico (fecha|sorteo) + agrupación por
+    /// categoría con monto (columna Venta) y porcentaje calculado.
     /// </summary>
-    public Task<Facturacion> ObtenerAsync(DateTime inicio, DateTime fin)
+    public async Task<Facturacion?> ObtenerAsync(DateTime inicio, DateTime fin, CancellationToken cancellationToken = default)
     {
+        string path = $"{Ruta}?fecha_inicio={inicio:yyyy-MM-dd}&fecha_fin={fin:yyyy-MM-dd}";
+        FacturacionApi? api = await _api.GetAsync<FacturacionApi>(path, cancellationToken)
+            .ConfigureAwait(false);
+        if (api is null)
+        {
+            return null;
+        }
+
         var reporte = new Facturacion
         {
             FechaInicio = inicio,
             FechaFin = fin,
-            Vendedor = string.Empty,
+            Vendedor = api.Vendedor,
+            ComisionPct = api.ComisionPct,
         };
 
-        foreach (RegistroFacturacion r in RegistrosPrueba.Where(r => r.Fecha >= inicio.Date && r.Fecha <= fin.Date))
+        foreach (RegistroFacturacionApi r in api.Registros ?? new List<RegistroFacturacionApi>())
         {
-            reporte.Registros.Add(r);
+            // Fecha cruda del backend → DateOnly es-MX seguro (patrón FA/Recibos).
+            if (!FormatosFecha.TryParseFechaBackend(r.Fecha, out DateOnly fecha))
+            {
+                continue; // sin fecha no hay fila confiable — no inventar
+            }
+
+            reporte.Registros.Add(new RegistroFacturacion
+            {
+                Fecha = fecha.ToDateTime(TimeOnly.MinValue),
+                Sorteo = r.Sorteo,
+                // Sin categoría (producto faltante) → "N/A", convención del
+                // propio backend para etiquetas ausentes — no se inventa nombre
+                // y registro/agrupación/PDF quedan consistentes.
+                Categoria = string.IsNullOrWhiteSpace(r.Categoria) ? "N/A" : r.Categoria,
+                Entrega = r.Entrega,
+                Devolucion = r.Devolucion,
+                Venta = r.Venta,
+                Ganancia = r.Ganancia,
+            });
         }
 
+        // Pie/leyenda: agrupación por CATEGORÍA (producto); monto = Venta.
         decimal total = reporte.TotalFacturado;
-        foreach (IGrouping<string, RegistroFacturacion> grupo in reporte.Registros.GroupBy(r => r.Sorteo))
+        foreach (IGrouping<string, RegistroFacturacion> grupo in reporte.Registros.GroupBy(r => r.Categoria))
         {
             decimal monto = grupo.Sum(r => r.Venta);
             reporte.Categorias.Add(new CategoriaFacturacion
@@ -84,6 +101,6 @@ public class FacturacionService
             });
         }
 
-        return Task.FromResult(reporte);
+        return reporte;
     }
 }

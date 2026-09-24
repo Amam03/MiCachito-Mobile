@@ -1,16 +1,23 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
 using MiCachito.Mobile.Services;
 
 namespace MiCachito.Mobile.ViewModels;
 
 /// <summary>
-/// VM de Reportes (mockups 9.x). Pestañas: Estado de Cuenta (activa),
-/// Fondo de Ahorro (flujo completo local) y Facturación (placeholder).
-/// Fase SOLO INTERFAZ: los reportes se generan con valores en cero y
-/// SIN registros (ni mocks ni seeds — directriz del usuario); la
-/// descarga genera el PDF real y lo guarda en Descargas.
+/// VM de Reportes (mockups 9.x). Pestañas: Estado de Cuenta, Fondo de
+/// Ahorro y Facturación. FASE 2 (2026-09-22): Fondo de Ahorro consulta
+/// el backend real (GET api/mobile/reportes/fondo-ahorro) con overlay de
+/// carga, manejo de errores (aviso rojo en el modal, que queda abierto
+/// para reintentar) y serie de saldo acumulado en la gráfica. FASE 3
+/// (2026-09-22): Facturación consulta el backend real (GET
+/// api/mobile/reportes/facturacion) con el mismo patrón. FASE 4
+/// (2026-09-22): Estado de Cuenta consulta el backend real (GET
+/// api/mobile/reportes/estado-cuenta) con overlay, aviso rojo sobre la
+/// pestaña y tarjetas de sorteo reales (solo consignaciones, semántica
+/// Fase 1).
 /// </summary>
 public partial class ReportesViewModel : BaseViewModel
 {
@@ -43,6 +50,54 @@ public partial class ReportesViewModel : BaseViewModel
     /// <summary>True mientras corre "Descargando....".</summary>
     [ObservableProperty]
     private bool _descargando;
+
+    /// <summary>True mientras la consulta de Fondo de Ahorro está en vuelo (overlay).</summary>
+    [ObservableProperty]
+    private bool _consultandoFondo;
+
+    /// <summary>Mensaje de error de la consulta de Fondo de Ahorro (aviso rojo en el modal).</summary>
+    [ObservableProperty]
+    private string _mensajeErrorFondo = string.Empty;
+
+    /// <summary>True cuando hay error de consulta de Fondo de Ahorro (muestra el aviso).</summary>
+    public bool HayErrorFondo => !string.IsNullOrEmpty(MensajeErrorFondo);
+
+    /// <summary>Mensaje de error de la generación de Estado de Cuenta (aviso rojo).</summary>
+    [ObservableProperty]
+    private string _mensajeErrorEc = string.Empty;
+
+    /// <summary>True cuando hay error de generación de Estado de Cuenta (muestra el aviso).</summary>
+    public bool HayErrorEc => !string.IsNullOrEmpty(MensajeErrorEc);
+
+    /// <summary>Notifica las derivadas de error de Estado de Cuenta.</summary>
+    private void NotificarErrorEc()
+    {
+        OnPropertyChanged(nameof(HayErrorEc));
+    }
+
+    /// <summary>True mientras la consulta de Facturación está en vuelo (overlay).</summary>
+    [ObservableProperty]
+    private bool _consultandoFac;
+
+    /// <summary>Mensaje de error de la consulta de Facturación (aviso rojo en el modal).</summary>
+    [ObservableProperty]
+    private string _mensajeErrorFac = string.Empty;
+
+    /// <summary>True cuando hay error de consulta de Facturación.</summary>
+    public bool HayErrorFac => !string.IsNullOrEmpty(MensajeErrorFac);
+
+    /// <summary>Error visible en el modal compartido: el de la pestaña activa (FA o Facturación).</summary>
+    public bool ModalHayError => PestanaActiva == 2 ? HayErrorFac : HayErrorFondo;
+
+    /// <summary>Mensaje de error del modal compartido: el de la pestaña activa.</summary>
+    public string ModalMensajeError => PestanaActiva == 2 ? MensajeErrorFac : MensajeErrorFondo;
+
+    /// <summary>Notifica las derivadas de error del modal compartido (FA/FAC).</summary>
+    private void NotificarErrorModal()
+    {
+        OnPropertyChanged(nameof(ModalHayError));
+        OnPropertyChanged(nameof(ModalMensajeError));
+    }
 
     // ── Estado de Cuenta ──
 
@@ -125,6 +180,9 @@ public partial class ReportesViewModel : BaseViewModel
     /// <summary>Se dispara cuando el pie necesita redibujarse (nueva consulta).</summary>
     public event EventHandler? PieSolicitaRedibujo;
 
+    /// <summary>Se dispara cuando la gráfica FA necesita redibujarse (nueva consulta).</summary>
+    public event EventHandler? GraficaFaSolicitaRedibujo;
+
     public ReportesViewModel(
         EstadoCuentaService servicio,
         EstadoDeCuentaPdfService pdf,
@@ -176,8 +234,13 @@ public partial class ReportesViewModel : BaseViewModel
     public string ColorPestana1 => Pestana1Activa ? "#4125F4" : "#9E9E9E";
     public string ColorPestana2 => Pestana2Activa ? "#4125F4" : "#9E9E9E";
 
-    /// <summary>True si el listado de sorteos está vacío (fase actual: siempre).</summary>
+    /// <summary>True si el listado de sorteos está vacío (sin consignaciones vivas).</summary>
     public bool SinSorteos => EstadoCuenta?.Sorteos.Count == 0;
+
+    /// <summary>Filas de sorteos del Estado de Cuenta (tarjetas, BindableLayout).</summary>
+    public IReadOnlyList<SorteoEstadoCuenta> SorteosEc =>
+        (IReadOnlyList<SorteoEstadoCuenta>?)EstadoCuenta?.Sorteos ?? new List<SorteoEstadoCuenta>();
+
 
     // ── Valores planos del Estado de Cuenta (bindings compilados) ──
 
@@ -271,6 +334,33 @@ public partial class ReportesViewModel : BaseViewModel
     /// <summary>FAB PDF FA: pestaña activa + descargado.</summary>
     public bool FabPdfFaVisible => Pestana1Activa && FondoDescargado;
 
+    /// <summary>Serie de la gráfica FA: saldo acumulado por fecha (punto inicial = saldo_inicial).</summary>
+    public IReadOnlyList<(double Fraccion, decimal Saldo)> FaSerieSaldo
+    {
+        get
+        {
+            if (_fondoAhorro is null || _fondoAhorro.Movimientos.Count == 0)
+            {
+                return Array.Empty<(double, decimal)>();
+            }
+
+            DateTime inicio = _fondoAhorro.FechaInicio;
+            DateTime fin = _fondoAhorro.FechaFin;
+            double span = Math.Max(1.0, (fin - inicio).TotalDays);
+
+            decimal saldo = _fondoAhorro.SaldoInicial;
+            var serie = new List<(double, decimal)> { (0.0, saldo) };
+            foreach (MovimientoFondoAhorro m in _fondoAhorro.Movimientos)
+            {
+                saldo += m.Monto; // aportación + / retiro −
+                double fraccion = Math.Clamp((m.Fecha - inicio).TotalDays / span, 0.0, 1.0);
+                serie.Add((fraccion, saldo));
+            }
+
+            return serie;
+        }
+    }
+
     /// <summary>FAB descarga Estado de Cuenta: pestaña activa + generado.</summary>
     public bool FabDescargaEcVisible => Pestana0Activa && HayReporte;
 
@@ -313,6 +403,8 @@ public partial class ReportesViewModel : BaseViewModel
         OnPropertyChanged(nameof(ModalHastaTexto));
         OnPropertyChanged(nameof(ModalPuedeConsultar));
         OnPropertyChanged(nameof(OpacidadConsultar));
+        // El aviso rojo del modal compartido bifurca por pestaña.
+        NotificarErrorModal();
     }
 
     partial void OnReporteGeneradoChanged(bool value)
@@ -320,6 +412,7 @@ public partial class ReportesViewModel : BaseViewModel
         OnPropertyChanged(nameof(HayReporte));
         OnPropertyChanged(nameof(SinReporte));
         OnPropertyChanged(nameof(SinSorteos));
+        OnPropertyChanged(nameof(SorteosEc));
         OnPropertyChanged(nameof(FabDescargaEcVisible));
         foreach (string n in new[]
         {
@@ -367,25 +460,58 @@ public partial class ReportesViewModel : BaseViewModel
     // ── Estado de Cuenta: comandos ──
 
     /// <summary>
-    /// Genera el reporte: overlay "Procesando...." (~2 s simulados) y
-    /// estructura en cero sin sorteos.
+    /// Genera el reporte: FASE 4 — consulta real GET api/mobile/reportes/
+    /// estado-cuenta con overlay "Procesando...." y manejo de errores
+    /// (mismo patrón que Fondo de Ahorro): en error el botón queda
+    /// reutilizable y un aviso rojo aparece sobre la pestaña.
     /// </summary>
     [RelayCommand]
     private async Task GenerarReporteAsync()
     {
-        if (Procesando || ReporteGenerado)
+        if (Procesando || (ReporteGenerado && !HayErrorEc))
         {
             return;
         }
 
         Procesando = true;
+        MensajeErrorEc = string.Empty;
+        NotificarErrorEc();
         try
         {
-            EstadoCuenta = await _servicio.ObtenerAsync();
-            await Task.Delay(2000);
+            EstadoCuenta? estado = await _servicio.ObtenerAsync();
+            if (estado is null)
+            {
+                MensajeErrorEc = "El reporte no está disponible";
+                NotificarErrorEc();
+                return;
+            }
+
+            EstadoCuenta = estado;
             ReporteGenerado = true;
             OnPropertyChanged(nameof(HayReporte));
             OnPropertyChanged(nameof(SinReporte));
+            OnPropertyChanged(nameof(SinSorteos));
+            OnPropertyChanged(nameof(SorteosEc));
+        }
+        catch (TaskCanceledException)
+        {
+            MensajeErrorEc = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            NotificarErrorEc();
+        }
+        catch (OperationCanceledException)
+        {
+            MensajeErrorEc = "Consulta cancelada";
+            NotificarErrorEc();
+        }
+        catch (Exception ex) when (ex is HttpRequestException or IOException)
+        {
+            MensajeErrorEc = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            NotificarErrorEc();
+        }
+        catch (ApiException ex)
+        {
+            MensajeErrorEc = ex.Message;
+            NotificarErrorEc();
         }
         finally
         {
@@ -484,13 +610,16 @@ public partial class ReportesViewModel : BaseViewModel
         {
             if (esFac)
             {
-                FacFechaDesde = elegida;
+                // El TEXTO va antes que la fecha: el label del modal bindea
+                // ModalDesdeTexto (computada), que solo se notifica al cambiar
+                // la FECHA — si la fecha va primero, notifica con el texto viejo.
                 FacDesdeTexto = elegida.Value.ToString("dd/MM/yyyy");
+                FacFechaDesde = elegida;
             }
             else
             {
-                FechaDesde = elegida;
                 FechaDesdeTexto = elegida.Value.ToString("dd/MM/yyyy");
+                FechaDesde = elegida;
             }
         }
     }
@@ -512,13 +641,14 @@ public partial class ReportesViewModel : BaseViewModel
         {
             if (esFac)
             {
-                FacFechaHasta = elegida;
+                // Ídem Desde: texto antes que fecha (label del modal al día).
                 FacHastaTexto = elegida.Value.ToString("dd/MM/yyyy");
+                FacFechaHasta = elegida;
             }
             else
             {
-                FechaHasta = elegida;
                 FechaHastaTexto = elegida.Value.ToString("dd/MM/yyyy");
+                FechaHasta = elegida;
             }
         }
     }
@@ -538,18 +668,60 @@ public partial class ReportesViewModel : BaseViewModel
                 return;
             }
 
-            _facturacion = await _facServicio.ObtenerAsync(FacFechaDesde.Value, FacFechaHasta.Value);
-            FacConsultado = true;
-            ModalFechasVisible = false;
-            // Notificar SIEMPRE: en re-consultas FacConsultado ya era true y
-            // OnFacConsultadoChanged no dispara (total/%/periodo quedarían viejos).
-            OnPropertyChanged(nameof(FacDesdeLarga));
-            OnPropertyChanged(nameof(FacHastaLarga));
-            OnPropertyChanged(nameof(FacTotal));
-            OnPropertyChanged(nameof(FacPorcentajePrincipal));
-            OnPropertyChanged(nameof(FacCategorias));
-            OnPropertyChanged(nameof(FacSegmentos));
-            PieSolicitaRedibujo?.Invoke(this, EventArgs.Empty);
+            // FASE 3: consulta real al backend con overlay de carga y manejo
+            // de errores (mismo patrón que Fondo de Ahorro): el modal NO se
+            // cierra hasta que la consulta es exitosa — en error queda
+            // abierto con el aviso rojo para reintentar.
+            ConsultandoFac = true;
+            MensajeErrorFac = string.Empty;
+            NotificarErrorModal();
+            try
+            {
+                _facturacion = await _facServicio.ObtenerAsync(FacFechaDesde.Value, FacFechaHasta.Value);
+                if (_facturacion is null)
+                {
+                    MensajeErrorFac = "El reporte no está disponible";
+                    NotificarErrorModal();
+                    return;
+                }
+
+                FacConsultado = true;
+                ModalFechasVisible = false;
+                // Notificar SIEMPRE: en re-consultas FacConsultado ya era true
+                // y OnFacConsultadoChanged no dispara (total/%/periodo quedarían viejos).
+                OnPropertyChanged(nameof(FacDesdeLarga));
+                OnPropertyChanged(nameof(FacHastaLarga));
+                OnPropertyChanged(nameof(FacTotal));
+                OnPropertyChanged(nameof(FacPorcentajePrincipal));
+                OnPropertyChanged(nameof(FacCategorias));
+                OnPropertyChanged(nameof(FacSegmentos));
+                PieSolicitaRedibujo?.Invoke(this, EventArgs.Empty);
+            }
+            catch (TaskCanceledException)
+            {
+                MensajeErrorFac = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+                NotificarErrorModal();
+            }
+            catch (OperationCanceledException)
+            {
+                MensajeErrorFac = "Consulta cancelada";
+                NotificarErrorModal();
+            }
+            catch (Exception ex) when (ex is HttpRequestException or IOException)
+            {
+                MensajeErrorFac = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+                NotificarErrorModal();
+            }
+            catch (ApiException ex)
+            {
+                // 400 (rango inválido) u otros — mensaje del backend.
+                MensajeErrorFac = ex.Message;
+                NotificarErrorModal();
+            }
+            finally
+            {
+                ConsultandoFac = false;
+            }
             return;
         }
 
@@ -558,12 +730,66 @@ public partial class ReportesViewModel : BaseViewModel
             return;
         }
 
-        _fondoAhorro = await _fondoServicio.ObtenerAsync(FechaDesde.Value, FechaHasta.Value);
-        FondoConsultado = true;
-        ModalFechasVisible = false;
-        // Ídem Fondo de Ahorro: el periodo mostrado debe refrescar en re-consultas.
-        OnPropertyChanged(nameof(FechaDesdeLarga));
-        OnPropertyChanged(nameof(FechaHastaLarga));
+        // FASE 2: consulta real al backend con overlay de carga y manejo
+        // de errores (patrón DetallePagoViewModel). El modal NO se cierra
+        // hasta que la consulta es exitosa — en error queda abierto con
+        // el aviso rojo para reintentar.
+        ConsultandoFondo = true;
+        MensajeErrorFondo = string.Empty;
+        OnPropertyChanged(nameof(HayErrorFondo));
+        try
+        {
+            _fondoAhorro = await _fondoServicio.ObtenerAsync(FechaDesde.Value, FechaHasta.Value);
+            if (_fondoAhorro is null)
+            {
+                MensajeErrorFondo = "El reporte no está disponible";
+                NotificarErrorModal();
+                return;
+            }
+
+            FondoConsultado = true;
+            ModalFechasVisible = false;
+            // Ídem Fondo de Ahorro: el periodo y los saldos deben refrescar
+            // en re-consultas (OnFondoConsultadoChanged no dispara si ya
+            // era true — mismo bug documentado de Facturación).
+            OnPropertyChanged(nameof(FechaDesdeLarga));
+            OnPropertyChanged(nameof(FechaHastaLarga));
+            foreach (string n in new[]
+            {
+                nameof(FaSaldoInicial), nameof(FaDepositos),
+                nameof(FaRetiros), nameof(FaSaldoFinal),
+            })
+            {
+                OnPropertyChanged(n);
+            }
+
+            GraficaFaSolicitaRedibujo?.Invoke(this, EventArgs.Empty);
+        }
+        catch (TaskCanceledException)
+        {
+            MensajeErrorFondo = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            NotificarErrorModal();
+        }
+        catch (OperationCanceledException)
+        {
+            MensajeErrorFondo = "Consulta cancelada";
+            NotificarErrorModal();
+        }
+        catch (Exception ex) when (ex is HttpRequestException or IOException)
+        {
+            MensajeErrorFondo = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            NotificarErrorModal();
+        }
+        catch (ApiException ex)
+        {
+            // 400 (rango inválido) u otros — mensaje del backend.
+            MensajeErrorFondo = ex.Message;
+            NotificarErrorModal();
+        }
+        finally
+        {
+            ConsultandoFondo = false;
+        }
     }
 
     /// <summary>

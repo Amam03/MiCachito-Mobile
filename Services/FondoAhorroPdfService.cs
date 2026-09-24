@@ -8,9 +8,10 @@ namespace MiCachito.Mobile.Services;
 /// Genera el PDF "Reporte de Fondo de Ahorro" (mockup 9.2 contenido
 /// pdf) con SkiaSharp, siguiendo el patrón de EstadoDeCuentaPdfService:
 /// página carta 612×792, logo, título + subtítulo con el periodo real,
-/// titular, tabla de movimientos con encabezado rojo #F44336
-/// (Fecha | Folio | Origen | Monto, VACÍA en esta fase), barra roja de
-/// Total y pie institucional #E53935.
+/// titular real (desde la Fase 2, del backend), tabla de movimientos
+/// con encabezado rojo #F44336 (Fecha | Folio | Origen | Descripción |
+/// Monto) con las filas del periodo, barra roja de Total y pie
+/// institucional #E53935.
 /// </summary>
 public class FondoAhorroPdfService
 {
@@ -127,8 +128,8 @@ public class FondoAhorroPdfService
 
     /// <summary>
     /// Dibuja la tabla de movimientos: barra de encabezado roja con las
-    /// 4 columnas (Fecha, Folio, Origen, Monto) y las filas. En esta
-    /// fase la tabla está VACÍA (sin registros) — solo el encabezado.
+    /// 5 columnas (Fecha, Folio, Origen, Descripción, Monto) y las filas
+    /// del periodo con monto con signo (aportación +, retiro −).
     /// </summary>
     private static float TablaMovimientos(
         SKCanvas canvas,
@@ -142,9 +143,9 @@ public class FondoAhorroPdfService
         canvas.DrawRect(SKRect.Create(34f, y, Ancho - 68f, 16f), barra);
         canvas.DrawRect(SKRect.Create(34f, y, Ancho - 68f, 16f), borde);
 
-        // Columnas: Fecha | Folio | Origen | Monto
-        float[] xs = { 36f, 200f, 350f, Ancho - 36f };
-        string[] titulos = { "Fecha", "Folio", "Origen", "Monto" };
+        // Columnas: Fecha | Folio | Origen | Descripción | Monto
+        float[] xs = { 36f, 120f, 190f, 270f, Ancho - 36f };
+        string[] titulos = { "Fecha", "Folio", "Origen", "Descripción", "Monto" };
         for (int i = 0; i < titulos.Length; i++)
         {
             if (i == titulos.Length - 1)
@@ -159,17 +160,41 @@ public class FondoAhorroPdfService
 
         y += 16f + 8f;
 
-        // Filas de movimientos (VACÍA en esta fase)
+        // Filas de movimientos del periodo (del backend, Fase 2)
         foreach (MovimientoFondoAhorro m in fondo.Movimientos)
         {
             DibujarTexto(canvas, fuenteNormal, m.Fecha.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture), xs[0], y);
             DibujarTexto(canvas, fuenteNormal, m.Folio, xs[1], y);
             DibujarTexto(canvas, fuenteNormal, m.Origen, xs[2], y);
-            DibujarDerecha(canvas, fuenteNormal, Moneda(m.Monto), xs[3], y);
+            DibujarTexto(canvas, fuenteNormal, Recortar(m.Descripcion, xs[3], xs[4] - xs[3] - 8f, fuenteNormal), xs[3], y);
+            DibujarDerecha(canvas, fuenteNormal, Moneda(m.Monto), xs[4], y);
             y += Linea;
         }
 
         return y;
+    }
+
+    /// <summary>Recorta el texto con elipsis si excede el ancho de la columna.</summary>
+    private static string Recortar(string texto, float x, float ancho, SKPaint fuente)
+    {
+        if (string.IsNullOrWhiteSpace(texto) || fuente.MeasureText(texto) <= ancho)
+        {
+            return texto;
+        }
+
+        const string elipsis = "...";
+        float anchoElipsis = fuente.MeasureText(elipsis);
+        string acumulado = string.Empty;
+        foreach (char c in texto)
+        {
+            if (fuente.MeasureText(acumulado + c) + anchoElipsis > ancho)
+            {
+                return acumulado + elipsis;
+            }
+            acumulado += c;
+        }
+
+        return acumulado;
     }
 
     /// <summary>Fecha en formato de pantalla: "29-octubre-2025".</summary>
@@ -183,7 +208,10 @@ public class FondoAhorroPdfService
     /// <summary>Texto o guion si está vacío (estado vacío, sin inventar datos).</summary>
     private static string Vacio(string texto) => string.IsNullOrWhiteSpace(texto) ? "—" : texto;
 
-    /// <summary>Decimal formateado como moneda: "$ 0.00".</summary>
+    /// <summary>
+    /// Decimal formateado como moneda con signo: "$ 500.00" / "$ -500.00"
+    /// (retiros con signo negativo, derivado del origen en el service).
+    /// </summary>
     private static string Moneda(decimal v) =>
         $"$ {v.ToString("#,##0.00", CultureInfo.CurrentCulture)}";
 
