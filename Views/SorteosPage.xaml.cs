@@ -17,9 +17,9 @@ public partial class SorteosPage : ContentPage
         BindingContext = viewModel;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        _viewModel.AlAparecer();
+        await _viewModel.AlAparecerAsync();
     }
 }

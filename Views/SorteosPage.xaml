@@ -204,11 +204,23 @@
                                         BackgroundColor="{StaticResource White}"
                                         Padding="12,10,12,10">
                                         <VerticalStackLayout Spacing="6">
-                                            <Grid ColumnDefinitions="*,Auto">
+                                            <Grid ColumnDefinitions="Auto,Auto,*,Auto">
                                                 <Label Text="{Binding Folio}" FontSize="13"
                                                        FontAttributes="Bold" FontFamily="OpenSansSemibold"
                                                        TextColor="{StaticResource McTextDark}" />
-                                                <Label Text="{Binding Series}" Grid.Column="1" FontSize="11"
+                                                <Border
+                                                    Grid.Column="1"
+                                                    StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 4"
+                                                    BackgroundColor="{StaticResource McLotenalHeader}"
+                                                    Padding="6,1,6,1"
+                                                    Margin="8,0,0,0"
+                                                    VerticalOptions="Center">
+                                                    <Label Text="{Binding Movimiento}" FontSize="9"
+                                                           FontAttributes="Bold"
+                                                           TextColor="{StaticResource White}" />
+                                                </Border>
+                                                <Label Text="{Binding Series}" Grid.Column="3" FontSize="11"
                                                        TextColor="{StaticResource McGrayText}"
                                                        VerticalOptions="Center" />
                                             </Grid>
@@ -282,6 +294,18 @@
                                FontSize="14" FontAttributes="Bold" FontFamily="OpenSansSemibold"
                                TextColor="{StaticResource McTextDark}"
                                HorizontalTextAlignment="Center" />
+
+                        <!-- Pagos hechos al momento del sorteo (aplicado_a
+                             sorteo_vigente | sorteo_celebrado) -->
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding PagosExpandido}">
+                            <Label Grid.Column="0" Text="Al momento del sorteo:"
+                                   FontSize="11" TextColor="{StaticResource McGrayText}"
+                                   VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{Binding PagosAlMomentoText}"
+                                   FontSize="11" FontAttributes="Bold"
+                                   TextColor="{StaticResource McTextDark}"
+                                   VerticalOptions="Center" />
+                        </Grid>
 
                         <!-- Tabla de pagos (expandido) -->
                         <Border
@@ -358,6 +382,53 @@
                 HorizontalTextAlignment="Center" />
         </Border>
 
+        <!-- ============ AVISO ROJO de error (lista/detalle, reintentable:
+             re-entrar a la pantalla recarga; cambiar de sorteo reintenta) ============ -->
+        <Border
+            Grid.Row="1"
+            IsVisible="{Binding HayError}"
+            StrokeThickness="0"
+            StrokeShape="RoundRectangle 8"
+            BackgroundColor="{StaticResource McError}"
+            Padding="12,10"
+            Margin="16,8,16,0"
+            HorizontalOptions="Fill"
+            VerticalOptions="Start">
+            <Label
+                Text="{Binding MensajeError}"
+                TextColor="White"
+                FontSize="12"
+                HorizontalTextAlignment="Center" />
+        </Border>
+
+        <!-- ============ OVERLAY cargando lista (Procesando) ============ -->
+        <Grid
+            Grid.Row="0" Grid.RowSpan="3"
+            IsVisible="{Binding CargandoLista}"
+            BackgroundColor="{StaticResource McScrimBlack55}">
+            <VerticalStackLayout VerticalOptions="Center" Spacing="12">
+                <ActivityIndicator IsRunning="True" Color="{StaticResource White}" />
+                <Label Text="Procesando...."
+                       TextColor="{StaticResource White}"
+                       FontSize="14" FontAttributes="Bold"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <!-- ============ OVERLAY cargando detalle (Consultando) ============ -->
+        <Grid
+            Grid.Row="0" Grid.RowSpan="3"
+            IsVisible="{Binding CargandoDetalle}"
+            BackgroundColor="{StaticResource McScrimBlack55}">
+            <VerticalStackLayout VerticalOptions="Center" Spacing="12">
+                <ActivityIndicator IsRunning="True" Color="{StaticResource White}" />
+                <Label Text="Consultando...."
+                       TextColor="{StaticResource White}"
+                       FontSize="14" FontAttributes="Bold"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Grid>
+
         <!-- ============ DROPDOWN overlay (lista de celebrados) ============ -->
         <Grid
             Grid.Row="0" Grid.RowSpan="3"
@@ -387,8 +458,15 @@
                         ItemsSource="{Binding Sorteos}"
                         SelectionMode="None"
                         MaximumHeightRequest="420">
+                        <CollectionView.EmptyView>
+                            <Label Text="No tienes sorteos registrados"
+                                   FontSize="13"
+                                   TextColor="{StaticResource McGrayText}"
+                                   HorizontalTextAlignment="Center"
+                                   Padding="0,16,0,16" />
+                        </CollectionView.EmptyView>
                         <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="entities:SorteoActivoLotenal">
+                            <DataTemplate x:DataType="entities:SorteoCelebradoInfo">
                                 <Grid Padding="14,10,14,10">
                                     <Grid.GestureRecognizers>
                                         <TapGestureRecognizer
@@ -396,10 +474,12 @@
                                             CommandParameter="{Binding .}" />
                                     </Grid.GestureRecognizers>
                                     <StackLayout Spacing="1">
-                                        <Label Text="{Binding NombreCorto}"
+                                        <Label Text="{Binding Sorteo}"
                                                FontSize="14" FontAttributes="Bold"
                                                FontFamily="OpenSansSemibold"
-                                               TextColor="{StaticResource McTextDark}" />
+                                               TextColor="{StaticResource McTextDark}"
+                                               LineBreakMode="TailTruncation"
+                                               MaxLines="1" />
                                         <Label Text="{Binding FechaLarga}"
                                                FontSize="12"
                                                TextColor="{StaticResource McGrayText}" />
