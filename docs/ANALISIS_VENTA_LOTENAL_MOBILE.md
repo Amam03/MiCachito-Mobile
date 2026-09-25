@@ -363,71 +363,89 @@ existente), precios (precio_fraccion), identidad (auth hecha), trazabilidad
 
 ## E. DATOS/MOCK: sustituir vs NO tocar
 
-Sustituir (exclusivos Vender LN): `TiendasDisponiblesData` (filas 9.x → GET
-billetes del billetero), `SorteosLotenalData` como fuente de 7.x (→ GET
-ventas/sorteos; pantalla 6 → productos reales §A.8 — pendiente v2 #9), saldo
-"$0.00" hardcodeado.
-Se CONSERVA (decisión v2 #2, sujeta a P3): pantalla 8 + catálogo de ciudades
-como PICKER operativo; contenido real de ciudades pendiente (las 9 del
-mockup son territorio Sr. Billetero).
+Regla: se sustituye el CONSUMO de Vender LOTENAL por datos reales (endpoints
+propios de Vender, §N); NINGÚN archivo se borra mientras otro módulo lo use.
+
+Sustituir consumo (exclusivos Vender LN): `TiendasDisponiblesData` (filas
+9.x → GET billetes del billetero), `SorteosLotenalData` como fuente de 7.x
+(→ GET ventas/sorteos; pantalla 6 → productos reales §A.8 — pendiente v2
+#9), saldo "$0.00" hardcodeado.
+
+CONSERVAR ARCHIVO (regla v3): `SorteosActivosLotenalData` — compartido hoy
+por Vender (7.x y 11) Y Devolución 6.1 (lista de sorteos + FechaSorteoCodigo
+valida la fecha del QR); Gestión Sorteos YA NO lo usa (migrado a
+SorteosService real en a494b4d). Se sustituye SOLO el consumo de Vender; el
+ARCHIVO se conserva mientras Devolución 6.1 lo siga usando; su sustitución
+se coordina en F4 — NUNCA borrar el archivo antes.
+
+Se CONSERVA (decisión v2 #2, sujeta a P3): pantalla 8 + catálogo de
+ciudades como PICKER operativo — ciudad FUERA del MVP por ahora; contenido
+real de ciudades pendiente (las 9 del mockup son territorio Sr. Billetero).
 `SignosZodiacoData` queda estático (catálogo inmutable 12 signos).
-NO TOCAR: `SorteosTecData`, `TiempoAireData`, `ExpendiosDemoData`, y
-CRÍTICO `SorteosActivosLotenalData` COMPARTIDO hoy por Vender (7.x y 11) Y
-Devolución 6.1 (lista de sorteos + FechaSorteoCodigo valida la fecha del
-QR); Gestión Sorteos YA NO lo usa (migrado a SorteosService real en
-a494b4d). Al sustituir el consumo de Vender hay que sustituir
-SIMULTÁNEAMENTE el de Devolución 6.1 o dejarle el mock vivo — NUNCA borrar
-el archivo mientras Devolución siga en fase interfaz. Ningún dato de BD se
-toca desde Mobile.
+NO TOCAR (fuera de alcance por ahora): `SorteosTecData` (Tec),
+`TiempoAireData` (Tiempo Aire), `ExpendiosDemoData`, ciudad (P3),
+vencimiento (P5), garantías (P12), Rasca/Prorra (P12). Ningún dato de BD
+se toca desde Mobile.
 
 ## F. PROPUESTA TÉCNICA (archivos)
 
 Backend (dev-mobile):
-- NUEVO `models/services/VentaService.php`: lógica extraída de actionCrear
-  (paridad exacta) + variante mobile (precio server, id_tienda NULL,
-  cancelación al mismo billetero). VentasController::actionCrear delega.
+- NUEVO `models/services/VentaService.php` — LÓGICA COMÚN Desktop/Mobile
+  (una sola verdad de la venta): extracción de actionCrear con paridad
+  exacta; VentasController::actionCrear delega (MISMO contrato Desktop).
+  Reglas de la variante mobile (aisladas en el controller mobile): Mobile
+  vende SIEMPRE por `id_billete` exacto (R4); `id_billetero` vendedor =
+  SESIÓN (getIdBilleteroActual, jamás del request); precio del BACKEND
+  (`sorteos.precio_fraccion` vía normalizarPrecioFraccion, jamás del
+  cliente); `id_tienda = NULL`; cancelación devuelve a 'asignado' al
+  MISMO billetero.
 - NUEVO `controllers/api/mobile/VentasController.php` (actionSorteos,
   actionBilletes, actionCrear, actionIndex, actionView, actionCancelar,
   actionDevolucion) extendiendo BaseMobileController (getIdBilleteroActual).
 - `config/web.php`: bloque nuevo /api/mobile/ventas* (rutas Desktop intactas;
-  /api/mobile/sorteos de Gestión intacto).
-- MIGRACIÓN aditiva opcional `ventas.ciudad_venta` (solo si P3 la mantiene;
-  aprobación previa; INSERTs Desktop explícitos no se rompen).
-- CERO tablas nuevas: atomicidad = FOR UPDATE existente; identidad = FK
-  existente; estado LIVE = billetes_loteria existente.
+  /api/mobile/sorteos de Gestión intacto — §N).
+- CERO tablas nuevas y CERO migraciones en el MVP: atomicidad = FOR UPDATE
+  existente; identidad = FK id_billetero existente; estado LIVE =
+  billetes_loteria existente. `ventas.ciudad_venta` queda FUERA del MVP:
+  solo se reconsideraría tras P3, con aprobación previa, en fase posterior.
 
 Mobile (master):
 - `Api/ApiEndpoints.cs` (+MobileVentas), NUEVO `Services/MobileVentasService.cs`,
-  DTOs `Models/Responses/`.
-- VMs existentes conectados (SorteosActivos, AgregarBoletos, CarritoCompras;
-  SeleccionCiudad pasa ciudad al carrito/venta si P3 la mantiene), NUEVA
-  `Views/VentaExitosaLotenalPage.xaml`+VM.
-- `Platforms/Android/Services/ImpresoraService.cs`: SPP+ESC/POS (F6).
+  DTOs `Models/Responses/` (patrón SorteosService de Gestión).
+- VMs existentes conectados (SorteosActivos, AgregarBoletos, CarritoCompras),
+  NUEVA `Views/VentaExitosaLotenalPage.xaml`+VM. Pantalla 8 (ciudad) fuera
+  del MVP (P3); si P3 la reactiva en fase posterior, SeleccionCiudad
+  pasaría la ciudad al carrito/venta.
+- `Platforms/Android/Services/ImpresoraService.cs`: SPP+ESC/POS (F6, §H).
 - Pantalla 6 alimentada por productos LN reales (7; colores/subcódigo
   mapeados como hoy, pendiente v2 #9).
 
 ## G. IMPACTO DESKTOP (riesgo y mitigación)
 
-1. **Migración `ventas.ciudad_venta` (BAJO, OPCIONAL en v3)**: solo si P3 la
-   mantiene; columna NULL aditiva; ventas Desktop quedan NULL; INSERTs
-   Desktop enumeran columnas explícitas.
-2. **VentaService (MEDIO)**: único cambio en código Desktop compartido
-   (actionCrear). Paridad exacta + regresión Desktop 44/4 + E2E Docker de
-   venta/cancelación ANTES de abrir el endpoint mobile. Si la paridad
-   falla: DETENERSE.
-3. **Cancelación mobile al mismo billetero (semántica distinta, AISLADA)**:
+Regla del MVP: CERO cambios funcionales en Desktop y CERO tablas/columnas
+nuevas en BD — todo el estado compartido emerge de las mismas tablas
+(billetes_loteria + inventario_cedis + ventas/ventas_detalle).
+
+1. **VentaService (MEDIO — único punto de contacto con Desktop)**: refactor
+   con paridad exacta de actionCrear (no es cambio funcional: mismo
+   contrato, misma BD). Condición dura: la extracción pasa PRIMERO la
+   regresión Desktop completa (44/4) + E2E Docker de venta/cancelación
+   ANTES de abrir cualquier endpoint mobile; si la paridad falla:
+   DETENERSE y reportar (D2).
+2. **Cancelación mobile al mismo billetero (semántica distinta, AISLADA)**:
    Desktop cancel → 'disponible'/cedis + billetero NULL; Mobile cancel →
    'asignado'/mismo billetero. Vive SOLO en el controller/service mobile;
    actionCancelar Desktop intacto.
-4. **Cierre de sorteo (CERO cambio para el MVP)**: con id_billetero_actual
+3. **Cierre de sorteo (CERO cambio para el MVP)**: con id_billetero_actual
    conservado en los billetes vendidos por Mobile, el cierre existente
    agrupa y comisiona a CADA billetero con SU comisión — flujo Desktop
-   intacto. (Riesgos R1/R2 del cierre documentados en §RIESGOS como fixes
-   Desktop separados, con aprobación.)
+   intacto. (R1/R2 = fixes Desktop preexistentes, SEPARADOS del MVP, solo
+   con aprobación explícita — D5.)
+4. **Ciudad: FUERA del MVP** (P3 deliberada aparte) → sin migración de BD
+   en el MVP. Si una fase posterior la reactiva (P3): columna NULL aditiva
+   con aprobación previa; INSERTs Desktop enumeran columnas explícitas.
 5. Rutas nuevas aditivas; auth mobile intacto; aislamiento: sesión→vendedor,
    precio server-side, dotación cerrada→409.
-6. Para el MVP de Vender: CERO cambios obligatorios en Desktop/BD (todo el
-   estado compartido emerge de las mismas tablas).
 
 ## H. FLUJO DE IMPRESIÓN (actualizado v3)
 
@@ -452,6 +470,20 @@ esta actualización del plan.
 
 ## I. PLAN DE IMPLEMENTACIÓN (fases v3; mapea las v2 Fase 0/A-F)
 
+REGLAS PRINCIPALES (transversales a todas las fases):
+1. `billetes_loteria` es la FUENTE DE VERDAD del estado del billete
+   (inventario_cedis para stock agregado); Mobile NO crea inventario
+   paralelo (§D.0).
+2. Relación billetero↔app SIEMPRE por `id_billetero` (FK sesión→expendio→
+   billetero), JAMÁS por nombre (§K).
+3. `/api/mobile/sorteos` es de GESTIÓN (histórico); Vender usa endpoints
+   PROPIOS (propuesta /api/mobile/ventas/*, §N).
+4. Fuera de alcance por ahora: Tec, Tiempo Aire, ciudad (P3), vencimiento
+   (P5), garantías (P12), Rasca/Prorra (P12).
+5. Orden de fases FIJO: F0 → F1 inventario → F2 conexión Mobile → F3
+   venta → F4 devolución → F5 sincronización → F6 impresión → F7 pruebas/
+   regresión. No se abre una fase sin cerrar la anterior.
+
 - **F0 — Identidad y relación billetero ↔ usuario Mobile** (VERIFICADA, sin
   código): cadena id_billetero probada en BD (§K, billetero 11 ↔ e2e_dot).
   Restante: decidir estrategia id_usuario_captura (P8) y preparar billetero
@@ -459,15 +491,18 @@ esta actualización del plan.
   (crear concentrador) queda OBSOLETA.
 - **F1 — Inventario LIVE disponible para Vender (backend lectura)**:
   GET /api/mobile/ventas/sorteos + /api/mobile/ventas/billetes (nombres
-  propuestos) contra billetes_loteria LIVE del billetero de la sesión.
-  E2E Docker (billetero 11, dotaciones 4024/4025). Commit.
-- **F2 — Consulta de sorteos/billetes disponibles (mobile lectura)**: VMs
+  propuestos; decisión P11) contra billetes_loteria LIVE del billetero de
+  la sesión (estatus='asignado' AND id_billetero_actual=sesión). E2E Docker
+  (billetero 11, dotaciones 4024/4025). Commit.
+- **F2 — Conexión Mobile (consulta de sorteos/billetes disponibles)**: VMs
   7.x/9.x/10.x con datos reales (fila=serie, fracciones libres), pantalla 6
-  con productos reales; sustitución de mocks coordinada con Devolución 6.1
-  (§E) → emulador → inspección → commit.
-- **F3 — Venta individual y descuento de inventario**:
+  con productos reales; sustitución SOLO del consumo de Vender, conservando
+  `SorteosActivosLotenalData` para Devolución 6.1 (§E) → emulador →
+  inspección → commit.
+- **F3 — Venta individual y descuento de inventario** (reglas §F: por
+  id_billete, id_billetero de sesión, precio backend, id_tienda NULL):
   (a) backend: VentaService paridad (regresión Desktop 44/4 ANTES de abrir
-  endpoint; si falla, parar) → POST venta mobile + cancelar (al mismo
+  endpoint; si falla, parar — D2) → POST venta mobile + cancelar (al mismo
   billetero) + historial;
   (b) mobile: VenderAsync→POST, VentaExitosaLotenal (folio, total, comisión
   estimada), historial real → inspección → commit.
@@ -481,7 +516,8 @@ esta actualización del plan.
   material → app deja de mostrar); bloqueo de venta/devolución en dotación
   cerrada; verificación cruzada Desktop ve ventas Mobile (grids/reportes).
 - **F6 — Impresión**: spike impresora física → SPP+ESC/POS + guardado +
-  errores + reimpresión; formato LOTENAL a validar (§H).
+  errores + reimpresión; reutiliza infraestructura existente probada en
+  Tec (§H); formato LOTENAL a validar; SIN implementación en el plan.
 - **F7 — Pruebas E2E y regresión Desktop**: E2E completo contra Docker
   (entrega Desktop → disponibilidad app → venta app → visible Desktop →
   devolución app → visible Desktop), regresión Desktop 44/4 completa,
