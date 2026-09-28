@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
 using MiCachito.Mobile.Services;
 
@@ -28,6 +29,17 @@ public partial class NuevaDevolucionViewModel : BaseViewModel
     [ObservableProperty]
     private bool avisoCancelarVisible;
 
+    /// <summary>True mientras se envía la devolución al backend (F4).</summary>
+    [ObservableProperty]
+    private bool guardando;
+
+    /// <summary>Mensaje de error del envío (aviso rojo, la devolución se conserva).</summary>
+    [ObservableProperty]
+    private string mensajeError = string.Empty;
+
+    /// <summary>True cuando hay error visible.</summary>
+    public bool HayError => !string.IsNullOrEmpty(MensajeError);
+
     /// <summary>Cachitos capturados (filas en curso, modo Cachitos).</summary>
     public int ContadorCachitos => _devoluciones.ContadorCachitos;
 
@@ -49,7 +61,11 @@ public partial class NuevaDevolucionViewModel : BaseViewModel
     /// <summary>Carga el sorteo en curso al aparecer.</summary>
     public void AlAparecer()
     {
-        NombreSorteo = _devoluciones.SorteoEnCurso?.NombreCorto ?? string.Empty;
+        NombreSorteo = _devoluciones.SorteoEnCurso is null
+            ? string.Empty
+            : string.IsNullOrEmpty(_devoluciones.SorteoEnCurso.NumeroSorteo)
+                ? _devoluciones.SorteoEnCurso.NombreProducto
+                : $"{_devoluciones.SorteoEnCurso.NombreProducto} {_devoluciones.SorteoEnCurso.NumeroSorteo}";
         OnPropertyChanged(nameof(Titulo));
         NotificarContadores();
     }
@@ -124,17 +140,60 @@ public partial class NuevaDevolucionViewModel : BaseViewModel
         return Shell.Current.GoToAsync($"{nameof(Views.DesgloseDevolucionPage)}?modo={modo}");
     }
 
-    /// <summary>GUARDAR: registra la devolución (aunque esté vacía, UI-only) y regresa al listado.</summary>
+    /// <summary>
+    /// GUARDAR (F4, REAL): envía los boletos capturados al backend
+    /// (POST api/mobile/ventas/devolver — movimiento pendiente con
+    /// estado LIVE inmediato) y regresa al listado. Sin capturas no
+    /// hace nada (el botón requiere al menos un boleto). Errores
+    /// (409 vendido/devuelto/dotación cerrada, 403 ajeno, red): aviso
+    /// rojo con el mensaje del backend; la devolución se CONSERVA
+    /// para corregir y reintentar.
+    /// </summary>
     [RelayCommand]
-    private Task GuardarAsync()
+    private async Task GuardarAsync()
     {
-        if (Shell.Current is null)
+        if (Shell.Current is null || IsBusy || Guardando)
         {
-            return Task.CompletedTask;
+            return;
         }
 
-        _devoluciones.Guardar();
-        return Shell.Current.GoToAsync("../..");
+        if (ContadorCachitos + ContadorTiras + ContadorSeries == 0)
+        {
+            return;
+        }
+
+        Guardando = true;
+        MensajeError = string.Empty;
+        OnPropertyChanged(nameof(HayError));
+        try
+        {
+            _ = await _devoluciones.GuardarAsync().ConfigureAwait(true);
+            await Shell.Current.GoToAsync("../..");
+        }
+        catch (TaskCanceledException)
+        {
+            MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            OnPropertyChanged(nameof(HayError));
+        }
+        catch (OperationCanceledException)
+        {
+            MensajeError = "Devolución cancelada";
+            OnPropertyChanged(nameof(HayError));
+        }
+        catch (Exception ex) when (ex is HttpRequestException or IOException)
+        {
+            MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            OnPropertyChanged(nameof(HayError));
+        }
+        catch (ApiException ex)
+        {
+            MensajeError = ex.Message;
+            OnPropertyChanged(nameof(HayError));
+        }
+        finally
+        {
+            Guardando = false;
+        }
     }
 
     /// <summary>

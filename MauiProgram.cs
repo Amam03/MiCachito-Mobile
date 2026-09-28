@@ -34,6 +34,10 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<IAuthService, AuthService>();
             builder.Services.AddTransient<IExpendiosService, ExpendiosService>();
 
+            // F2: Vender > Lotería Nacional contra la API real (F1):
+            // dotaciones y series LIVE del billetero de la sesión.
+            builder.Services.AddTransient<MobileVentasService>();
+
             builder.Services.AddSingleton<SessionService>();
             builder.Services.AddSingleton<ISessionService>(sp => sp.GetRequiredService<SessionService>());
             builder.Services.AddSingleton<IAuthTokenProvider>(sp => sp.GetRequiredService<SessionService>());
@@ -60,6 +64,8 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Views.AgregarBoletosPage>();
             builder.Services.AddTransient<ViewModels.CarritoComprasViewModel>();
             builder.Services.AddTransient<Views.CarritoComprasPage>();
+            builder.Services.AddTransient<ViewModels.VentaExitosaLotenalViewModel>();
+            builder.Services.AddTransient<Views.VentaExitosaLotenalPage>();
             builder.Services.AddTransient<ViewModels.SorteosTecViewModel>();
             builder.Services.AddTransient<Views.SorteosTecPage>();
             builder.Services.AddTransient<ViewModels.SeleccionarBilleteViewModel>();
@@ -98,7 +104,8 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Views.TicketsVentaPage>();
             builder.Services.AddTransient<ViewModels.DetalleVentaViewModel>();
             builder.Services.AddTransient<Views.DetalleVentaPage>();
-            builder.Services.AddSingleton<Services.DevolucionService>();
+            builder.Services.AddSingleton<Services.DevolucionService>(sp =>
+                new Services.DevolucionService(sp.GetRequiredService<MobileVentasService>()));
             builder.Services.AddTransient<ViewModels.DevolucionesViewModel>();
             builder.Services.AddTransient<Views.DevolucionesPage>();
             builder.Services.AddTransient<ViewModels.ListaSorteosDevolucionViewModel>();

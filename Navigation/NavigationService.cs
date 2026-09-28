@@ -99,33 +99,34 @@ public class NavigationService : INavigationService
     }
 
     /// <summary>
-    /// Navega a SeleccionCiudadPage pasando el Id del sorteo activo y el Id
-    /// del tipo de sorteo. SeleccionCiudadViewModel los recibe vía
-    /// [QueryProperty("sorteoId")] y [QueryProperty("tipoSorteoId")].
+    /// Navega a SeleccionCiudadPage pasando la CLAVE de la dotación
+    /// (id_sorteo|numero_sorteo) y el Id del tipo de sorteo.
+    /// SeleccionCiudadViewModel los recibe vía [QueryProperty("sorteoId")]
+    /// y [QueryProperty("tipoSorteoId")].
     /// </summary>
-    public Task NavigateToSeleccionCiudadAsync(int sorteoId, int tipoSorteoId)
+    public Task NavigateToSeleccionCiudadAsync(string sorteoClave, int tipoSorteoId)
     {
         if (Shell.Current is not null)
         {
             return Shell.Current.GoToAsync(
-                $"{nameof(Views.SeleccionCiudadPage)}?sorteoId={sorteoId}&tipoSorteoId={tipoSorteoId}");
+                $"{nameof(Views.SeleccionCiudadPage)}?sorteoId={Uri.EscapeDataString(sorteoClave)}&tipoSorteoId={tipoSorteoId}");
         }
 
         return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Navega a AgregarBoletosPage pasando el Id del sorteo activo, el Id
+    /// Navega a AgregarBoletosPage pasando la clave de la dotación, el Id
     /// del tipo de sorteo y el Id de la ciudad (0 = "Cualquier ciudad").
     /// AgregarBoletosViewModel los recibe vía [QueryProperty("sorteoId")],
     /// [QueryProperty("tipoSorteoId")] y [QueryProperty("ciudadId")].
     /// </summary>
-    public Task NavigateToAgregarBoletosAsync(int sorteoId, int tipoSorteoId, int ciudadId)
+    public Task NavigateToAgregarBoletosAsync(string sorteoClave, int tipoSorteoId, int ciudadId)
     {
         if (Shell.Current is not null)
         {
             return Shell.Current.GoToAsync(
-                $"{nameof(Views.AgregarBoletosPage)}?sorteoId={sorteoId}&tipoSorteoId={tipoSorteoId}&ciudadId={ciudadId}");
+                $"{nameof(Views.AgregarBoletosPage)}?sorteoId={Uri.EscapeDataString(sorteoClave)}&tipoSorteoId={tipoSorteoId}&ciudadId={ciudadId}");
         }
 
         return Task.CompletedTask;

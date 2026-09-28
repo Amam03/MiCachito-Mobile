@@ -23,6 +23,14 @@ public class RegistroCarrito
     /// </summary>
     public int IdTienda { get; init; }
 
+    /// <summary>
+    /// SERIE de origen (IdSerie de SerieDisponible, F2): al Eliminar/Vender
+    /// se localiza la fila real de la lista 9.x / sesión compartida por
+    /// este id. IdTienda se conserva para compatibilidad con los usos
+    /// existentes.
+    /// </summary>
+    public int IdSerie { get; init; }
+
     /// <summary>Sorteo + número (ej. "SUPERIOR 2894").</summary>
     public string SorteoTexto { get; init; } = string.Empty;
 

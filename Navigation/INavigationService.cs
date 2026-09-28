@@ -44,20 +44,24 @@ public interface INavigationService
     Task NavigateToSorteosActivosAsync(int tipoSorteoId);
 
     /// <summary>
-    /// Navega a la pantalla "Seleccionar Ciudad" tras elegir un sorteo activo.
+    /// Navega a la pantalla "Seleccionar Ciudad" (pantalla 8) tras elegir
+    /// una dotación, pasando la CLAVE de la dotación (id_sorteo|numero_sorteo,
+    /// ej. "41|4024"; "41|" = legacy sin número) y el Id del tipo de sorteo.
+    /// SeleccionCiudadViewModel los recibe vía [QueryProperty("sorteoId")].
     /// </summary>
-    /// <param name="sorteoId">Id del sorteo activo seleccionado (ver SorteosActivosLotenalData).</param>
+    /// <param name="sorteoClave">Clave id_sorteo|numero_sorteo de la dotación.</param>
     /// <param name="tipoSorteoId">Id del tipo de sorteo (contexto de navegación).</param>
-    Task NavigateToSeleccionCiudadAsync(int sorteoId, int tipoSorteoId);
+    Task NavigateToSeleccionCiudadAsync(string sorteoClave, int tipoSorteoId);
 
     /// <summary>
     /// Navega a la pantalla "Agregar Boletos" (pantallas 9.1 / 9.2) tras
-    /// seleccionar la ciudad, pasando el contexto completo del flujo.
+    /// seleccionar la ciudad, pasando la clave de la dotación, el Id del tipo
+    /// de sorteo y el Id de la ciudad (0 = "Cualquier ciudad").
     /// AgregarBoletosViewModel los recibe vía [QueryProperty("sorteoId")],
     /// [QueryProperty("tipoSorteoId")] y [QueryProperty("ciudadId")].
     /// </summary>
-    /// <param name="sorteoId">Id del sorteo activo seleccionado (pantalla 7.x).</param>
+    /// <param name="sorteoClave">Clave id_sorteo|numero_sorteo de la dotación.</param>
     /// <param name="tipoSorteoId">Id del tipo de sorteo (contexto de navegación).</param>
     /// <param name="ciudadId">Id de la ciudad seleccionada (0 = "Cualquier ciudad").</param>
-    Task NavigateToAgregarBoletosAsync(int sorteoId, int tipoSorteoId, int ciudadId);
+    Task NavigateToAgregarBoletosAsync(string sorteoClave, int tipoSorteoId, int ciudadId);
 }

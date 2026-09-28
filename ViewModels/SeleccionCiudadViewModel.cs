@@ -9,14 +9,18 @@ namespace MiCachito.Mobile.ViewModels;
 
 /// <summary>
 /// ViewModel de la pantalla "Seleccionar Ciudad" (pantalla 8).
-/// Aparece tras seleccionar un sorteo activo (pantalla 7.x) y muestra
+/// Aparece tras seleccionar una dotación (pantalla 7.x) y muestra
 /// las ciudades/CEDIS donde se puede vender ese sorteo.
 ///
-/// Recibe el Id del sorteo y el Id del tipo de sorteo vía QueryProperty
-/// (navegación Shell), para mantener el contexto del flujo de venta.
+/// Recibe la CLAVE de la dotación (id_sorteo|numero_sorteo, ej.
+/// "41|4024") como string vía QueryProperty y el Id del tipo de
+/// sorteo, para mantener el contexto del flujo de venta. La clave
+/// viaja intacta a la pantalla 9.x (Agregar Boletos).
 ///
 /// REGLA DE NEGOCIO: "CUALQUIER CIUDAD" siempre es el primer elemento
 /// de la lista; después van las ciudades/CEDIS correspondientes.
+/// La ciudad es solo un PICKER operativo (P3 pendiente; ciudad fuera
+/// del MVP: la venta F3 no la persiste).
 /// </summary>
 [QueryProperty(nameof(SorteoIdStr), "sorteoId")]
 [QueryProperty(nameof(TipoSorteoIdStr), "tipoSorteoId")]
@@ -27,21 +31,21 @@ public partial class SeleccionCiudadViewModel : BaseViewModel
     [ObservableProperty]
     private ObservableCollection<CiudadCedis> _ciudades = new();
 
-    private int? _sorteoId;
+    private string? _sorteoClave;
     private int? _tipoSorteoId;
 
     /// <summary>
-    /// Id del sorteo activo seleccionado en la pantalla 7.x,
-    /// recibido vía navegación Shell (como string).
+    /// CLAVE de la dotación seleccionada en la pantalla 7.x
+    /// ("41|4024"), recibida vía navegación Shell (como string).
     /// </summary>
     public string? SorteoIdStr
     {
-        get => _sorteoId?.ToString();
+        get => _sorteoClave;
         set
         {
-            if (int.TryParse(value, out var id))
+            if (!string.IsNullOrWhiteSpace(value))
             {
-                _sorteoId = id;
+                _sorteoClave = value;
             }
         }
     }
@@ -71,7 +75,7 @@ public partial class SeleccionCiudadViewModel : BaseViewModel
 
     /// <summary>
     /// Carga las ciudades desde el catálogo mock ("CUALQUIER CIUDAD" primera).
-    /// Futuro: reemplazar por llamada a GET /api/cedis (con sede-scoping).
+    /// Pendiente P3: catálogo real de ciudades (la venta no persiste ciudad).
     /// </summary>
     private void CargarCiudades()
     {
@@ -79,10 +83,10 @@ public partial class SeleccionCiudadViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Selección de una ciudad/CEDIS para el sorteo en curso: navega a la
-    /// pantalla "Agregar Boletos" (pantallas 9.1 / 9.2) pasando el contexto
-    /// completo del flujo (sorteo + tipo + ciudad).
-    /// "Cualquier ciudad" (IdCiudad = 0) muestra todas las tiendas.
+    /// Selección de una ciudad/CEDIS para la dotación en curso: navega a la
+    /// pantalla "Agregar Boletos" (pantallas 9.1 / 9.2) pasando la clave de
+    /// la dotación + el contexto completo del flujo (tipo + ciudad).
+    /// "Cualquier ciudad" (IdCiudad = 0) muestra todas las series.
     /// </summary>
     [RelayCommand]
     private Task SeleccionarCiudadAsync(CiudadCedis? ciudad)
@@ -93,7 +97,7 @@ public partial class SeleccionCiudadViewModel : BaseViewModel
         }
 
         return _navigationService.NavigateToAgregarBoletosAsync(
-            _sorteoId ?? 0,
+            _sorteoClave ?? string.Empty,
             _tipoSorteoId ?? 0,
             ciudad.IdCiudad);
     }

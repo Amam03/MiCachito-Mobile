@@ -154,8 +154,8 @@
                     </HorizontalStackLayout>
                 </Border>
 
-                <!-- ============ LISTA DE TIENDAS / BOLETOS ============ -->
-                <!-- Normal (9.1): número + fracciones / ciudad, estado.
+                <!-- ============ LISTA DE SERIES CON FRACCIONES LIBRES ============ -->
+                <!-- Normal (9.1): número + fracciones / SERIE.
                      Zodiaco (9.2): añade la línea de SIGNO entre ambas.
                      Botón carrito oscuro a la derecha de cada fila. -->
                 <CollectionView
@@ -165,7 +165,7 @@
                     Margin="20,16,20,0">
 
                     <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="entities:TiendaDisponible">
+                        <DataTemplate x:DataType="entities:SerieDisponible">
 
                             <Border
                                 StrokeThickness="1"
@@ -712,6 +712,60 @@
                         HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
             </Border>
+
+            <!-- ============ ESTADOS DE CARGA (F2: patrón Gestión) ============ -->
+
+            <!-- Estado vacío: la dotación no tiene material LIVE hoy -->
+            <Label
+                IsVisible="{Binding SinSeries}"
+                Text="Sin billetes disponibles"
+                FontSize="15"
+                TextColor="{StaticResource McTextDark}"
+                HorizontalOptions="Center"
+                VerticalOptions="Center" />
+
+            <!-- Aviso rojo de error con botón reintentar -->
+            <VerticalStackLayout
+                IsVisible="{Binding HayError}"
+                Spacing="10"
+                Margin="20,24,20,0"
+                VerticalOptions="Start">
+                <Border
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="{StaticResource McError}"
+                    Padding="12,10"
+                    HorizontalOptions="Fill">
+                    <Label
+                        Text="{Binding MensajeError}"
+                        TextColor="White"
+                        FontSize="12"
+                        HorizontalTextAlignment="Center" />
+                </Border>
+                <Button
+                    Text="Reintentar"
+                    Command="{Binding ReintentarCommand}"
+                    BackgroundColor="{StaticResource McPrimaryMorado}"
+                    TextColor="White"
+                    FontSize="14"
+                    CornerRadius="8"
+                    HeightRequest="40"
+                    HorizontalOptions="Center"
+                    MinimumWidthRequest="140" />
+            </VerticalStackLayout>
+
+            <!-- Overlay cargando (Procesando) -->
+            <Grid
+                IsVisible="{Binding Cargando}"
+                BackgroundColor="{StaticResource McScrimBlack55}">
+                <VerticalStackLayout VerticalOptions="Center" Spacing="12">
+                    <ActivityIndicator IsRunning="True" Color="{StaticResource White}" />
+                    <Label Text="Procesando...."
+                           TextColor="{StaticResource White}"
+                           FontSize="14" FontAttributes="Bold"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Grid>
 
         </Grid>
 

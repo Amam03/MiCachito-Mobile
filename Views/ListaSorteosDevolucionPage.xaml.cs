@@ -19,6 +19,6 @@ public partial class ListaSorteosDevolucionPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        _vm.AlAparecer();
+        _ = _vm.AlAparecerCommand.ExecuteAsync(null);
     }
 }

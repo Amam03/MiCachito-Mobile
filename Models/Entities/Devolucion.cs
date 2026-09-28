@@ -39,6 +39,28 @@ public sealed class FilaDesglose
 
     /// <summary>Fecha del sorteo leída del código (validación vs sorteo elegido).</summary>
     public string? FechaSorteoCodigo { get; init; }
+
+    // ============ Campos para el POST de devolución (F4) ============
+
+    /// <summary>
+    /// Fracción/vigésimo NUMÉRICA del código (null si no trae). El backend
+    /// desambigua el billete exacto por numero_billete+serie+fracción+signo
+    /// +dotación.
+    /// </summary>
+    public int? FraccionNum { get; init; }
+
+    /// <summary>Código de signo zodiacal del código (null si no es zodiaco).</summary>
+    public string? SignoCodigo { get; init; }
+
+    /// <summary>Serie FÍSICA del código ("01"; null en zodiaco). Ojo: la columna
+    /// Serie de la tabla muestra serie o signo según el sorteo.</summary>
+    public string? SerieFisica { get; init; }
+
+    /// <summary>Dotación de la devolución en curso (billetes_loteria.numero_sorteo).</summary>
+    public string? NumeroSorteo { get; init; }
+
+    /// <summary>Id del sorteo de la devolución en curso.</summary>
+    public int IdSorteo { get; init; }
 }
 
 /// <summary>
@@ -48,6 +70,18 @@ public sealed class FilaDesglose
 public sealed class Devolucion
 {
     public int Folio { get; init; }
+
+    /// <summary>
+    /// Folio REAL del movimiento devuelto por el backend (F4,
+    /// "MA-20260928-0002"; vacío en registros de la fase UI-only).
+    /// </summary>
+    public string FolioTexto { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Estatus administrativo del movimiento ("pendiente" hasta la
+    /// liquidación en el flujo Desktop; vacío en registros UI-only).
+    /// </summary>
+    public string Estatus { get; init; } = string.Empty;
 
     /// <summary>Sorteo activo elegido (id + nombre corto para el header).</summary>
     public int IdSorteo { get; init; }

@@ -30,7 +30,11 @@ public partial class DesgloseDevolucionViewModel : BaseViewModel
         $"{NombreModo} Capturados ({Filas.Count})";
 
     /// <summary>Nombre del sorteo seleccionado (arriba de la tabla).</summary>
-    public string NombreSorteo => _devoluciones.SorteoEnCurso?.NombreCorto ?? "-";
+    public string NombreSorteo => _devoluciones.SorteoEnCurso is null
+        ? "-"
+        : string.IsNullOrEmpty(_devoluciones.SorteoEnCurso.NumeroSorteo)
+            ? _devoluciones.SorteoEnCurso.NombreProducto
+            : $"{_devoluciones.SorteoEnCurso.NombreProducto} {_devoluciones.SorteoEnCurso.NumeroSorteo}";
 
     /// <summary>Nombre legible del modo.</summary>
     public string NombreModo => Modo switch

@@ -1,71 +1,66 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Data;
 using MiCachito.Mobile.Models.Entities;
+using MiCachito.Mobile.Models.Responses;
+using MiCachito.Mobile.Services;
 
 namespace MiCachito.Mobile.ViewModels;
 
 /// <summary>
-/// ViewModel de la pantalla "Carrito de Compras" (pantalla 11), a la que
-/// se llega desde el carrito del header de Agregar Boletos.
+/// ViewModel de la pantalla "Carrito de Compras" (pantalla 11), a la
+/// que se llega desde el carrito del header de Agregar Boletos (9.x).
 ///
-/// Recibe vía QueryProperty (navegación Shell):
-///   - sorteoId: sorteo activo en curso (pantalla 7.x)
-///   - tipoSorteoId: tipo de sorteo (pantalla 6)
+/// Recibe vía QueryProperty (navegación Shell) el tipo de sorteo
+/// (pantalla 6); los registros NO vienen de navegación: se toman del
+/// almacén de sesión compartido SesionVentaLotenal (mismas instancias
+/// de SerieDisponible que la lista 9.x). Por eso Eliminar/Vender se
+/// reflejan en aquella pantalla sin recargar (INotifyPropertyChanged
+/// de SerieDisponible) y el badge se refresca al volver (OnAppearing).
 ///
-/// REGISTROS: uno por tienda con selección (Seleccionadas > 0). Se
-/// reconstruyen al ENTRAR desde el catálogo compartido (las mismas
-/// instancias que la lista 9.x): por eso Eliminar/Vender se reflejan
-/// en aquella pantalla sin recargarla (INotifyPropertyChanged de
-/// TiendaDisponible) y el badge se refresca al volver (OnAppearing).
+/// REGISTROS: uno por SERIE con selección (Seleccionadas > 0). El
+/// PRECIO por cachito es el real del backend (DotacionDisponible.
+/// PrecioFraccion de la dotación en curso) — no hay catálogo de
+/// precios local (el precio mostrado proviene del backend, F2 §5).
 ///
 /// Reglas:
-///   - Eliminar: quita el registro, descuenta de los totales y la tienda
-///     vuelve a "0/{total}" (la selección se limpia; el total disponible
-///     NO cambia).
-///   - Vender (solo estado local, sin backend): cada tienda de origen
-///     descuenta los boletos vendidos (total disponible baja), la
+///   - Eliminar: quita el registro, descuenta de los totales y la serie
+///     vuelve a "0/{total}" (la selección se limpia; el total
+///     disponible NO cambia).
+///   - Vender (solo estado local hasta F3): cada serie de origen
+///     descuenta los cachitos vendidos (TotalDisponible baja), la
 ///     selección se limpia, el carrito queda vacío y regresa a
-///     Agregar Boletos. "Los boletos pasan al inventario de la
-///     sucursal" aún no tiene representación visual (futuro backend).
-///   - Barra inferior: Cantidad = suma de boletos de todos los
+///     Agregar Boletos.
+///   - Barra inferior: Cantidad = suma de cachitos de todos los
 ///     registros; Total = suma de importes.
 /// </summary>
-[QueryProperty(nameof(SorteoIdStr), "sorteoId")]
 [QueryProperty(nameof(TipoSorteoIdStr), "tipoSorteoId")]
 public partial class CarritoComprasViewModel : BaseViewModel
 {
-    /// <summary>Ids de los tipos de sorteo zodiacales (ver SorteosLotenalData).</summary>
-    private const int TipoZodiaco = 3;
-    private const int TipoZodiacoEspecial = 4;
+    private readonly MobileVentasService _servicio;
 
     [ObservableProperty]
     private ObservableCollection<RegistroCarrito> _registros = new();
 
-    private int? _sorteoId;
+    /// <summary>True mientras se envía la venta (overlay "Procesando").</summary>
+    [ObservableProperty]
+    private bool cargando;
+
+    /// <summary>Mensaje de error de la venta (aviso rojo, reintentable).</summary>
+    [ObservableProperty]
+    private string mensajeError = string.Empty;
+
+    /// <summary>True cuando hay error visible.</summary>
+    public bool HayError => !string.IsNullOrEmpty(MensajeError);
+
     private int? _tipoSorteoId;
     private bool _cargado;
-    private SorteoActivoLotenal? _sorteo;
 
     /// <summary>
-    /// Id del sorteo activo, recibido como string vía navegación Shell.
-    /// </summary>
-    public string? SorteoIdStr
-    {
-        get => _sorteoId?.ToString();
-        set
-        {
-            if (int.TryParse(value, out var id))
-            {
-                _sorteoId = id;
-                IntentarCargar();
-            }
-        }
-    }
-
-    /// <summary>
-    /// Id del tipo de sorteo, recibido como string vía navegación Shell.
+    /// Id del tipo de sorteo, recibido como string vía navegación Shell
+    /// (solo contexto; los registros vienen de la sesión compartida).
     /// </summary>
     public string? TipoSorteoIdStr
     {
@@ -80,16 +75,15 @@ public partial class CarritoComprasViewModel : BaseViewModel
         }
     }
 
-    public CarritoComprasViewModel()
+    public CarritoComprasViewModel(MobileVentasService servicio)
     {
+        _servicio = servicio;
         Title = "Carrito de Compras";
     }
 
-    private bool EsZodiaco => _tipoSorteoId is TipoZodiaco or TipoZodiacoEspecial;
-
     // ============ Derivados (notificar con NotificarDerivadas) ============
 
-    /// <summary>Suma de boletos de todos los registros.</summary>
+    /// <summary>Suma de cachitos de todos los registros.</summary>
     public int CantidadBoletos => Registros.Sum(r => r.Cantidad);
 
     /// <summary>Suma de importes de todos los registros.</summary>
@@ -111,27 +105,20 @@ public partial class CarritoComprasViewModel : BaseViewModel
     public bool SinRegistros => Registros.Count == 0;
 
     /// <summary>
-    /// Carga los registros solo cuando los dos parámetros de navegación
-    /// están disponibles (Shell los asigna en orden indeterminado).
+    /// Carga los registros al recibir el parámetro de navegación. NO
+    /// consulta mocks: toma las series con selección del almacén de
+    /// sesión SesionVentaLotenal (mismas instancias que la lista 9.x).
     /// </summary>
     private void IntentarCargar()
     {
-        if (_cargado || _sorteoId is null || _tipoSorteoId is null)
+        if (_cargado || _tipoSorteoId is null)
         {
             return;
         }
 
         _cargado = true;
-        _sorteo = SorteosActivosLotenalData.ObtenerPorTipoId(_tipoSorteoId.Value)
-            .FirstOrDefault(s => s.IdSorteo == _sorteoId.Value);
-
-        if (_sorteo is null)
-        {
-            return;
-        }
-
-        var registros = TiendasDisponiblesData.ObtenerPorCiudad(0, EsZodiaco)
-            .Where(t => t.Seleccionadas > 0)
+        var registros = SesionVentaLotenal.Series
+            .Where(s => s.Seleccionadas > 0)
             .Select(CrearRegistro)
             .ToList();
 
@@ -140,47 +127,32 @@ public partial class CarritoComprasViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Construye el registro de una tienda: sorteo, cantidad, precio
-    /// individual y total. El precio por cachito es el PRECIO DEL
-    /// SORTEO tomado de la fuente existente (SorteosActivosLotenalData,
-    /// alineada al backend): MAYOR $30, SUPERIOR $40, ZODIACO $20,
-    /// ZODIACO ESPECIAL $35, ESPECIAL $60, GRAN ESPECIAL $250,
-    /// MAGNO $120 y GORDITO NAVIDEÑO $120. No se duplica la fuente
-    /// ni se inventa otra: se toma del catálogo ya cargado (_sorteo).
+    /// Construye el registro de una serie: sorteo, cantidad, precio
+    /// individual y total. El precio por cachito es el REAL del backend
+    /// (PrecioFraccion de la dotación en curso); el color, el mapeado
+    /// del catálogo de la pantalla 6 (DotacionDisponible.ColorHex).
+    /// SorteoTexto: "{producto} {número de dotación}" (ej. "MAYOR 4024").
     /// </summary>
-    private RegistroCarrito CrearRegistro(TiendaDisponible tienda)
+    private RegistroCarrito CrearRegistro(SerieDisponible serie)
     {
+        DotacionDisponible? dotacion = SesionVentaLotenal.Dotacion;
+        string nombre = dotacion?.NombreProducto ?? string.Empty;
+        string numero = dotacion?.NumeroSorteo ?? string.Empty;
+
         return new RegistroCarrito
         {
-            IdTienda = tienda.IdTienda,
-            SorteoTexto = $"{NombreCortoSorteo()} {NumeroDeSorteo()}",
-            TiendaTexto = tienda.DisplayName,
-            Cantidad = tienda.Seleccionadas,
-            Precio = _sorteo!.Precio,
-            ColorHex = _sorteo!.ColorHex
+            IdSerie = serie.IdSerie,
+            SorteoTexto = string.IsNullOrEmpty(numero) ? nombre : $"{nombre} {numero}",
+            TiendaTexto = serie.DisplayName,
+            Cantidad = serie.Seleccionadas,
+            Precio = dotacion?.PrecioFraccion ?? 0m,
+            ColorHex = dotacion?.ColorHex ?? "#4125F4"
         };
-    }
-
-    private string NumeroDeSorteo() => _sorteo?.NumeroSorteo ?? string.Empty;
-
-    /// <summary>
-    /// Nombre corto del sorteo para la tarjeta (ej. "SUPERIOR",
-    /// "GRAN ESPECIAL", "GORDITO NAVIDEÑO"): NombreSorteo sin el
-    /// prefijo "SORTEO ". Evita etiquetas ambiguas como
-    /// "ESPECIAL 208" para el Gran Especial.
-    /// </summary>
-    private string NombreCortoSorteo()
-    {
-        const string prefijo = "SORTEO ";
-
-        return _sorteo?.NombreSorteo.StartsWith(prefijo, StringComparison.OrdinalIgnoreCase) == true
-            ? _sorteo.NombreSorteo[prefijo.Length..]
-            : _sorteo?.NombreSorteo ?? string.Empty;
     }
 
     /// <summary>
     /// Botón Eliminar de un registro: lo quita del carrito, descuenta
-    /// su importe de los totales y la tienda vuelve a "0/{total}".
+    /// su importe de los totales y la serie vuelve a "0/{total}".
     /// </summary>
     [RelayCommand]
     private void EliminarRegistro(RegistroCarrito? registro)
@@ -190,12 +162,12 @@ public partial class CarritoComprasViewModel : BaseViewModel
             return;
         }
 
-        var tienda = TiendasDisponiblesData.ObtenerPorCiudad(0, EsZodiaco)
-            .FirstOrDefault(t => t.IdTienda == registro.IdTienda);
+        var serie = SesionVentaLotenal.Series
+            .FirstOrDefault(s => s.IdSerie == registro.IdSerie);
 
-        if (tienda is not null)
+        if (serie is not null)
         {
-            tienda.Seleccionadas = 0;
+            serie.Seleccionadas = 0;
         }
 
         Registros.Remove(registro);
@@ -203,41 +175,115 @@ public partial class CarritoComprasViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Botón Vender: por ahora SOLO estado local (sin backend). Los
-    /// boletos se descuentan del origen (el total disponible de cada
-    /// tienda baja), las selecciones se limpian, el carrito queda
-    /// vacío y regresa a Agregar Boletos. El paso "a inventario de la
-    /// sucursal" no tiene representación visual todavía.
+    /// Botón Vender — VENTA REAL (F3): junta los id_billete EXACTOS de
+    /// las fracciones libres de cada serie según la cantidad
+    /// seleccionada (una fracción = un cachito vendido) y llama a
+    /// POST api/mobile/ventas/crear. El backend resuelve vendedor
+    /// (sesión), precio (sorteos.precio_fraccion) y totales; marca los
+    /// billetes 'vendido' conservando id_billetero_actual.
+    ///
+    /// Éxito: descuenta localmente (TotalDisponible baja), limpia la
+    /// sesión de venta y navega a VentaExitosaLotenal con folio/total
+    /// reales. Error (409 ya vendido, 403 ajeno, red): aviso rojo con
+    /// el mensaje del backend + botón Reintentar; el carrito se
+    /// CONSERVA para reintentar.
     /// </summary>
     [RelayCommand]
-    private Task VenderAsync()
+    private async Task VenderAsync()
     {
-        if (Registros.Count == 0)
+        if (Registros.Count == 0 || IsBusy)
         {
-            return Task.CompletedTask;
+            return;
         }
 
+        // id_billete exactos: las primeras N fracciones libres de cada
+        // serie (N = seleccionadas de esa serie).
+        var idsBilletes = new List<int>();
         foreach (var registro in Registros)
         {
-            var tienda = TiendasDisponiblesData.ObtenerPorCiudad(0, EsZodiaco)
-                .FirstOrDefault(t => t.IdTienda == registro.IdTienda);
+            var serie = SesionVentaLotenal.Series
+                .FirstOrDefault(s => s.IdSerie == registro.IdSerie);
 
-            if (tienda is not null)
+            if (serie is null)
             {
-                tienda.TotalDisponible = Math.Max(0, tienda.TotalDisponible - registro.Cantidad);
-                tienda.Seleccionadas = 0;
+                continue;
+            }
+
+            idsBilletes.AddRange(serie.FraccionesLibres
+                .Take(serie.Seleccionadas)
+                .Select(f => f.IdBillete));
+        }
+
+        if (idsBilletes.Count == 0)
+        {
+            MensajeError = "Los boletos seleccionados ya no están disponibles. Vuelve a entrar a la dotación para actualizar.";
+            OnPropertyChanged(nameof(HayError));
+            return;
+        }
+
+        IsBusy = true;
+        Cargando = true;
+        MensajeError = string.Empty;
+        OnPropertyChanged(nameof(HayError));
+
+        try
+        {
+            VentaCreadaApi venta = await _servicio.CrearVentaAsync(idsBilletes).ConfigureAwait(true);
+
+            // Éxito: descuento local + limpieza + navegación con datos reales.
+            foreach (var registro in Registros.ToList())
+            {
+                var serie = SesionVentaLotenal.Series
+                    .FirstOrDefault(s => s.IdSerie == registro.IdSerie);
+
+                if (serie is not null)
+                {
+                    serie.TotalDisponible = Math.Max(0, serie.TotalDisponible - registro.Cantidad);
+                    serie.Seleccionadas = 0;
+                }
+            }
+
+            Registros.Clear();
+            NotificarDerivadas();
+
+            string boletos = idsBilletes.Count == 1
+                ? "1 boleto"
+                : $"{idsBilletes.Count} boletos";
+
+            if (Shell.Current is not null)
+            {
+                await Shell.Current.GoToAsync(
+                    $"{nameof(Views.VentaExitosaLotenalPage)}" +
+                    $"?folio={Uri.EscapeDataString(venta.Folio)}" +
+                    $"&total={Uri.EscapeDataString($"${venta.Total:0.00}")}" +
+                    $"&boletos={Uri.EscapeDataString(boletos)}");
             }
         }
-
-        Registros.Clear();
-        NotificarDerivadas();
-
-        if (Shell.Current is not null)
+        catch (TaskCanceledException)
         {
-            return Shell.Current.GoToAsync("..");
+            MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            OnPropertyChanged(nameof(HayError));
         }
-
-        return Task.CompletedTask;
+        catch (OperationCanceledException)
+        {
+            MensajeError = "Venta cancelada";
+            OnPropertyChanged(nameof(HayError));
+        }
+        catch (Exception ex) when (ex is HttpRequestException or IOException)
+        {
+            MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            OnPropertyChanged(nameof(HayError));
+        }
+        catch (ApiException ex)
+        {
+            MensajeError = ex.Message;
+            OnPropertyChanged(nameof(HayError));
+        }
+        finally
+        {
+            Cargando = false;
+            IsBusy = false;
+        }
     }
 
     /// <summary>

@@ -73,11 +73,25 @@
                     HorizontalOptions="Center"
                     Margin="0,60,0,0" />
 
+                <!-- Aviso rojo de error de la carga (reintentar re-entrando) -->
+                <Border
+                    IsVisible="{Binding HayError}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 8"
+                    BackgroundColor="{StaticResource McError}"
+                    Padding="12,10">
+                    <Label
+                        Text="{Binding MensajeError}"
+                        TextColor="White"
+                        FontSize="12"
+                        HorizontalTextAlignment="Center" />
+                </Border>
+
                 <VerticalStackLayout
                     Spacing="10"
                     BindableLayout.ItemsSource="{Binding Sorteos}">
                     <BindableLayout.ItemTemplate>
-                        <DataTemplate x:DataType="entities:SorteoActivoLotenal">
+                        <DataTemplate x:DataType="entities:DotacionDisponible">
                             <Border
                                 StrokeThickness="0"
                                 StrokeShape="RoundRectangle 12"
@@ -125,6 +139,20 @@
 
             </VerticalStackLayout>
         </ScrollView>
+
+        <!-- Overlay cargando (Procesando) -->
+        <Grid
+            Grid.Row="0" Grid.RowSpan="2"
+            IsVisible="{Binding Cargando}"
+            BackgroundColor="{StaticResource McScrimBlack55}">
+            <VerticalStackLayout VerticalOptions="Center" Spacing="12">
+                <ActivityIndicator IsRunning="True" Color="{StaticResource White}" />
+                <Label Text="Procesando...."
+                       TextColor="{StaticResource White}"
+                       FontSize="14" FontAttributes="Bold"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Grid>
 
     </Grid>
 
