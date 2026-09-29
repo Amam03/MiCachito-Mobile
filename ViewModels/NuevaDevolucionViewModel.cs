@@ -17,6 +17,30 @@ public partial class NuevaDevolucionViewModel : BaseViewModel
 {
     private readonly DevolucionService _devoluciones;
 
+    /// <summary>Impresión del comprobante (F6); la devolución NO se repite.</summary>
+    private readonly Services.IImpresoraService _impresora;
+
+    // ── F6: estado de impresión del comprobante de devolución ─────
+
+    /// <summary>Diálogo post-guardado con "Imprimir comprobante" (F6).</summary>
+    [ObservableProperty]
+    private bool dialogoDevolucionExitosa;
+
+    /// <summary>Mensaje de resultado de impresión (éxito/error).</summary>
+    [ObservableProperty]
+    private string mensajeImpresion = string.Empty;
+
+    /// <summary>True mientras se envía el comprobante a la impresora.</summary>
+    [ObservableProperty]
+    private bool imprimiendoComprobante;
+
+    /// <summary>True cuando hay un mensaje de impresión visible.</summary>
+    [ObservableProperty]
+    private bool hayMensajeImpresion;
+
+    /// <summary>Comprobante de la última devolución (reintento sin repetir devolución).</summary>
+    private Services.ComprobanteLotenal? _comprobanteDevolucion;
+
     /// <summary>Modo de captura activo (seleccionado entre los 3).</summary>
     [ObservableProperty]
     private ModoCapturaDevolucion modoActivo = ModoCapturaDevolucion.Series;
@@ -52,9 +76,12 @@ public partial class NuevaDevolucionViewModel : BaseViewModel
     /// <summary>Header "Nueva Devolución - N" del servicio.</summary>
     public string Titulo => _devoluciones.TituloEnCurso;
 
-    public NuevaDevolucionViewModel(DevolucionService devoluciones)
+    public NuevaDevolucionViewModel(
+        DevolucionService devoluciones,
+        Services.IImpresoraService impresora)
     {
         _devoluciones = devoluciones;
+        _impresora = impresora;
         Title = "Nueva Devolución";
     }
 
@@ -167,8 +194,16 @@ public partial class NuevaDevolucionViewModel : BaseViewModel
         OnPropertyChanged(nameof(HayError));
         try
         {
-            _ = await _devoluciones.GuardarAsync().ConfigureAwait(true);
-            await Shell.Current.GoToAsync("../..");
+            var registro = await _devoluciones.GuardarAsync().ConfigureAwait(true);
+
+            // F6: comprobante de la devolución recién creada (folio MA-
+            // real, sorteo y filas) — se arma UNA vez; reintentos de
+            // impresión reutilizan el objeto sin repetir la devolución.
+            _comprobanteDevolucion = Services.ComprobanteLotenalFactory.DesdeDevolucion(registro);
+
+            // F6: diálogo de éxito con opción Imprimir (la devolución YA
+            // está registrada en backend; la impresión es best-effort).
+            DialogoDevolucionExitosa = true;
         }
         catch (TaskCanceledException)
         {
@@ -231,5 +266,53 @@ public partial class NuevaDevolucionViewModel : BaseViewModel
     public void AlVolverDeEscaneo()
     {
         NotificarContadores();
+    }
+
+    // ── F6: impresión del comprobante de devolución ──────────────────
+
+    /// <summary>
+    /// "Imprimir comprobante" del diálogo de éxito: envía el comprobante
+    /// de la devolución YA registrada (folio MA- real) por Bluetooth
+    /// SPP/ESC-POS. Un fallo NO repite la devolución: muestra el error
+    /// con Reintentar (reusa _comprobanteDevolucion).
+    /// </summary>
+    [RelayCommand]
+    private async Task ImprimirComprobanteAsync()
+    {
+        if (ImprimiendoComprobante || _comprobanteDevolucion is null)
+        {
+            return;
+        }
+
+        ImprimiendoComprobante = true;
+        MensajeImpresion = string.Empty;
+        HayMensajeImpresion = false;
+        try
+        {
+            ResultadoImpresion r = await _impresora.ImprimirComprobanteAsync(_comprobanteDevolucion);
+            MensajeImpresion = r.Mensaje;
+            HayMensajeImpresion = true;
+        }
+        finally
+        {
+            ImprimiendoComprobante = false;
+        }
+    }
+
+    /// <summary>
+    /// "Continuar" del diálogo de éxito: cierra el diálogo y regresa al
+    /// listado de devoluciones (flujo original tras guardar).
+    /// </summary>
+    [RelayCommand]
+    private async Task ContinuarDevolucionAsync()
+    {
+        if (Shell.Current is null)
+        {
+            return;
+        }
+
+        DialogoDevolucionExitosa = false;
+        _comprobanteDevolucion = null;
+        await Shell.Current.GoToAsync("../..");
     }
 }

@@ -100,6 +100,9 @@ namespace MiCachito.Mobile
             builder.Services.AddSingleton<Services.TicketPdfService>();
             builder.Services.AddSingleton<Services.IImpresoraService>(
                 new Platforms.Android.Services.ImpresoraService());
+            // F6: selección/prueba de impresora Bluetooth.
+            builder.Services.AddTransient<ViewModels.ImpresoraViewModel>();
+            builder.Services.AddTransient<Views.ImpresoraPage>();
             builder.Services.AddTransient<ViewModels.TicketsVentaViewModel>();
             builder.Services.AddTransient<Views.TicketsVentaPage>();
             builder.Services.AddTransient<ViewModels.DetalleVentaViewModel>();

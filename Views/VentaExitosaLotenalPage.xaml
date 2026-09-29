@@ -11,80 +11,164 @@
     <!-- Patrón aprobado de VentaExitosaTec (círculo verde con check,
          botón Continuar al Home) + datos REALES de la venta (F3):
          folio, total y boletos devueltos por el backend. -->
-    <VerticalStackLayout
-        Padding="30,0,30,0"
-        Spacing="24"
-        HorizontalOptions="Center"
-        VerticalOptions="Center">
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,24,30,24"
+            Spacing="20"
+            HorizontalOptions="Center"
+            VerticalOptions="Center">
 
-        <!-- Círculo verde con check -->
-        <Border
-            StrokeThickness="0"
-            StrokeShape="RoundRectangle 48"
-            BackgroundColor="{StaticResource McGreenAccept}"
-            WidthRequest="96"
-            HeightRequest="96"
-            HorizontalOptions="Center">
-            <Image
-                Source="icon_check_blanco.svg"
-                WidthRequest="48"
-                HeightRequest="48"
-                HorizontalOptions="Center"
-                VerticalOptions="Center" />
-        </Border>
+            <!-- Círculo verde con check -->
+            <Border
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 48"
+                BackgroundColor="{StaticResource McGreenAccept}"
+                WidthRequest="96"
+                HeightRequest="96"
+                HorizontalOptions="Center">
+                <Image
+                    Source="icon_check_blanco.svg"
+                    WidthRequest="48"
+                    HeightRequest="48"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+            </Border>
 
-        <!-- Título -->
-        <Label
-            Text="Venta Exitosa"
-            FontSize="24"
-            FontAttributes="Bold"
-            FontFamily="OpenSansSemibold"
-            TextColor="{StaticResource McTextDark}"
-            HorizontalOptions="Center" />
-
-        <!-- Datos reales de la venta (backend) -->
-        <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+            <!-- Título -->
             <Label
-                Text="{Binding Folio}"
-                FontSize="16"
-                FontAttributes="Bold"
-                TextColor="{StaticResource McPrimaryMorado}"
-                HorizontalOptions="Center" />
-            <Label
-                Text="{Binding TotalTexto}"
-                FontSize="20"
+                Text="Venta Exitosa"
+                FontSize="24"
                 FontAttributes="Bold"
                 FontFamily="OpenSansSemibold"
                 TextColor="{StaticResource McTextDark}"
                 HorizontalOptions="Center" />
-            <Label
-                Text="{Binding BoletosTexto}"
-                FontSize="14"
-                TextColor="{StaticResource McGrayText}"
-                HorizontalOptions="Center" />
+
+            <!-- Datos reales de la venta (backend) -->
+            <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                <Label
+                    Text="{Binding Folio}"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    TextColor="{StaticResource McPrimaryMorado}"
+                    HorizontalOptions="Center" />
+                <Label
+                    Text="{Binding TotalTexto}"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource McTextDark}"
+                    HorizontalOptions="Center" />
+                <Label
+                    Text="{Binding BoletosTexto}"
+                    FontSize="14"
+                    TextColor="{StaticResource McGrayText}"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
+
+            <!-- Botón Imprimir comprobante (F6): imprime/reimprime el
+                 comprobante de ESTA venta; un fallo de impresión NO
+                 repite la venta (solo reenvía el texto a la impresora). -->
+            <Border
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 10"
+                BackgroundColor="{StaticResource McLotenalHeader}"
+                HeightRequest="50"
+                WidthRequest="220"
+                HorizontalOptions="Center">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ImprimirComprobanteCommand}" />
+                </Border.GestureRecognizers>
+                <Grid>
+                    <Label
+                        Text="Imprimir comprobante"
+                        FontSize="15"
+                        FontAttributes="Bold"
+                        FontFamily="OpenSansSemibold"
+                        TextColor="{StaticResource White}"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                    <ActivityIndicator
+                        IsRunning="{Binding Imprimiendo}"
+                        IsVisible="{Binding Imprimiendo}"
+                        Color="{StaticResource White}"
+                        WidthRequest="24"
+                        HeightRequest="24"
+                        HorizontalOptions="End"
+                        Margin="0,0,12,0"
+                        VerticalOptions="Center" />
+                </Grid>
+            </Border>
+
+            <!-- Botón Continuar -->
+            <Border
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 10"
+                BackgroundColor="{StaticResource McGreen}"
+                HeightRequest="50"
+                WidthRequest="200"
+                HorizontalOptions="Center">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ContinuarCommand}" />
+                </Border.GestureRecognizers>
+                <Label
+                    Text="Continuar"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    TextColor="{StaticResource White}"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+            </Border>
+
+            <!-- Mensaje de impresión (F6): éxito (Aceptar) o error
+                 (Reintentar / Seleccionar impresora). La venta YA está
+                 hecha: la impresión nunca repite la operación. -->
+            <VerticalStackLayout
+                IsVisible="{Binding HayMensajeImpresion}"
+                Spacing="8"
+                HorizontalOptions="Center">
+                <Label
+                    Text="{Binding MensajeImpresion}"
+                    FontSize="13"
+                    TextColor="{StaticResource McGrayText}"
+                    HorizontalTextAlignment="Center"
+                    MaxLines="3"
+                    LineBreakMode="WordWrap" />
+                <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                    <Button
+                        Text="Reintentar impresión"
+                        IsVisible="{Binding RequiereSeleccionImpresora}"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        BackgroundColor="{StaticResource McLotenalHeader}"
+                        TextColor="{StaticResource White}"
+                        CornerRadius="8"
+                        HeightRequest="36"
+                        Command="{Binding ImprimirComprobanteCommand}" />
+                    <Button
+                        Text="Seleccionar impresora"
+                        IsVisible="{Binding RequiereSeleccionImpresora}"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        BackgroundColor="{StaticResource McSuccess}"
+                        TextColor="{StaticResource White}"
+                        CornerRadius="8"
+                        HeightRequest="36"
+                        Command="{Binding SeleccionarImpresoraCommand}" />
+                    <Button
+                        Text="ACEPTAR"
+                        IsVisible="{Binding ImpresionExitosa}"
+                        FontSize="13"
+                        FontAttributes="Bold"
+                        BackgroundColor="{StaticResource McGrayText}"
+                        TextColor="{StaticResource White}"
+                        CornerRadius="8"
+                        HeightRequest="36"
+                        Command="{Binding CerrarMensajeImpresionCommand}" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+
         </VerticalStackLayout>
-
-        <!-- Botón Continuar -->
-        <Border
-            StrokeThickness="0"
-            StrokeShape="RoundRectangle 10"
-            BackgroundColor="{StaticResource McGreen}"
-            HeightRequest="50"
-            WidthRequest="200"
-            HorizontalOptions="Center">
-            <Border.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding ContinuarCommand}" />
-            </Border.GestureRecognizers>
-            <Label
-                Text="Continuar"
-                FontSize="16"
-                FontAttributes="Bold"
-                FontFamily="OpenSansSemibold"
-                TextColor="{StaticResource White}"
-                HorizontalOptions="Center"
-                VerticalOptions="Center" />
-        </Border>
-
-    </VerticalStackLayout>
+    </ScrollView>
 
 </ContentPage>

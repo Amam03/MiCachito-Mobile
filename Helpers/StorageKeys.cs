@@ -40,4 +40,11 @@ public static class StorageKeys
     /// Indica si el usuario pidió recordar la sesión.
     /// </summary>
     public const string RememberMe = "remember_me";
+
+    /// <summary>
+    /// DIRECCIÓN MAC de la impresora Bluetooth seleccionada (F6),
+    /// guardada en Preferences (configuración de dispositivo, NO dato
+    /// de negocio: sin tabla/migración). Formato "AA:BB:CC:DD:EE:FF".
+    /// </summary>
+    public const string ImpresoraBluetooth = "impresora_bluetooth";
 }
