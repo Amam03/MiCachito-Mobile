@@ -4,19 +4,23 @@ namespace MiCachito.Mobile.Views;
 
 public partial class SorteosTecPage : ContentPage
 {
+    private readonly SorteosTecViewModel _viewModel;
+
     public SorteosTecPage(SorteosTecViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
+        _viewModel = viewModel;
     }
 
     /// <summary>
-    /// Al volver de la 13/14 refresca el badge del carrito flotante
-    /// (agregar/eliminar billetes pudo cambiarlo).
+    /// Al aparecer, carga los sorteos TEC del billetero desde la API.
+    /// Antes la lista venía de SorteosTecData (catálogo fijo con ids
+    /// desfasados y billetes inventados que no existían en la BD).
     /// </summary>
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        (BindingContext as SorteosTecViewModel)?.AlAparecer();
+        await _viewModel.CargarAsync();
     }
 }

@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MiCachito.Mobile.Data;
+using MiCachito.Mobile.Models;
 using MiCachito.Mobile.Models.Entities;
 
 namespace MiCachito.Mobile.ViewModels;
@@ -57,34 +58,31 @@ public partial class CarritoTecViewModel : BaseViewModel
     public bool SinRegistros => Registros.Count == 0;
 
     /// <summary>
-    /// Reconstruye los registros desde el catálogo compartido: los
-    /// billetes con Agregado=true de cualquier sorteo.
+    /// Reconstruye los registros desde el carrito PERSISTIDO
+    /// (CarritoTecService). Los datos de cada boleto (nombre de sorteo y
+    /// precio) vienen guardados junto al id, así que el carrito se repinta
+    /// aunque la app se haya cerrado y los sorteos aún no se hayan recargado.
     /// </summary>
     private void CargarRegistros()
     {
-        var registros = SorteosTecData.BilletesAgregados()
-            .Select(CrearRegistro)
-            .ToList();
+        List<CarritoTecItem> itens = SorteosTecViewModel.Carrito.Billetes.ToList();
 
-        Registros = new ObservableCollection<RegistroCarritoTec>(registros);
+        Registros = new ObservableCollection<RegistroCarritoTec>(
+            itens.Select(CrearRegistro).ToList());
     }
 
     /// <summary>
-    /// Construye el registro de un billete: número, sorteo y precio
-    /// individual = precio del sorteo TAL CUAL (SorteoTec.Precio, misma
-    /// regla que la 11 pulida: no se divide ni se inventa otra fuente).
+    /// Construye el registro de un boleto del carrito persistido.
     /// </summary>
-    private RegistroCarritoTec CrearRegistro(BilleteTec billete)
+    private static RegistroCarritoTec CrearRegistro(CarritoTecItem item)
     {
-        var sorteo = SorteosTecData.ObtenerPorId(billete.IdSorteo);
-
         return new RegistroCarritoTec
         {
-            IdBillete = billete.IdBillete,
-            NumeroBillete = billete.Numero,
-            SorteoTexto = sorteo?.NombreSorteo ?? string.Empty,
-            Precio = sorteo?.Precio ?? 0m,
-            ColorHex = sorteo?.ColorHex ?? string.Empty
+            IdBillete = item.IdBillete,
+            NumeroBillete = item.Numero,
+            SorteoTexto = item.NombreSorteo,
+            Precio = item.Precio,
+            ColorHex = item.ColorHex
         };
     }
 
@@ -99,25 +97,17 @@ public partial class CarritoTecViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Botón Eliminar de un registro: lo quita del carrito y la fila de
-    /// origen pierde la pleca verde (misma instancia del catálogo).
+    /// Botón Eliminar de un registro: lo quita del carrito y de lo persistido.
     /// </summary>
     [RelayCommand]
-    private void EliminarRegistro(RegistroCarritoTec? registro)
+    private async Task EliminarRegistro(RegistroCarritoTec? registro)
     {
         if (registro is null)
         {
             return;
         }
 
-        var billete = SorteosTecData.BilletesAgregados()
-            .FirstOrDefault(b => b.IdBillete == registro.IdBillete);
-
-        if (billete is not null)
-        {
-            billete.Agregado = false;
-        }
-
+        await SorteosTecViewModel.Carrito.QuitarAsync(registro.IdBillete);
         Registros.Remove(registro);
         NotificarDerivadas();
     }

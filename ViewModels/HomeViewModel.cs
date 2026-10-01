@@ -8,6 +8,13 @@ namespace MiCachito.Mobile.ViewModels;
 public partial class HomeViewModel : BaseViewModel
 {
     private readonly ISessionService _sessionService;
+
+    /// <summary>
+    /// Carrito TEC persistido. Se inyecta para vaciarlo al cerrar sesion:
+    /// vive en SecureStorage y sobrevive al cierre de la app, asi que sin
+    /// esto el siguiente usuario del dispositivo veria los boletos ajenos.
+    /// </summary>
+    private readonly CarritoTecService _carritoTecService;
     private readonly IAuthService _authService;
     private readonly INavigationService _navigationService;
 
@@ -47,11 +54,13 @@ public partial class HomeViewModel : BaseViewModel
     public HomeViewModel(
         ISessionService sessionService,
         IAuthService authService,
-        INavigationService navigationService)
+        INavigationService navigationService,
+        CarritoTecService carritoTecService)
     {
         _sessionService = sessionService;
         _authService = authService;
         _navigationService = navigationService;
+        _carritoTecService = carritoTecService;
         Title = "Vender";
     }
 
@@ -125,6 +134,17 @@ public partial class HomeViewModel : BaseViewModel
             try
             {
                 await _sessionService.ClearAsync();
+            }
+            catch (Exception)
+            {
+            }
+
+            // El carrito TEC vive en SecureStorage: se vacía al cerrar sesión
+            // para que el siguiente usuario del dispositivo no vea (ni
+            // intente vender) los boletos del anterior.
+            try
+            {
+                await _carritoTecService.VaciarAsync();
             }
             catch (Exception)
             {

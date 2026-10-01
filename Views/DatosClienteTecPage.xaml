@@ -2,11 +2,21 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:MiCachito.Mobile.Helpers"
     x:Class="MiCachito.Mobile.Views.DatosClienteTecPage"
     Title="Datos del Cliente"
     BackgroundColor="{StaticResource White}"
     NavigationPage.HasNavigationBar="False"
     Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- Solo el converter. Los colores (McRedCancel, etc.) ya vienen
+                 de App.xaml, que hace Merge de Resources/Styles/Colors.xaml;
+                 volver a referenciarlo aqui duplica el diccionario. -->
+            <local:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*">
 
@@ -180,6 +190,18 @@
                         TitleColor="{StaticResource McPlaceholder}"
                         FontSize="16" />
                 </VerticalStackLayout>
+
+                <!-- Error de la venta: se muestra cuando el backend rechaza la
+                     venta (409 boleto ya vendido, 403 de otro billetero, 422
+                     sin precio) o se cae la red. Antes la app navegaba a
+                     "Venta Exitosa" sin registrar nada y el usuario veía un
+                     comprobante de una venta que nunca existió. -->
+                <Label
+                    Text="{Binding Error}"
+                    TextColor="{StaticResource McRedCancel}"
+                    FontSize="13"
+                    Margin="0,10,0,0"
+                    IsVisible="{Binding Error, Converter={StaticResource StringNotEmptyConverter}}" />
 
                 <!-- Botón Confirmar Venta (verde #01C853 medido) -->
                 <Border

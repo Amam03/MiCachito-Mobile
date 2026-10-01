@@ -39,6 +39,12 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<MobileVentasService>();
 
             builder.Services.AddSingleton<SessionService>();
+
+    // Carrito TEC: Singleton como SessionService, porque las pantallas 12,
+    // 13, 14 y 15 son instancias distintas del MISMO flujo y deben ver los
+    // mismos boletos. Persiste en SecureStorage para sobrevivir a que la app
+    // se cierre a mitad de la venta.
+    builder.Services.AddSingleton<CarritoTecService>();
             builder.Services.AddSingleton<ISessionService>(sp => sp.GetRequiredService<SessionService>());
             builder.Services.AddSingleton<IAuthTokenProvider>(sp => sp.GetRequiredService<SessionService>());
 

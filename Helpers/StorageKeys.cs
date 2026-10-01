@@ -47,4 +47,16 @@ public static class StorageKeys
     /// de negocio: sin tabla/migración). Formato "AA:BB:CC:DD:EE:FF".
     /// </summary>
     public const string ImpresoraBluetooth = "impresora_bluetooth";
+
+    /// <summary>
+    /// Carrito de venta TEC en curso, serializado (CarritoTecState) en
+    /// SecureStorage. Se persiste para que el carrito sobreviva a que la app
+    /// se cierre a mitad del flujo de venta.
+    ///
+    /// Guarda SOLO lo que el billetero eligió (id de boleto, número y datos
+    /// de muestra para pintar el carrito). NO es un inventario paralelo: el
+    /// estado de venta sigue siendo el de billets_loteria en el backend, y
+    /// al confirmar la venta se releen los precios desde ahí.
+    /// </summary>
+    public const string CarritoTec = "carrito_tec";
 }

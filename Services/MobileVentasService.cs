@@ -241,4 +241,113 @@ public class MobileVentasService
     }
 
     private const string RutaDevolver = "api/mobile/ventas/devolver";
+
+    // ── Sorteos TEC ─────────────────────────────────────────────────────────
+    // Rutas propias (NO las de LN): TEC no se fracciona, se vende por BOLETO
+    // COMPLETO y su precio vive en sorteos.precio_billete_completo
+    // (precio_fraccion es 0.00). Ampliar el filtro de LN a categoria 4 no
+    // serviria: la forma de la respuesta (dotaciones con numero_sorteo,
+    // series y fracciones libres) no aplica a TEC.
+    private const string RutaSorteosTec = "api/mobile/ventas/sorteos-tec";
+    private const string RutaBilletesTec = "api/mobile/ventas/billetes-tec";
+
+    /// <summary>
+    /// Sorteos TEC con material ASIGNADO al billetero de la sesión.
+    /// GET api/mobile/ventas/sorteos-tec.
+    ///
+    /// Devuelve el precio del BOLETO COMPLETO (el backend lo resuelve con
+    /// normalizarPrecioBoleto) y cuántos boletos hay disponibles, para que la
+    /// tarjeta 12 pueda mostrar el conteo real en vez del del mock.
+    ///
+    /// Los ids y precios vienen de la BD; antes salian de SorteosTecData
+    /// (catálogo fijo con ids desfasados y billetes inventados).
+    /// </summary>
+    public async Task<IReadOnlyList<SorteoTec>> SorteosTecDisponiblesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        SorteosTecApi? api = await _api
+            .GetAsync<SorteosTecApi>(RutaSorteosTec, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (api?.Sorteos is null)
+        {
+            return Array.Empty<SorteoTec>();
+        }
+
+        return api.Sorteos.Select(s => new SorteoTec
+        {
+            IdSorteo = s.IdSorteo,
+            NombreSorteo = s.NombreSorteo ?? string.Empty,
+            // El precio llega como string decimal ("490.00").
+            Precio = ParsearPrecio(s.Precio),
+            ColorHex = ColorPorSorteo(s.IdSorteo, s.NombreSorteo),
+        }).ToList();
+    }
+
+    /// <summary>
+    /// Billetes TEC disponibles del billetero de la sesión en UN sorteo.
+    /// GET api/mobile/ventas/billetes-tec?id_sorteo=
+    /// </summary>
+    public async Task<IReadOnlyList<BilleteTec>> BilletesTecDisponiblesAsync(
+        int idSorteo, CancellationToken cancellationToken = default)
+    {
+        BilletesTecApi? api = await _api
+            .GetAsync<BilletesTecApi>($"{RutaBilletesTec}?id_sorteo={idSorteo}", cancellationToken)
+            .ConfigureAwait(false);
+
+        if (api?.Billetes is null)
+        {
+            return Array.Empty<BilleteTec>();
+        }
+
+        return api.Billetes.Select(b => new BilleteTec
+        {
+            IdBillete = b.IdBillete,
+            IdSorteo = idSorteo,
+            Numero = b.NumeroBillete ?? string.Empty,
+        }).ToList();
+    }
+
+    /// <summary>
+    /// Crea la venta TEC (F3): POST api/mobile/ventas/crear con los
+    /// id_billete EXACTOS. El backend valida pertenencia, estado 'asignado' y
+    /// precio; devuelve el folio y el total REALES.
+    ///
+    /// Mismo endpoint que LN a proposito: la venta es la misma operacion, la
+    /// unica diferencia es como el backend resuelve el precio (por linea).
+    /// </summary>
+    public async Task<VentaCreadaApi> CrearVentaTecAsync(
+        IReadOnlyList<int> idsBilletes, CancellationToken cancellationToken = default)
+    {
+        if (idsBilletes.Count == 0)
+        {
+            throw new ArgumentException("La venta necesita al menos un billete.", nameof(idsBilletes));
+        }
+
+        var payload = new
+        {
+            items = idsBilletes.Select(id => new { id_billete = id }).ToArray(),
+        };
+
+        VentaCreadaApi? venta = await _api.PostAsync<VentaCreadaApi>(
+            RutaCrearVenta, payload, cancellationToken).ConfigureAwait(false);
+
+        return venta ?? throw new ApiException(
+            System.Net.HttpStatusCode.InternalServerError,
+            "El servidor no devolvió la venta creada.");
+    }
+
+    /// <summary>
+    /// Color de la tarjeta (pantalla 12). Mantiene los colores que el usuario
+    /// eligio en sep-2026 y cae a morado si aparece un sorteo nuevo, para no
+    /// inventar un color por sorteo.
+    /// </summary>
+    private static string ColorPorSorteo(int idSorteo, string? nombre) => idSorteo switch
+    {
+        18 => "#F57C00",  // Sorteo Educativo (naranja)
+        19 => "#00897B",  // Sorteo Dinero de X Vida (verde azulado)
+        20 => "#7D44B7",  // Sorteo Mi Sueño (morado)
+        21 => "#0097DC",  // Sorteo Tradicional (azul)
+        _ => "#7D44B7",
+    };
 }

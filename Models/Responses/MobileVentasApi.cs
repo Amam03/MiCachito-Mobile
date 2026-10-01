@@ -197,3 +197,97 @@ public sealed class DevolucionCreadaApi
     [JsonPropertyName("total_cachitos")]
     public int TotalCachitos { get; set; }
 }
+
+// ── Sorteos TEC ───────────────────────────────────────────────────────────────
+// Contrato de api/mobile/ventas/sorteos-tec y .../billetes-tec. Rutas
+// PROPIAS porque TEC no se fracciona: no hay dotaciones con numero_sorteo,
+// ni series, ni fracciones libres. Se vende por BOLETO COMPLETO.
+
+/// <summary>
+/// Respuesta de GET api/mobile/ventas/sorteos-tec: sorteos TEC con material
+/// asignado al billetero de la sesion (productos.id_categoria = 4).
+/// </summary>
+public sealed class SorteosTecApi
+{
+    /// <summary>Sorteos TEC disponibles, fecha descendente.</summary>
+    [JsonPropertyName("sorteos")]
+    public List<SorteoTecApi>? Sorteos { get; set; }
+}
+
+/// <summary>Fila de la lista de sorteos TEC.</summary>
+public sealed class SorteoTecApi
+{
+    /// <summary>Id del sorteo (sorteos.id_sorteo).</summary>
+    [JsonPropertyName("id_sorteo")]
+    public int IdSorteo { get; set; }
+
+    /// <summary>Nombre del sorteo tal cual la BD ("Sorteo Mi Sueño").</summary>
+    [JsonPropertyName("nombre_sorteo")]
+    public string? NombreSorteo { get; set; }
+
+    /// <summary>Fecha del sorteo ("yyyy-MM-dd").</summary>
+    [JsonPropertyName("fecha_sorteo")]
+    public string? FechaSorteo { get; set; }
+
+    /// <summary>Tipo (sorteos.tipo_sorteo = "sorteos_tec").</summary>
+    [JsonPropertyName("tipo_sorteo")]
+    public string? TipoSorteo { get; set; }
+
+    /// <summary>
+    /// Precio del BOLETO COMPLETO. Llega como STRING ("490.00"): los
+    /// decimales de MySQL viajan como string en el JSON de Yii2 (igual que
+    /// precio_fraccion en LN); se parsea en el servicio.
+    /// </summary>
+    [JsonPropertyName("precio")]
+    public string? Precio { get; set; }
+
+    /// <summary>Boletos disponibles del billetero en ese sorteo.</summary>
+    [JsonPropertyName("boletos_disponibles")]
+    public int BoletosDisponibles { get; set; }
+}
+
+/// <summary>
+/// Respuesta de GET api/mobile/ventas/billetes-tec?id_sorteo=
+/// </summary>
+public sealed class BilletesTecApi
+{
+    /// <summary>Encabezado del sorteo (nombre y precio del boleto).</summary>
+    [JsonPropertyName("sorteo")]
+    public SorteoTecEncabezadoApi? Sorteo { get; set; }
+
+    /// <summary>Boletos vendibles del billetero en ese sorteo.</summary>
+    [JsonPropertyName("billetes")]
+    public List<BilleteTecApi>? Billetes { get; set; }
+
+    /// <summary>Total de boletos disponibles.</summary>
+    [JsonPropertyName("total_billetes")]
+    public int TotalBilletes { get; set; }
+}
+
+/// <summary>Encabezado del sorteo TEC consultado.</summary>
+public sealed class SorteoTecEncabezadoApi
+{
+    /// <summary>Id del sorteo.</summary>
+    [JsonPropertyName("id_sorteo")]
+    public int IdSorteo { get; set; }
+
+    /// <summary>Nombre del sorteo.</summary>
+    [JsonPropertyName("nombre_sorteo")]
+    public string? NombreSorteo { get; set; }
+
+    /// <summary>Precio del boleto completo (string decimal).</summary>
+    [JsonPropertyName("precio")]
+    public string? Precio { get; set; }
+}
+
+/// <summary>Un boleto TEC vendible (una unidad, sin fracciones).</summary>
+public sealed class BilleteTecApi
+{
+    /// <summary>Id exacto que se envia al crear la venta.</summary>
+    [JsonPropertyName("id_billete")]
+    public int IdBillete { get; set; }
+
+    /// <summary>Numero impreso del boleto.</summary>
+    [JsonPropertyName("numero_billete")]
+    public string? NumeroBillete { get; set; }
+}

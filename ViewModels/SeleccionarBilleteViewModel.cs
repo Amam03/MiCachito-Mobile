@@ -2,7 +2,9 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MiCachito.Mobile.Data;
+using MiCachito.Mobile.Models;
 using MiCachito.Mobile.Models.Entities;
+using MiCachito.Mobile.Services;
 
 namespace MiCachito.Mobile.ViewModels;
 
@@ -15,7 +17,7 @@ namespace MiCachito.Mobile.ViewModels;
 /// billetes. El carrito del header abre la pantalla 14.
 ///
 /// El estado Agregado vive en las instancias compartidas del catálogo
-/// (SorteosTecData): se refleja en la 12/14 sin recargarlas.
+/// El estado Agregado se refleja desde el carrito compartido (CarritoTecService).
 /// </summary>
 [QueryProperty(nameof(SorteoIdStr), "sorteoId")]
 public partial class SeleccionarBilleteViewModel : BaseViewModel
@@ -47,54 +49,81 @@ public partial class SeleccionarBilleteViewModel : BaseViewModel
             if (int.TryParse(value, out var id))
             {
                 _sorteoId = id;
-                IntentarCargar();
+                _ = IntentarCargarAsync();
             }
         }
     }
 
-    public SeleccionarBilleteViewModel()
+    private readonly MobileVentasService _ventas;
+    private readonly ISessionService _session;
+
+    public SeleccionarBilleteViewModel(MobileVentasService ventas, ISessionService session)
     {
         Title = "Seleccionar Billete";
+        _ventas = ventas;
+        _session = session;
     }
-
-    private SorteoTec? Sorteo => _sorteoId is null
-        ? null
-        : SorteosTecData.ObtenerPorId(_sorteoId.Value);
 
     // ============ Derivados (notificar con NotificarDerivadas) ============
 
-    /// <summary>Badge del carrito del header: billetes agregados (todos los sorteos).</summary>
-    public string BadgeTexto => SorteosTecData.TotalAgregados().ToString();
+    /// <summary>Badge del carrito del header: boletos agregados (todos los sorteos).</summary>
+    public string BadgeTexto => SorteosTecViewModel.Carrito.Billetes.Count.ToString();
 
     /// <summary>True con al menos un billete agregado (muestra el badge).</summary>
-    public bool HayEnCarrito => SorteosTecData.TotalAgregados() > 0;
+    public bool HayEnCarrito => SorteosTecViewModel.Carrito.HayBilletes;
 
     /// <summary>True sin billetes en el sorteo (mensaje "Sin billetes disponibles").</summary>
     public bool SinBilletes => Billetes.Count == 0;
 
     /// <summary>
-    /// Carga la lista solo cuando el parámetro de navegación está disponible.
+    /// Carga la lista de boletos REALES del sorteo (api/mobile/ventas/
+    /// boletos-tec). Antes usaba SorteosTecData, cuyo catálogo fijo traía
+    /// un billete inventado por sorteo con un id que no existe en la BD:
+    /// venderlo nunca habría registrado nada.
     /// </summary>
-    private void IntentarCargar()
+    private async Task IntentarCargarAsync()
     {
-        if (_cargado || _sorteoId is null)
+        if (_cargado || _sorteoId is null || IsBusy)
         {
             return;
         }
 
         _cargado = true;
-        var sorteo = Sorteo;
-
-        if (sorteo is null)
+        IsBusy = true;
+        try
         {
-            return;
-        }
+            NombrePantalla = "Cargando...";
+            IReadOnlyList<BilleteTec> lista = await _ventas.BilletesTecDisponiblesAsync(_sorteoId.Value);
+            Billetes = new ObservableCollection<BilleteTec>(lista);
+            // Cache en memoria para que el carrito (14) pueda resolver el
+            // nombre y el precio del sorteo de cada boleto.
+            SorteosTecCatalogo.CargarBilletes(lista);
 
-        NombrePantalla = sorteo.NombreSorteo;
-        Title = sorteo.NombreSorteo;
-        Billetes = new ObservableCollection<BilleteTec>(sorteo.Billetes);
-        _cargadoEnUtc = DateTime.UtcNow;
-        NotificarDerivadas();
+            // Refleja la pleca verde en los boletos que ya estaban en el
+            // carrito persistido (p. ej. se volvió de otra pantalla).
+            foreach (BilleteTec b in Billetes)
+            {
+                b.Agregado = SorteosTecViewModel.Carrito.IdsBilletes().Contains(b.IdBillete);
+            }
+
+            // Sin nombre de sorteo en esta pantalla: el titulo real lo trae
+            // la tarjeta de la pantalla 12. Se muestra el id solo como
+            // referencia, nunca un nombre inventado.
+            NombrePantalla = $"Sorteo {_sorteoId.Value}";
+            Title = NombrePantalla;
+        }
+        catch (Exception)
+        {
+            // Red caída o sin material asignado: lista vacía, sin inventar.
+            Billetes = new ObservableCollection<BilleteTec>();
+            NombrePantalla = "Sin billetes disponibles";
+        }
+        finally
+        {
+            _cargadoEnUtc = DateTime.UtcNow;
+            IsBusy = false;
+            NotificarDerivadas();
+        }
     }
 
     /// <summary>
@@ -110,9 +139,12 @@ public partial class SeleccionarBilleteViewModel : BaseViewModel
     /// Botón de carrito de una fila: agrega el billete (pleca verde) o
     /// lo quita si ya estaba agregado. Ignora el toque durante la
     /// ventana anti tap-fantasma tras cargar.
+    ///
+    /// Persiste en SecureStorage: si la app se cierra, el boleto sigue en
+    /// el carrito al volver.
     /// </summary>
     [RelayCommand]
-    private void AgregarBillete(BilleteTec? billete)
+    private async Task AgregarBillete(BilleteTec? billete)
     {
         if (billete is null)
         {
@@ -124,7 +156,20 @@ public partial class SeleccionarBilleteViewModel : BaseViewModel
             return;
         }
 
-        billete.Agregado = !billete.Agregado;
+        SorteoTec? sorteo = SorteosTecCatalogo.ObtenerSorteo(billete.IdSorteo);
+        await SorteosTecViewModel.Carrito.AlternarAsync(
+            _session.CurrentSession?.Billetero?.IdBilletero ?? 0,
+            new CarritoTecItem
+            {
+                IdBillete = billete.IdBillete,
+                IdSorteo = sorteo?.IdSorteo ?? billete.IdSorteo,
+                Numero = billete.Numero,
+                NombreSorteo = sorteo?.NombreSorteo ?? string.Empty,
+                Precio = sorteo?.Precio ?? 0m,
+                ColorHex = sorteo?.ColorHex ?? string.Empty,
+            });
+
+        billete.Agregado = SorteosTecViewModel.Carrito.IdsBilletes().Contains(billete.IdBillete);
         NotificarDerivadas();
     }
 
