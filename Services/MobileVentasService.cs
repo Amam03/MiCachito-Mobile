@@ -3,6 +3,7 @@ using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Data;
 using MiCachito.Mobile.Helpers;
 using MiCachito.Mobile.Models.Entities;
+using MiCachito.Mobile.Models.Requests;
 using MiCachito.Mobile.Models.Responses;
 
 namespace MiCachito.Mobile.Services;
@@ -317,16 +318,37 @@ public class MobileVentasService
     /// unica diferencia es como el backend resuelve el precio (por linea).
     /// </summary>
     public async Task<VentaCreadaApi> CrearVentaTecAsync(
-        IReadOnlyList<int> idsBilletes, CancellationToken cancellationToken = default)
+        IReadOnlyList<int> idsBilletes,
+        ClienteVenta? cliente = null,
+        CancellationToken cancellationToken = default)
     {
         if (idsBilletes.Count == 0)
         {
             throw new ArgumentException("La venta necesita al menos un billete.", nameof(idsBilletes));
         }
 
+        // El cliente viaja en la MISMA peticion que los boletos. Antes se
+        // escribia en la pantalla 15 pero se descartaba al confirmar: la venta
+        // quedaba sin id_cliente y la columna Cliente del reporte de escritorio
+        // salia vacia.
+        //
+        // Es opcional: si no hay datos (pantalla saltada o nombre vacio), el
+        // backend registra la venta sin cliente en vez de inventar uno.
+        object? payloadCliente = cliente is null
+            ? null
+            : new
+            {
+                nombre = cliente.Nombre,
+                apellido_paterno = cliente.ApellidoPaterno,
+                apellido_materno = cliente.ApellidoMaterno,
+                telefono = cliente.Telefono,
+                correo = cliente.Correo,
+            };
+
         var payload = new
         {
             items = idsBilletes.Select(id => new { id_billete = id }).ToArray(),
+            cliente = payloadCliente,
         };
 
         VentaCreadaApi? venta = await _api.PostAsync<VentaCreadaApi>(

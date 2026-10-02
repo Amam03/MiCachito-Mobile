@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Data;
+using MiCachito.Mobile.Models.Requests;
 using MiCachito.Mobile.Models.Responses;
 using MiCachito.Mobile.Services;
 
@@ -68,6 +69,31 @@ public partial class DatosClienteTecViewModel : BaseViewModel
     private string? _error;
 
     /// <summary>
+    /// Datos del cliente tal como los escribio el billetero, listos para la
+    /// peticion de venta.
+    ///
+    /// Devuelve null si no hay nombre: en ese caso el backend registra la
+    /// venta sin cliente en vez de crear un registro vacio en `clientes`.
+    /// Preferimos una columna Cliente vacia a un cliente sin nombre.
+    /// </summary>
+    private ClienteVenta? cliente
+    {
+        get
+        {
+            var datos = new ClienteVenta
+            {
+                Nombre = (Nombre ?? string.Empty).Trim(),
+                ApellidoPaterno = (ApellidoPaterno ?? string.Empty).Trim(),
+                ApellidoMaterno = (ApellidoMaterno ?? string.Empty).Trim(),
+                Telefono = (Telefono ?? string.Empty).Trim(),
+                Correo = (CorreoElectronico ?? string.Empty).Trim(),
+            };
+
+            return datos.EsUtilizable ? datos : null;
+        }
+    }
+
+    /// <summary>
     /// Botón "Confirmar Venta": REGISTRA la venta en el backend
     /// (POST api/mobile/ventas/crear) con los id_billete reales del carrito,
     /// y solo si el backend confirma, vacía el carrito y abre la pantalla de
@@ -100,7 +126,12 @@ public partial class DatosClienteTecViewModel : BaseViewModel
             // La venta se registra primero. Si el backend la rechaza (409
             // boleto ya vendido, 403 ajeno, 422 sin precio) NO se navega:
             // el billetero tiene que saber que no se vendió.
-            VentaCreadaApi venta = await _ventas.CrearVentaTecAsync(ids);
+            //
+            // Los datos del cliente que se escribieron en esta pantalla se
+            // mandan ahora: antes se descartaban aqui y la venta quedaba sin
+            // id_cliente, por lo que la columna Cliente del reporte de
+            // escritorio salia vacia.
+            VentaCreadaApi venta = await _ventas.CrearVentaTecAsync(ids, cliente);
 
             FolioVenta = venta.Folio;
 
