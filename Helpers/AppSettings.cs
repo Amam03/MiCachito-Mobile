@@ -29,7 +29,7 @@ public static class AppSettings
     ///   - Backend remoto (QA/Producción) .............. http://servidor:8080/
     /// </summary>
     public static readonly string BaseUrl =
-        "http://192.168.100.56:8080/";
+        Environment.GetEnvironmentVariable("API_BASE_URL") ?? "http://10.0.2.2:8080/";
 
     /// <summary>
     /// Timeout por defecto de las peticiones HTTP.
