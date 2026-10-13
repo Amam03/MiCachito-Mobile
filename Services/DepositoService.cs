@@ -1,43 +1,80 @@
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
 
 namespace MiCachito.Mobile.Services;
 
 /// <summary>
-/// Estado en memoria del flujo Depósitos (mockups 7.x de Gestión). Fase
-/// solo-interfaz: nada se persiste; la lista arranca vacía y solo crece
-/// al guardar depósitos reales capturados por el usuario. Los catálogos
-/// (bancos) son datos del mockup, NO seeds de registros.
+/// Depósitos del billetero contra la API real (/api/mobile/depositos/*):
+/// historial (GET), registro (POST con folio servidor DEP-YYYYMMDD-NNNN y
+/// estatus 'pendiente' hasta que Caja lo valide desde Escritorio) y
+/// catálogo de cuentas bancarias activas para el selector (mismo catálogo
+/// que api/cuentas-bancarias de Desktop).
+///
+/// El id_billetero NUNCA se envía: el backend lo toma de la sesión.
+/// Lanza ApiException en errores HTTP; la red caída llega como
+/// HttpRequestException/TaskCanceled y los VMs la capturan.
 /// </summary>
 public class DepositoService
 {
+    private const string RutaDepositos = "api/mobile/depositos";
+    private const string RutaCuentas = "api/mobile/depositos/cuentas";
+
+    private readonly IApiClient _api;
+
+    public DepositoService(IApiClient api)
+    {
+        _api = api;
+    }
+
+    /// <summary>Historial de depósitos del billetero (más reciente primero).</summary>
+    public async Task<List<DepositoApi>> CargarDepositosAsync(CancellationToken cancellationToken = default)
+    {
+        List<DepositoApi>? items = await _api.GetAsync<List<DepositoApi>>(RutaDepositos, cancellationToken)
+            .ConfigureAwait(false);
+        return items ?? new List<DepositoApi>();
+    }
+
     /// <summary>
-    /// Instituciones del selector (mockup 7.2 "Seleccionar Banco"; fila 3
-    /// ilegible, definida como BBVA por el usuario). Fuente real: backend,
-    /// catálogo de cuentas bancarias (ver docs/NOTAS_DEPOSITOS.md).
+    /// Registra un depósito del billetero de la sesión. El folio y el
+    /// estatus ('pendiente') los asigna el backend.
     /// </summary>
-    public static readonly string[] Bancos =
+    /// <param name="idCuentaBancaria">Cuenta activa del selector.</param>
+    /// <param name="fechaDeposito">"yyyy-MM-dd".</param>
+    /// <param name="horaDeposito">"HH:mm" o null.</param>
+    /// <param name="monto">Monto mayor a 0.</param>
+    /// <param name="referencia">Folio/Movimiento del formulario.</param>
+    /// <param name="observaciones">Nombre del sorteo asociado.</param>
+    public async Task<DepositoCreadoApi> RegistrarDepositoAsync(
+        int idCuentaBancaria,
+        string fechaDeposito,
+        string? horaDeposito,
+        decimal monto,
+        string? referencia,
+        string? observaciones,
+        CancellationToken cancellationToken = default)
     {
-        "BANAMEX",
-        "BANCO AZTECA",
-        "BBVA",
-        "INBURSA",
-        "SANTANDER",
-    };
+        var body = new
+        {
+            id_cuenta_bancaria = idCuentaBancaria,
+            fecha_deposito = fechaDeposito,
+            hora_deposito = horaDeposito,
+            monto = monto,
+            referencia = referencia,
+            observaciones = observaciones,
+        };
 
-    private readonly List<Deposito> _depositos = new();
+        DepositoCreadoApi? creado = await _api.PostAsync<DepositoCreadoApi>(RutaDepositos, body, cancellationToken)
+            .ConfigureAwait(false);
 
-    /// <summary>Depósitos guardados (más reciente primero).</summary>
-    public IReadOnlyList<Deposito> Depositos => _depositos;
+        return creado ?? throw new ApiException(
+            System.Net.HttpStatusCode.OK, "El servidor no devolvió el depósito registrado");
+    }
 
-    /// <summary>Folio consecutivo del siguiente depósito.</summary>
-    public int SiguienteFolio => _depositos.Count + 1;
-
-    /// <summary>Registra el depósito y devuelve el folio asignado.</summary>
-    public int Guardar(Deposito deposito)
+    /// <summary>Cuentas bancarias activas para el selector de banco.</summary>
+    public async Task<List<CuentaBancariaApi>> CargarCuentasAsync(CancellationToken cancellationToken = default)
     {
-        deposito.Folio = SiguienteFolio;
-        deposito.RegistradoEnUtc = DateTime.UtcNow;
-        _depositos.Insert(0, deposito);
-        return deposito.Folio;
+        List<CuentaBancariaApi>? items = await _api.GetAsync<List<CuentaBancariaApi>>(RutaCuentas, cancellationToken)
+            .ConfigureAwait(false);
+        return items ?? new List<CuentaBancariaApi>();
     }
 }

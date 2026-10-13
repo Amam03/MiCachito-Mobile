@@ -3,8 +3,9 @@ using MiCachito.Mobile.ViewModels;
 namespace MiCachito.Mobile.Views;
 
 /// <summary>
-/// Pantalla "Depósitos" (mockups 7/7.3): listado en memoria + FAB "+".
-/// Fase solo-interfaz.
+/// Pantalla "Depósitos" (mockups 7/7.3): historial real del billetero
+/// (GET api/mobile/depositos) + FAB "+". La nube ámbar de la tarjeta
+/// corresponde a estatus 'pendiente' (sin validar por Caja).
 /// </summary>
 public partial class DepositosPage : ContentPage
 {
@@ -16,9 +17,9 @@ public partial class DepositosPage : ContentPage
         BindingContext = _vm = vm;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        _vm.AlAparecer();
+        await _vm.AlAparecerAsync();
     }
 }

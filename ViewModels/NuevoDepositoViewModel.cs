@@ -1,5 +1,7 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
 using MiCachito.Mobile.Platforms.Android.Services;
 using MiCachito.Mobile.Services;
@@ -10,18 +12,27 @@ namespace MiCachito.Mobile.ViewModels;
 /// ViewModel de "Nuevo Depósito" (mockups 7.1/7.2 de Gestión): formulario
 /// con selectores de banco/fecha/hora, folio y monto (dial-pad estilo
 /// teléfono de la pantalla 10), observaciones (nombre del sorteo),
-/// comprobante adjunto y validaciones rojas al Aceptar. Fase
-/// solo-interfaz: el registro se guarda en memoria (DepositoService).
+/// comprobante adjunto y validaciones rojas al Aceptar.
+///
+/// Integración backend (2026-09-30): el selector de banco lista las
+/// CUENTAS BANCARIAS ACTIVAS del backend (GET api/mobile/depositos/
+/// cuentas; label corto = banco) y Aceptar registra con POST
+/// api/mobile/depositos (folio servidor DEP-YYYYMMDD-NNNN, estatus
+/// 'pendiente'). El id_billetero NUNCA se envía: lo resuelve el backend
+/// de la sesión. El comprobante sigue siendo solo el nombre del archivo
+/// local (decisión: sin upload).
 /// </summary>
 public partial class NuevoDepositoViewModel : BaseViewModel
 {
     private readonly DepositoService _depositos;
 
-    /// <summary>Bancos del selector (catálogo del mockup 7.2).</summary>
-    public IReadOnlyList<string> Bancos => DepositoService.Bancos;
+    /// <summary>Id de la cuenta bancaria elegida (0 = sin selección).</summary>
+    private int _idCuentaBancaria;
 
-    // ---------- Estado del formulario ----------
+    /// <summary>Cuentas activas del backend para el selector.</summary>
+    public ObservableCollection<CuentaBancariaApi> Cuentas { get; } = new();
 
+    /// <summary>Label corto de la cuenta elegida (nombre del banco).</summary>
     [ObservableProperty]
     private string bancoSeleccionado = string.Empty;
 
@@ -95,6 +106,10 @@ public partial class NuevoDepositoViewModel : BaseViewModel
     [ObservableProperty]
     private bool avisoObservaciones;
 
+    /// <summary>Aviso de error del POST (422/HTTP); vacío = sin error.</summary>
+    [ObservableProperty]
+    private string mensajeError = string.Empty;
+
     /// <summary>True tras el primer Aceptar: los campos se revalidan al cambiar.</summary>
     private bool _validacionActiva;
 
@@ -128,6 +143,50 @@ public partial class NuevoDepositoViewModel : BaseViewModel
         Title = "Nuevo Depósito";
     }
 
+    /// <summary>Carga el catálogo real de cuentas al aparecer la página.</summary>
+    public async Task AlAparecerAsync()
+    {
+        MensajeError = string.Empty;
+        if (Cuentas.Count == 0)
+        {
+            try
+            {
+                try
+                {
+                    List<CuentaBancariaApi> cuentas = await _depositos.CargarCuentasAsync();
+                    Cuentas.Clear();
+                    foreach (CuentaBancariaApi c in cuentas)
+                    {
+                        Cuentas.Add(c);
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                    MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+                }
+                catch (OperationCanceledException)
+                {
+                    MensajeError = "Consulta cancelada";
+                }
+                catch (Exception ex) when (ex is HttpRequestException or IOException)
+                {
+                    MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+                }
+                catch (ApiException ex)
+                {
+                    MensajeError = $"No se pudo cargar el catálogo de bancos: {ex.Message}";
+                }
+            }
+            finally
+            {
+                OnPropertyChanged(nameof(HayErrorCatalogo));
+            }
+        }
+    }
+
+    /// <summary>True con error del catálogo (muestra el aviso rojo arriba del form).</summary>
+    public bool HayErrorCatalogo => !string.IsNullOrEmpty(MensajeError);
+
     partial void OnFolioMovimientoChanged(string value) => NotificarEstado();
     partial void OnObservacionesChanged(string value) => NotificarEstado();
 
@@ -153,7 +212,7 @@ public partial class NuevoDepositoViewModel : BaseViewModel
             return;
         }
 
-        AvisoBanco = string.IsNullOrWhiteSpace(BancoSeleccionado);
+        AvisoBanco = _idCuentaBancaria <= 0;
         AvisoFecha = FechaDeposito is null;
         AvisoHora = HoraDeposito is null;
         AvisoFolio = string.IsNullOrWhiteSpace(FolioMovimiento);
@@ -181,9 +240,15 @@ public partial class NuevoDepositoViewModel : BaseViewModel
     }
 
     [RelayCommand]
-    private void SeleccionarBanco(string banco)
+    private void SeleccionarBanco(CuentaBancariaApi? cuenta)
     {
-        BancoSeleccionado = banco;
+        if (cuenta is null)
+        {
+            return;
+        }
+
+        _idCuentaBancaria = cuenta.IdCuenta;
+        BancoSeleccionado = cuenta.Banco;
         SelectorBancoVisible = false;
         NotificarEstado();
     }
@@ -326,12 +391,20 @@ public partial class NuevoDepositoViewModel : BaseViewModel
     // ---------- Validación y guardado ----------
 
     /// <summary>Aceptar: valida; si falta algo muestra los avisos rojos
-    /// (mockup 7.2) y NO guarda. Completo: guarda y regresa al listado.</summary>
+    /// (mockup 7.2) y NO guarda. Completo: POST api/mobile/depositos y
+    /// regresa al listado (que recarga al aparecer).</summary>
     [RelayCommand]
     private async Task AceptarAsync()
     {
+        if (IsBusy)
+        {
+            return;
+        }
+
         _validacionActiva = true;
         NotificarEstado();
+        MensajeError = string.Empty;
+        OnPropertyChanged(nameof(HayErrorCatalogo));
 
         if (AvisoBanco || AvisoFecha || AvisoHora || AvisoFolio
             || AvisoMonto || AvisoObservaciones)
@@ -339,20 +412,47 @@ public partial class NuevoDepositoViewModel : BaseViewModel
             return;
         }
 
-        _depositos.Guardar(new Deposito
+        IsBusy = true;
+        try
         {
-            Banco = BancoSeleccionado,
-            FechaDeposito = FechaDeposito!.Value,
-            HoraDeposito = HoraDeposito!.Value,
-            FolioMovimiento = FolioMovimiento.Trim(),
-            Monto = MontoValor,
-            Observaciones = Observaciones.Trim(),
-            NombreComprobante = string.IsNullOrWhiteSpace(NombreComprobante) ? null : NombreComprobante,
-        });
+            DepositoCreadoApi creado = await _depositos.RegistrarDepositoAsync(
+                _idCuentaBancaria,
+                FechaDeposito!.Value.ToString("yyyy-MM-dd"),
+                $"{HoraDeposito!.Value:hh\\:mm}",
+                MontoValor,
+                FolioMovimiento.Trim(),
+                Observaciones.Trim());
 
-        if (Shell.Current is not null)
+            _ = creado; // folio/estatus los muestra el listado al recargar
+
+            if (Shell.Current is not null)
+            {
+                await Shell.Current.GoToAsync("..");
+            }
+        }
+        catch (TaskCanceledException)
         {
-            await Shell.Current.GoToAsync("..");
+            MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            OnPropertyChanged(nameof(HayErrorCatalogo));
+        }
+        catch (OperationCanceledException)
+        {
+            MensajeError = "Consulta cancelada";
+            OnPropertyChanged(nameof(HayErrorCatalogo));
+        }
+        catch (Exception ex) when (ex is HttpRequestException or IOException)
+        {
+            MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            OnPropertyChanged(nameof(HayErrorCatalogo));
+        }
+        catch (ApiException ex)
+        {
+            MensajeError = $"No se pudo registrar el depósito: {ex.Message}";
+            OnPropertyChanged(nameof(HayErrorCatalogo));
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 

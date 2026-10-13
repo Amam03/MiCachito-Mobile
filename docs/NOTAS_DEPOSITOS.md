@@ -1,8 +1,10 @@
 # Notas de negocio — Depósitos (mockups 7.x, pestaña Gestión)
 
-Fase: SOLO INTERFAZ. Estado en memoria (`Services/DepositoService.cs`), sin
-backend, sin BD, sin seeds. Los datos de los mockups (bancos, fechas,
-montos) son referencias visuales, no datos reales.
+Fase: INTEGRADO (2026-09-30) contra `/api/mobile/depositos/*`
+(backend `controllers/api/mobile/DepositosController.php`): historial GET,
+registro POST con folio servidor `DEP-YYYYMMDD-NNNN` (`generarFolio()`) y
+estatus 'pendiente' hasta que Caja lo valida desde Escritorio, catálogo de
+cuentas activas GET `.../cuentas`. La entidad mock `Deposito` fue retirada.
 
 ## Flujo implementado
 
@@ -23,8 +25,12 @@ montos) son referencias visuales, no datos reales.
    muestra el aviso "Indica el sorteo del depósito" (#E60000). El usuario
    definió (decisión 3a): TODOS los obligatorios muestran aviso.
    El comprobante es OPCIONAL (decisión por default no confirmada).
-4. **Aceptar** guarda en memoria con folio consecutivo local desde 1 y
-   regresa al listado. **Cancelar** regresa sin guardar.
+4. **Aceptar** registra con POST `api/mobile/depositos` (folio servidor
+   `DEP-YYYYMMDD-NNNN`, estatus 'pendiente', id_billetero tomado de la
+   sesión) y regresa al listado, que recarga. **Cancelar** regresa sin
+   guardar. El selector de banco lista las cuentas activas del backend
+   (label corto = banco). Estado vacío/error/overlay al cargar, error de
+   catálogo/registro arriba del formulario (patrón Recibos de Pago).
 
 ## Decisiones del usuario (2026-09-09)
 
@@ -44,24 +50,27 @@ montos) son referencias visuales, no datos reales.
 | Monto | 20 caracteres, 2 decimales | monto number (sin tope en reglas) |
 | Observaciones (nombre del sorteo) | 50 | observaciones string (sin tope) |
 
-El backend exige `tipo_deposito` (efectivo|cheque|transferencia) y
-`estatus` (pendiente|validado|rechazado|utilizado) que la UI aún no
-captura — al integrar, definir de dónde salen (¿tipo desde el banco?
-estatus inicia "pendiente" como la nube ámbar).
+Resuelto en la integración: `tipo_deposito` fijo 'transferencia'
+(sin selector en la UI — decisión 1) y `estatus` inicia 'pendiente';
+lo valida Caja desde Escritorio (pendiente → validado|rechazado;
+validado → utilizado).
 
 ## Catálogos que deben venir del backend
 
-- **Bancos**: la fuente real es `cuentas_bancarias.banco` (backend
-  Yii2), no una lista fija. El selector actual usa el catálogo del
+- **Bancos**: RESUELTO — el selector lista las cuentas activas de
+  `cuentas_bancarias` vía GET `api/mobile/depositos/cuentas`
+  (label = banco, selección por id_cuenta). Ya NO usa el catálogo del
   mockup (BANAMEX, BANCO AZTECA, BBVA, INBURSA, SANTANDER).
-- **Folio**: consecutivo local solo para UI; el real es
-  `folio_deposito` único generado por el backend (regla `unique`).
+- **Folio**: RESUELTO — folio servidor `DEP-YYYYMMDD-NNNN` generado
+  por `DepositosBancarios::generarFolio()`; ya NO hay consecutivo
+  local.
 
 ## Sincronización
 
-- Icono nube ámbar = registro local pendiente de sincronizar. Al
-  integrar: POST del depósito + imagen (`imagen_deposito` en backend,
-  nombre de archivo/ruta), y la nube cambia a "sincronizado" (verde o
-  check) al confirmar el backend. El estatus del depósito en backend
-  ("pendiente") lo valida alguien más ("validado_por",
-  "fecha_validacion").
+- RESUELTO: el registro es POST síncrono al backend (no hay cola local).
+  Icono nube ámbar = depósito con estatus 'pendiente' (aún sin validar
+  por Caja desde Escritorio); desaparece cuando Caja lo mueve a
+  validado/rechazado/utilizado. La imagen del comprobante NO se envía
+  ni se guarda (decisión 3: no existe infraestructura de upload en
+  ningún canal — 0 filas con imagen en BD); la UI conserva solo el
+  nombre del archivo local.
