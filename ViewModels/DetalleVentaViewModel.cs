@@ -1,18 +1,21 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
+using MiCachito.Mobile.Models.Responses;
 using MiCachito.Mobile.Services;
 
 namespace MiCachito.Mobile.ViewModels;
 
 /// <summary>
-/// ViewModel del "Detalle de Venta" (mockup 5.1): datos del movimiento
-/// según tipo (LOTENAL/Tec: producto, boleto, valor; Tiempo Aire:
-/// compañía, teléfono, monto/paquete) + acciones Imprimir y Compartir.
-/// Recibe el folio vía [QueryProperty] y carga en AlAparecer (patrón
-/// del proyecto). Fase SOLO INTERFAZ.
+/// ViewModel del "Detalle de Venta" (mockup 5.1): datos de la venta REAL
+/// (GET api/mobile/ventas/{id}) según tipo (LOTENAL/Tec: producto,
+/// boleto, valor; Tiempo Aire: compañía, teléfono, monto/paquete) +
+/// acciones Imprimir y Compartir. Recibe el id_venta vía [QueryProperty]
+/// y carga en AlAparecerAsync (patrón del proyecto). 404 si la venta es
+/// ajena: se muestra el aviso y no se navega a datos de otro billetero.
 /// </summary>
-[QueryProperty(nameof(FolioQuery), "folio")]
+[QueryProperty(nameof(IdQuery), "id")]
 public partial class DetalleVentaViewModel : BaseViewModel
 {
     private readonly TicketsVentaService _tickets;
@@ -23,8 +26,16 @@ public partial class DetalleVentaViewModel : BaseViewModel
     [ObservableProperty]
     private MovimientoVenta? movimiento;
 
-    /// <summary>Folio recibido por navegación Shell (string).</summary>
-    public string? FolioQuery { get; set; }
+    /// <summary>Id de venta recibido por navegación Shell (string).</summary>
+    public string? IdQuery { get; set; }
+
+    [ObservableProperty]
+    private bool cargando;
+
+    [ObservableProperty]
+    private string mensajeError = string.Empty;
+
+    public bool HayError => !string.IsNullOrEmpty(MensajeError);
 
     public DetalleVentaViewModel(
         TicketsVentaService tickets,
@@ -37,11 +48,57 @@ public partial class DetalleVentaViewModel : BaseViewModel
         Title = "Detalle de Venta";
     }
 
-    /// <summary>Carga el movimiento al aparecer la página.</summary>
-    public void AlAparecer()
+    /// <summary>Carga la venta real al aparecer la página.</summary>
+    public async Task AlAparecerAsync()
     {
-        int folio = int.TryParse(FolioQuery, out int f) ? f : 0;
-        Movimiento = _tickets.ObtenerPorFolio(folio);
+        if (Cargando)
+        {
+            return;
+        }
+
+        Cargando = true;
+        MensajeError = string.Empty;
+        try
+        {
+            try
+            {
+                if (!int.TryParse(IdQuery, out int id) || id <= 0)
+                {
+                    MensajeError = "Venta no válida";
+                    return;
+                }
+
+                VentaDetalleApi detalle = await _tickets.CargarDetalleAsync(id);
+                Movimiento = MovimientoVenta.DesdeDetalle(detalle);
+            }
+            catch (TaskCanceledException)
+            {
+                MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            }
+            catch (OperationCanceledException)
+            {
+                MensajeError = "Consulta cancelada";
+            }
+            catch (Exception ex) when (ex is HttpRequestException or IOException)
+            {
+                MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            }
+            catch (ApiException ex)
+            {
+                MensajeError = $"No se pudo cargar la venta: {ex.Message}";
+            }
+        }
+        finally
+        {
+            Cargando = false;
+            OnPropertyChanged(nameof(HayError));
+            NotificarDerivadas();
+        }
+    }
+
+    /// <summary>Notifica las propiedades derivadas del movimiento.</summary>
+    private void NotificarDerivadas()
+    {
         OnPropertyChanged(nameof(Cliente));
         OnPropertyChanged(nameof(ImporteText));
         OnPropertyChanged(nameof(ProductoOCompania));
@@ -72,7 +129,7 @@ public partial class DetalleVentaViewModel : BaseViewModel
             ? "Producto / Sorteo"
             : "Compañía";
 
-    /// <summary>Boleto o teléfono según tipo.</summary>
+    /// <summary>Boleto(s) o teléfono según tipo.</summary>
     public string DatoPrincipal =>
         Movimiento?.Tipo is TipoVenta.Lotenal or TipoVenta.SorteosTec
             ? Movimiento.Boleto ?? string.Empty

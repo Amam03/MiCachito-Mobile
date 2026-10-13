@@ -1,97 +1,56 @@
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
+using MiCachito.Mobile.Models.Responses;
 
 namespace MiCachito.Mobile.Services;
 
 /// <summary>
-/// Servicio del flujo Tickets de Venta (mockups 5, 5.1, 5.2 de Gestión).
-/// Mantiene los movimientos de venta EN MEMORIA (patrón Premios y
-/// Reintegros): fase SOLO INTERFAZ con 3 movimientos TEMPORALES de
-/// prueba (uno por tipo) para probar listado, detalle, PDF, compartir
-/// e impresión. NO son seeds ni mocks permanentes — la fuente real de
-/// las ventas será el backend (ver docs/NOTAS_TICKETS_VENTA.md).
+/// Servicio del flujo Tickets de Venta (Gestión, mockups 5, 5.1, 5.2) contra
+/// la API real: historial (GET api/mobile/ventas) y detalle (GET
+/// api/mobile/ventas/{id}) de las ventas del billetero de la sesión.
+///
+/// El id_billetero NUNCA se envía: el backend lo toma de la sesión y el
+/// detalle de una venta ajena responde 404. Lanza ApiException en errores
+/// HTTP; la red caída llega como HttpRequestException/TaskCanceled y los
+/// VMs la capturan (patrón Depósitos).
+///
+/// ANTES: 3 movimientos TEMPORALES en memoria (fase solo-interfaz). La
+/// fuente real ES este servicio: las ventas que registra POST
+/// api/mobile/ventas/crear (LOTENAL y Sorteos Tec) son las que aparecen
+/// aquí (ver docs/NOTAS_TICKETS_VENTA.md).
 /// </summary>
 public class TicketsVentaService
 {
-    private readonly List<MovimientoVenta> _movimientos = [];
+    private readonly IApiClient _api;
 
-    /// <summary>Movimientos de venta (descendente por fecha).</summary>
-    public IReadOnlyList<MovimientoVenta> Movimientos()
+    public TicketsVentaService(IApiClient api)
     {
-        if (_movimientos.Count == 0)
-        {
-            CrearMovimientosPrueba();
-        }
-        return _movimientos.OrderByDescending(m => m.Fecha).ToList();
+        _api = api;
     }
 
-    /// <summary>Movimiento por folio (navegación al detalle).</summary>
-    public MovimientoVenta? ObtenerPorFolio(int folio) =>
-        Movimientos().FirstOrDefault(m => m.Folio == folio);
+    /// <summary>Historial de ventas del billetero (más reciente primero).</summary>
+    public async Task<List<VentaHistorialApi>> CargarVentasAsync(CancellationToken cancellationToken = default)
+    {
+        List<VentaHistorialApi>? items = await _api
+            .GetAsync<List<VentaHistorialApi>>(ApiEndpoints.MobileVentasHistorial.Historial, cancellationToken)
+            .ConfigureAwait(false);
+        return items ?? new List<VentaHistorialApi>();
+    }
 
     /// <summary>
-    /// Crea los 3 movimientos TEMPORALES de prueba (uno por tipo).
-    /// Datos verbatim del mockup 5.2 (venta Tec) y defaults aprobados
-    /// por el usuario para Lotenal y Tiempo Aire.
+    /// Detalle de UNA venta del billetero de la sesión (404 si es ajena).
     /// </summary>
-    private void CrearMovimientosPrueba()
+    /// <param name="idVenta">ventas.id_venta (clave de navegación).</param>
+    public async Task<VentaDetalleApi> CargarDetalleAsync(int idVenta, CancellationToken cancellationToken = default)
     {
-        // 1) Sorteos Tec — verbatim del PDF 5.2 (capa de texto)
-        _movimientos.Add(new MovimientoVenta
-        {
-            Folio = 5369,
-            Tipo = TipoVenta.SorteosTec,
-            Fecha = new DateOnly(2023, 9, 1),
-            Cliente = "MAURICIO LOPEZ GONZALEZ",
-            Importe = 180m,
-            Descripcion = "AVENTURAT ELECTRONICO 27",
-            Sorteo = "AVENTURAT ELECTRONICO 27",
-            Boleto = "67066",
-            Valor = 180m,
-            Plaza = "PUEBLA",
-            Cedis = "CEDIS PUEBLA",
-            Vendedor = "MAURICIO LOPEZ GONZALEZ",
-            ClienteNombrePdf = "María Eugenia abrajan aparicio",
-            ClienteTelefonoPdf = "2228736476",
-            ClienteCorreoPdf = "maru.abrajan@hotmail.es",
-            FolioCompraTec = "7448622",
-            FechaHoraMovimiento = new DateTime(2026, 9, 4, 11, 12, 51),
-        });
+        VentaDetalleApi? detalle = await _api
+            .GetAsync<VentaDetalleApi>(
+                string.Format(System.Globalization.CultureInfo.InvariantCulture, ApiEndpoints.MobileVentasHistorial.Detalle, idVenta),
+                cancellationToken)
+            .ConfigureAwait(false);
 
-        // 2) LOTENAL — sorteo MAYOR 4024 del catálogo (11-ago-2026, $30)
-        _movimientos.Add(new MovimientoVenta
-        {
-            Folio = 5569,
-            Tipo = TipoVenta.Lotenal,
-            Fecha = new DateOnly(2026, 8, 11),
-            Cliente = "PÚBLICO EN GENERAL",
-            Importe = 30m,
-            Descripcion = "SORTEO MAYOR 4024",
-            Sorteo = "SORTEO MAYOR 4024",
-            Boleto = "47727",
-            Valor = 30m,
-            Plaza = "PUEBLA",
-            Cedis = "CEDIS PUEBLA",
-            Vendedor = "MAURICIO LOPEZ GONZALEZ",
-            FechaHoraMovimiento = new DateTime(2026, 8, 11, 10, 30, 0),
-        });
-
-        // 3) Tiempo Aire — Telcel RECARGA $30 del catálogo
-        _movimientos.Add(new MovimientoVenta
-        {
-            Folio = 961,
-            Tipo = TipoVenta.TiempoAire,
-            Fecha = new DateOnly(2026, 9, 5),
-            Cliente = "PÚBLICO EN GENERAL",
-            Importe = 30m,
-            Descripcion = "Tiempo Aire Electrónico",
-            Compania = "Telcel",
-            Telefono = "2228736476",
-            MontoPaquete = "$30 RECARGA",
-            ClienteTelefonoPdf = "2228736476",
-            Plaza = "PUEBLA",
-            Cedis = "CEDIS PUEBLA",
-            Vendedor = "MAURICIO LOPEZ GONZALEZ",
-            FechaHoraMovimiento = new DateTime(2026, 9, 5, 9, 15, 0),
-        });
+        return detalle ?? throw new ApiException(
+            System.Net.HttpStatusCode.OK,
+            "El servidor no devolvió el detalle de la venta");
     }
 }

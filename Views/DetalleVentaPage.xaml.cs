@@ -3,9 +3,9 @@ using MiCachito.Mobile.ViewModels;
 namespace MiCachito.Mobile.Views;
 
 /// <summary>
-/// Pantalla "Detalle de Venta" (mockup 5.1): datos del movimiento
-/// según tipo + acciones Imprimir (Bluetooth) y Compartir (PDF).
-/// Fase SOLO INTERFAZ.
+/// Pantalla "Detalle de Venta" (mockup 5.1): datos de la venta REAL (GET
+/// api/mobile/ventas/{id}) según tipo + acciones Imprimir (Bluetooth) y
+/// Compartir (PDF).
 /// </summary>
 public partial class DetalleVentaPage : ContentPage
 {
@@ -17,9 +17,9 @@ public partial class DetalleVentaPage : ContentPage
         BindingContext = _vm = vm;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        _vm.AlAparecer();
+        await _vm.AlAparecerAsync();
     }
 }

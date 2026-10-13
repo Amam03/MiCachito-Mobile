@@ -1,5 +1,6 @@
 using SkiaSharp;
 using MiCachito.Mobile.Models.Entities;
+using MiCachito.Mobile.Models.Responses;
 
 namespace MiCachito.Mobile.Services;
 
@@ -72,8 +73,9 @@ public class TicketPdfService
         DibujarCentrado(canvas, fuenteTitulo, "Ticket de Venta", y);
         y += 22f;
 
-        // ── Plaza | CEDIS ─────────────────────────────────────────────
-        DibujarCentrado(canvas, fuenteNormal, $"{movimiento.Plaza}    {movimiento.Cedis}", y);
+        // ── CEDIS (D1: sin Plaza — no existe ciudad del CEDIS en la BD y no
+        // se inventa; el comprobante lleva el CEDIS emisor real) ────────
+        DibujarCentrado(canvas, fuenteNormal, movimiento.Cedis, y);
         y += Linea;
 
         // ── Vendedor ──────────────────────────────────────────────────
@@ -115,7 +117,9 @@ public class TicketPdfService
 
         // ── Tabla de desglose ─────────────────────────────────────────
         // Columnas del PDF de referencia (x en pt): Sorteo 34.5,
-        // Boleto 361.2, Precio 544.8 (right-aligned ~578)
+        // Boleto 361.2, Precio 544.8 (right-aligned ~578).
+        // D2: UNA FILA POR PARTIDA de la venta (las ventas reales traen
+        // 1-3 partidas; el detalle de cada fila sale de sus datos reales).
         bool esTecOLotenal = movimiento.Tipo is TipoVenta.SorteosTec or TipoVenta.Lotenal;
 
         if (esTecOLotenal)
@@ -125,10 +129,34 @@ public class TicketPdfService
             DibujarDerecha(canvas, fuenteNegrita, "Precio", 578.5f, y);
             y += Linea + 4f;
 
-            DibujarTexto(canvas, fuenteNormal, movimiento.Sorteo ?? string.Empty, 33.7f, y);
-            DibujarTexto(canvas, fuenteNormal, movimiento.Boleto ?? string.Empty, 360.4f, y);
-            DibujarDerecha(canvas, fuenteNormal, $"${movimiento.Valor ?? movimiento.Importe:0.00}", 578.2f, y);
-            y += Linea + 6f;
+            if (movimiento.Partidas is { Count: > 0 } partidas)
+            {
+                foreach (PartidaVentaApi p in partidas)
+                {
+                    string boleto = p.NumeroBillete ?? "—";
+                    if (!string.IsNullOrEmpty(p.Serie))
+                    {
+                        boleto += $" / {p.Serie}";
+                    }
+                    if (!string.IsNullOrEmpty(p.Signo))
+                    {
+                        boleto += $" / {p.Signo}";
+                    }
+                    DibujarTexto(canvas, fuenteNormal, p.NombreSorteo ?? string.Empty, 33.7f, y);
+                    DibujarTexto(canvas, fuenteNormal, boleto, 360.4f, y);
+                    DibujarDerecha(canvas, fuenteNormal, $"${p.PrecioUnitario:0.00}", 578.2f, y);
+                    y += Linea;
+                }
+            }
+            else
+            {
+                // Fallback (movimiento sin partidas cargadas — historial):
+                // una sola fila con los datos agregados del movimiento.
+                DibujarTexto(canvas, fuenteNormal, movimiento.Sorteo ?? string.Empty, 33.7f, y);
+                DibujarTexto(canvas, fuenteNormal, movimiento.Boleto ?? string.Empty, 360.4f, y);
+                DibujarDerecha(canvas, fuenteNormal, $"${movimiento.Valor ?? movimiento.Importe:0.00}", 578.2f, y);
+            }
+            y += 6f;
         }
         else
         {
@@ -148,30 +176,12 @@ public class TicketPdfService
         DibujarDerecha(canvas, fuenteNegrita, $"${movimiento.Importe:0.00}", 578.2f, y);
         y += Linea + 10f;
 
-        // ── Info adicional (Sorteos Tec) ──────────────────────────────
-        if (movimiento.Tipo == TipoVenta.SorteosTec
-            && !string.IsNullOrEmpty(movimiento.FolioCompraTec))
-        {
-            DibujarTexto(
-                canvas,
-                fuenteNormal,
-                $"Folio de Compra de Sorteos Tec: {movimiento.FolioCompraTec}",
-                36f,
-                y);
-            y += Linea + 2f;
-
-            // Leyenda de certificados (2 líneas, ancho completo)
-            y = DibujarParrafo(
-                canvas,
-                fuenteNormal,
-                "Los certificados digitales de los boletos comprados serán "
-                + "enviados al correo electrónico que aparece en la sección "
-                + "DATOS DEL CLIENTE tan pronto como Sorteos Tec los emita.",
-                34f,
-                578f,
-                y);
-            y += 8f;
-        }
+        // ── Info adicional (Sorteos Tec): D4, OMITIDA ──────────────────
+        // El folio de compra de Sorteos Tec NO existe ni en la BD ni en
+        // el backend (grep global = 0): la línea "Folio de Compra de
+        // Sorteos Tec: N" y la leyenda de certificados del mockup 5.2 se
+        // omiten por completo. Si algún día el proveedor devuelve ese
+        // folio, se re-agrega aquí ( MovimientoVenta.FolioCompraTec ).
 
         // ── GRACIAS POR SU COMPRA ─────────────────────────────────────
         DibujarCentrado(canvas, fuenteNegrita, "GRACIAS POR SU COMPRA", y);

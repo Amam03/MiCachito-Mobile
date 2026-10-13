@@ -3,10 +3,19 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:entities="clr-namespace:MiCachito.Mobile.Models.Entities"
+    xmlns:local="clr-namespace:MiCachito.Mobile.Helpers"
     xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
     x:Class="MiCachito.Mobile.Views.TicketsVentaPage"
     x:DataType="vm:TicketsVentaViewModel"
     Shell.NavBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- Solo el converter (patrón DatosClienteTecPage); los colores ya
+                 vienen de App.xaml (merge de Resources/Styles/Colors.xaml). -->
+            <local:StringNotEmptyConverter x:Key="StringNotEmptyConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*" RowSpacing="0">
 
@@ -76,6 +85,34 @@
         <!-- ============ Lista de ventas ============ -->
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="10" Padding="14,14,14,24">
+
+                <!-- Error de carga (patrón Depósitos: reintentar re-entrando) -->
+                <Border
+                    IsVisible="{Binding HayError}"
+                    StrokeThickness="0"
+                    BackgroundColor="#FDE8E8"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="12,10">
+                    <Label
+                        Text="{Binding MensajeError}"
+                        TextColor="#B3261E"
+                        FontSize="13"
+                        HorizontalOptions="FillAndExpand" />
+                </Border>
+
+                <!-- Estado vacío (sin ventas del tipo filtrado) -->
+                <Border
+                    IsVisible="{Binding EstaVacio}"
+                    StrokeThickness="0"
+                    BackgroundColor="White"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="12,16">
+                    <Label
+                        Text="{Binding MensajeVacio}"
+                        TextColor="{StaticResource McGrayText}"
+                        FontSize="13"
+                        HorizontalOptions="Center" />
+                </Border>
 
                 <!-- Filtro activo (solo visible si hay filtro) -->
                 <Border
@@ -153,6 +190,18 @@
                                         Text="{Binding FolioFechaText}"
                                         TextColor="{StaticResource McGrayText}"
                                         FontSize="11" />
+
+                                    <!-- Estatus discreto (D3): CANCELADA/DEVUELTA en gris junto al folio -->
+                                    <Label
+                                        Grid.Row="2"
+                                        Grid.Column="2"
+                                        IsVisible="{Binding EstatusText, Converter={StaticResource StringNotEmptyConverter}}"
+                                        Text="{Binding EstatusText}"
+                                        TextColor="{StaticResource McGrayText}"
+                                        FontSize="9"
+                                        FontAttributes="Bold"
+                                        VerticalOptions="End"
+                                        HorizontalOptions="End" />
 
                                 </Grid>
                             </Border>
@@ -276,6 +325,28 @@
             </Border>
 
         </Grid>
+
+        <!-- ============ Overlay "Cargando..." (patrón Depósitos/Recibos) ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="2"
+            IsVisible="{Binding Cargando}"
+            BackgroundColor="#80000000"
+            StrokeThickness="0"
+            Padding="0"
+            InputTransparent="False">
+            <VerticalStackLayout
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Spacing="14">
+                <ActivityIndicator IsRunning="True" Color="White" WidthRequest="40" HeightRequest="40" />
+                <Label
+                    Text="Cargando..."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Border>
 
     </Grid>
 

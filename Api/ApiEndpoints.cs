@@ -33,4 +33,18 @@ public static class ApiEndpoints
         /// expendio del conjunto. {0} = id_expendio.</summary>
         public const string Permisos = "api/mobile/expendios/{0}/permisos";
     }
+
+    /// <summary>
+    /// Tickets de Venta MOBILE (Gestión, mockups 5.x): historial y detalle
+    /// de las VENTAS REALES del billetero de la sesión (misma tabla que
+    /// POST ventas/crear). Scope siempre al id_billetero de la sesión.
+    /// </summary>
+    public static class MobileVentasHistorial
+    {
+        /// <summary>GET: historial de ventas (todas, cualquier estatus — D5).</summary>
+        public const string Historial = "api/mobile/ventas";
+
+        /// <summary>GET: detalle de una venta. {0} = id_venta.</summary>
+        public const string Detalle = "api/mobile/ventas/{0}";
+    }
 }

@@ -2,6 +2,10 @@
 
 **Estado:** Fase 0 (auth) implementada, probada E2E y publicada (2026-09-14). **Fase 1 (app MAUI conectada a `/api/mobile/auth/*`) IMPLEMENTADA y probada E2E en emulador contra Docker real (2026-09-14); pendiente de inspección del usuario para commit.** Ventas Lotenal, Tiempo Aire y Devoluciones: pendientes (ver §9).
 
+**Actualización de pendientes (2026-10-13).** Integraciones cerradas desde la última revisión: venta LOTENAL (F0-F7), devolución, permisos de venta por billetero, Sorteos Tec 12-15 real (`GET ventas/sorteos-tec` + `GET ventas/billetes-tec` + `POST ventas/crear`), Depósitos mock→real (`GET/POST api/mobile/depositos` + `GET /cuentas`, commits backend `a5230ed` / mobile `4f1d5df`), Reportes 9.x, Recibos de Pago 8.x y Sorteos de Gestión.
+
+**⏸️ TIEMPO AIRE — NO INTEGRAR AÚN (decisión 2026-10-13):** el módulo backend TAE YA existe (`controllers/api/mobile/TiempoAireController.php`: `GET api/mobile/tiempo-aire/proveedores`, `GET .../proveedores/<codigo>/montos`, `POST .../venta`, con `estado_operacion` real/simulada y provider `ProveedorTiempoAireSimulado` activo), **pero NO se integra todavía**: NO conectar la app al proveedor simulado ni reemplazar `Data/TiempoAireData.cs` (catálogo hardcodeado) hasta comenzar el trabajo de la semana con **TAECEL**. El catálogo en la app y el WIP de marcas (Virgin/Diri) se resuelven como parte de ese trabajo, junto con la investigación en `docs/INVESTIGACION_TIEMPO_AIRE_PROVEEDORES.md` (preguntas al proveedor + sandbox para validar los ~350 montos).
+
 Este documento es la **guía oficial** de cómo se integra Mi Cachito Mobile al backend. Cualquier desarrollador o agente de IA que toque el backend por trabajo de Mobile debe leerlo completo antes de modificar código.
 
 Repositorio backend: `MiCachito-backend`, rama de trabajo: **`dev-mobile`**.
@@ -139,16 +143,20 @@ Principio: **Mobile no llama endpoints Desktop autenticados** (el Bearer de `mob
 | auth | `POST /api/mobile/auth/logout` / `sesiones` / `sesiones/revocar` | ✅ hecho | `mobile_sesiones` | revocación de sesión/dispositivo |
 | expendios | `GET /api/mobile/expendios` | ✅ hecho (2026-09-16) | `billeteros_expendios` + `billeteros` (lectura) | lista el CONJUNTO de expendios del billetero de la sesión + estado compartido de permisos |
 | expendios | `PUT /api/mobile/expendios/<id_expendio>/permisos` | ✅ hecho (2026-09-16) | `billeteros` (UPDATE de `tiene_prod_digitales`/`tiene_tiempo_aire`/`tiene_lotenal`) | permisos por billetero, compartidos por todo el conjunto; id del path solo se valida como pertenencia al conjunto (mismo `id_billetero`), el UPDATE siempre fija `WHERE id_billetero = getIdBilleteroActual()` |
-| catálogo | `GET /api/mobile/sorteos` | pendiente | modelo `Sorteos` (misma query que `SorteosController::actionIndex`) | thin: sin permisos Desktop, sin `?id_cedis` |
-| catálogo | `GET /api/mobile/sorteos/{id}` | pendiente | modelo `Sorteos` | thin |
+| catálogo | `GET /api/mobile/sorteos` (+`/{id}`) | ✅ hecho (2026-09-24, `SorteosMobileController`) | modelo `Sorteos` | UNION pista física movs + financiera cartera, labels "producto - numero" |
+| catálogo | `GET /api/mobile/ventas/sorteos-tec` + `billetes-tec` | ✅ hecho (2026-10-05, `VentasController`) | `sorteos` (tipo_sorteo='sorteos_tec', ids 16-19) + `billetes_loteria` | carrito Tec con ids/precios reales de BD |
 | premios | `POST /api/premios/consultar` | **reuso directo** | endpoint público (sin auth, como Sr. Billetero) | nada — Mobile ya lo puede llamar |
-| ventas LN | `GET /api/mobile/ventas/billetes` | pendiente | `BilletesLoteria` (asignados al billetero) | thin |
-| ventas LN | `POST /api/mobile/ventas` | pendiente | `VentaService` + `ventas`/`ventas_detalle` | precios server-side, fracciones |
-| ventas LN | `POST /api/mobile/ventas/{id}/cancelar` | pendiente | lógica de `actionCancelar` (vía service) | scope del expendio |
-| tiempo aire | `POST /api/mobile/tae` | pendiente | `ventas_electronicas` + reglas de `billeteros` | validaciones/cálculo server-side |
+| ventas LN | `GET /api/mobile/ventas/billetes` | ✅ hecho (2026-09-28, `VentasController` mobile) | `BilletesLoteria` (asignados al billetero) | thin |
+| ventas LN | `POST /api/mobile/ventas` | ✅ hecho — ruta real `POST /api/mobile/ventas/crear` (2026-09-28) | `VentaService` + `ventas`/`ventas_detalle` | precios server-side, fracciones |
+| ventas LN | `POST /api/mobile/ventas/devolver` | ✅ hecho (2026-09-28, F4) | `DevolucionService` | `id_tienda_origen = NULL` |
+| ventas LN | cancelación de venta | ✅ hecho vía Desktop `actionCancelar` (R3/D5, canal-agnóstico, 2026-09-29) — sin endpoint mobile separado NI UI móvil | — | — |
+| tiempo aire | `GET /api/mobile/tiempo-aire/proveedores` + `proveedores/<codigo>/montos` + `POST venta` | **⏸️ existe pero en espera (2026-10-13): NO conectar hasta TAECEL** | `ventas_electronicas` + `catalogo_proveedores_tiempo_aire` | `estado_operacion` real/simulada, folio único idempotente; provider `ProveedorTiempoAireSimulado` activo |
 | tiempo aire | `GET /api/mobile/tae/historial` | pendiente | modelo `VentasElectronicas` | thin por id_billetero |
-| devoluciones | `POST /api/mobile/devoluciones` | pendiente | `DevolucionService` (extraído de `DevolucionesTiendaController::actionCreate`) | `id_tienda_origen = NULL` |
-| reportes | `GET /api/mobile/reportes/*` | pendiente | `LiquidacionesBilleteros`, `VentasElectronicas`, `Ventas` | thin, scope id_billetero |
+| devoluciones | `POST /api/mobile/devoluciones` | ✅ hecho — ruta real `POST /api/mobile/ventas/devolver` | `DevolucionService` | `id_tienda_origen = NULL` |
+| reportes | `GET /api/mobile/reportes/*` (estado-cuenta, fondo-ahorro, facturacion) | ✅ hecho (2026-09-23, `ReportesController` mobile) | `LiquidacionesBilleteros`, `VentasElectronicas`, `Ventas` | thin, scope id_billetero |
+| pagos | `GET /api/mobile/pagos/recibos` + `recibo/{id}` | ✅ hecho (2026-09-21, `PagosController`) | `fichas_pago` + `caja_movimientos` observaciones JSON | solo fichas aplicadas por Caja |
+| depósitos | `GET/POST /api/mobile/depositos` + `GET /cuentas` | ✅ hecho (2026-10-13, `DepositosController`, backend `a5230ed` / mobile `4f1d5df`) | `depositos_bancarios` + `cuentas_bancarias` | folio servidor DEP-, aislamiento entre billeteros |
+| tickets de venta | `GET /api/mobile/ventas` + `GET /api/mobile/ventas/{id}` | ✅ hecho (2026-10-13, `VentasController::actionIndex/actionDetalle`, Tickets 5.x) | `ventas` + `ventas_detalle` + `billeteros`/`cedis` (lectura) | historial TODAS las ventas del billetero (D5), detalle con partidas, 404 en venta ajena, scope SIEMPRE sesión; E2E `e2e_mobile_ventas_historial.py` 40/40 |
 | cuenta | cubierto por `auth/sesiones` | ✅ hecho | — | — |
 
 Regla de la tabla: al implementar cada endpoint, mover su fila de "pendiente" a "✅ hecho" y anotar en el commit.
@@ -257,11 +265,17 @@ Cualquier agente que trabaje en el backend por Mobile:
 
 ---
 
-## 9. Pendiente para la implementación funcional
+## 9. Pendiente para la implementación funcional (revisado 2026-10-13)
 
-1. ~~**Conectar la app MAUI al auth mobile**~~ ✅ Fase 1 HECHA (2026-09-14, ver §3 "Integración en la app"); pendiente solo inspección + commit.
-2. **`VentaService`** — extraer de `VentasController::actionCrear` (precios server-side desde `sorteos.precio_fraccion`, folio robusto) + **`MobileVentasController`** (fracciones sobre billetes asignados; derivar fracciones vendidas de `ventas_detalle`; si no cabe → parar y documentar).
-3. **`DevolucionService`** — extraer de `DevolucionesTiendaController::actionCreate`; **`MobileDevolucionController`** con `id_tienda_origen = NULL` (verificar nulidad en modelo/procesamiento antes; documentar si algo la exige).
-4. **TAE** — `POST /api/mobile/tae` sobre `ventas_electronicas`: validaciones y cálculos (comisión/ISR/fondo ahorro con las reglas del billetero) 100% server-side.
-5. **Catálogo sorteos mobile delgado** (`GET /api/mobile/sorteos`) — primer endpoint de lectura post-auth.
-6. Reportes / Tira de Liquidación / Depósitos / Fondo de Ahorro: thin endpoints sobre modelos existentes, cada uno con su análisis puntual antes de implementar.
+1. ~~**Conectar la app MAUI al auth mobile**~~ ✅ HECHA (2026-09-14).
+2. ~~**`VentaService` + `MobileVentasController`**~~ ✅ HECHA — venta LOTENAL cerrada F0-F7 (`POST api/mobile/ventas/crear`, precios server-side); venta Sorteos Tec real (12-15) contra el mismo endpoint.
+3. ~~**`DevolucionService` + `MobileDevolucionController`**~~ ✅ HECHA — `POST api/mobile/ventas/devolver` (F4) + cancelación canal-agnóstica R3/D5 en el VentasController Desktop.
+4. **TAE / Tiempo Aire — EN ESPERA HASTA TAECEL (semana del 2026-10-13+):** el backend YA existe (`TiempoAireController`: `GET proveedores`, `GET proveedores/<codigo>/montos`, `POST venta`, `estado_operacion` real/simulada, `ProveedorTiempoAireSimulado` activo — ver migraciones m261002_*). Pendiente cuando arranque: conectar la app (reemplazar `Data/TiempoAireData.cs`), evaluar ProveedorTiempoAireApi y los cálculos server-side (comisión/ISR/fondo ahorro con las reglas del billetero). **NO integrar antes con el proveedor simulado.**
+5. ~~**Catálogo sorteos mobile delgado**~~ ✅ HECHA — `GET api/mobile/sorteos` (+`/{id}`).
+6. ~~Reportes / Depósitos / Fondo de Ahorro~~ ✅ HECHAS (9.x integrado con PDFs; Depósitos 4f1d5df). Tira de Liquidación: NO APLICA (deshabilitada por diseño hasta capturas).
+7. ~~**Tickets de Venta 5.x**~~ ✅ HECHO (2026-10-13): `GET api/mobile/ventas` + `/{id}` implementados y conectados (historial real, D1–D5 cerradas — ver `NOTAS_TICKETS_VENTA.md`). Restan solo: reimpresión BT (prueba física de impresora, pendiente conocido) y TAE en el historial cuando el módulo aterrice con TAECEL.
+8. **Premios y Reintegros 3.x** — BACKEND PENDIENTE: persistencia/historial de movimientos PyR (hoy folio incremental local en memoria; estructura del movimiento en `NOTAS_PREMIOS_REINTEGROS.md`); decidir tabla (`captura_premios_instantanea` es el candidato a evaluar — análisis puntual antes de implementar).
+9. **Saldo del encabezado** — BACKEND PENDIENTE: el cálculo YA existe en `GET api/mobile/reportes/estado-cuenta` (`conceptos` + `totales` del billetero autenticado); falta decidir la fuente del número del header (posible reuso de ese endpoint con un endpoint delgado de saldo, o sub-llave) — análisis puntual antes de implementar. Hoy "$0.00" hardcodeado en `HomeViewModel`/`GestionViewModel`.
+10. **Expendios > Consulta de registros** — BACKEND PENDIENTE: contrato de consulta por rango + expendios marcados (hoy `Task.Delay(1500)` simulado, estado "Sin Registros"); impresión pendiente de definición.
+11. **Notificaciones** — BACKEND INEXISTENTE (estado vacío intencional en la app).
+12. **Dispositivos Enlazados** — FRONTEND PENDIENTE: consumir `GET api/mobile/auth/sesiones` + `POST auth/sesiones/revocar` (endpoints YA existen; hoy solo lista BT bonded).

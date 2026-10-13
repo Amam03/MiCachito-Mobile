@@ -1,9 +1,44 @@
 # Notas de Negocio — Tickets de Venta (Gestión, mockups 5, 5.1, 5.2)
 
-> Documento para futura integración con backend. Fase actual: SOLO
-> INTERFAZ — 3 movimientos TEMPORALES en memoria (uno por tipo:
-> Sorteos Tec, LOTENAL, Tiempo Aire) para probar listado, detalle,
-> PDF, compartir e impresión. NO son seeds ni mocks permanentes.
+> **INTEGRADO AL BACKEND (2026-10-13).** Historial y detalle consultan
+> las VENTAS REALES del billetero de la sesión: GET `api/mobile/ventas`
+> (todas, cualquier estatus, fecha descendente) y GET
+> `api/mobile/ventas/{id}` (detalle con partidas; 404 si la venta es
+> ajena). Los 3 movimientos TEMPORALES en memoria fueron ELIMINADOS.
+> Decisiones D1–D5 cerradas abajo. TAE no aparece (0 filas en
+> `ventas_electronicas`; módulo en espera de TAECEL — el filtro
+> "Tiempo Aire" muestra la lista vacía).
+
+## Decisiones D1–D5 (cerradas 2026-10-13)
+
+1. **D1 Plaza**: NO existe ciudad del CEDIS en la BD → el PDF muestra
+   SOLO el CEDIS emisor real (`cedis.nombre_cedis` vía
+   `billeteros.id_cedis`). Sin datos inventados.
+2. **D2 Multi-partida**: el detalle une los boletos por coma
+   ("0101, 0102"); el PDF dibuja UNA FILA POR PARTIDA en la tabla de
+   desglose. Partidas legacy sin `id_billete` → boleto "—".
+3. **D3 Estatus**: el historial trae TODAS las ventas (D5) y la fila
+   marca discretamente CANCELADA/DEVUELTA en gris junto al folio.
+4. **D4 Folio de compra Tec**: NO existe ni en BD ni en backend
+   (grep = 0) → línea y leyenda de certificados OMITIDAS del PDF.
+   Cliente: nombre capturado en DatosClienteTecPage o
+   "PÚBLICO EN GENERAL" (nunca inventado).
+5. **D5 Historial completo**: TODAS las ventas del billetero,
+   cualquier estatus (activa/pagada/cancelada/devuelta).
+
+Contrato (backend `dev`, `controllers/api/mobile/VentasController.php`
+`actionIndex`/`actionDetalle` + rutas en `config/web.php`):
+- Fila: `id_venta, folio, tipo ('lotenal'|'sorteos_tec'), estatus,
+  fecha_venta, total, id_sorteo, descripcion, cliente{nombre,
+  telefono, correo}|null`. Navegación por `id_venta` (NO por folio:
+  es display, "1103" o legacy "V-20260831-67707").
+- Detalle: encabezado + `vendedor` (billetero de la sesión), `cedis`,
+  `partidas[{numero_billete, serie, signo, cantidad, precio_unitario,
+  subtotal, numero_sorteo, nombre_sorteo}]`.
+- App: `TicketsVentaService` (IApiClient) + `MovimientoVenta` con
+  `DesdeHistorial`/`DesdeDetalle`; `MovimientoVenta.Folio` pasó de
+  int a string. E2E: `/home/sistemas/e2e_mobile_ventas_historial.py`
+  (40 checks, TODO OK 2026-10-13).
 
 ## Qué muestra el flujo
 

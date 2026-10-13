@@ -1,16 +1,18 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
+using MiCachito.Mobile.Models.Responses;
 using MiCachito.Mobile.Services;
 
 namespace MiCachito.Mobile.ViewModels;
 
 /// <summary>
-/// ViewModel de la pantalla "Ventas" (mockup 5): listado de ventas de
-/// Vender (LOTENAL, Sorteos Tec, Tiempo Aire) con filtro por tipo en
-/// overlay. Fase SOLO INTERFAZ — movimientos temporales del
-/// TicketsVentaService (ver docs/NOTAS_TICKETS_VENTA.md).
+/// ViewModel de la pantalla "Ventas" (mockup 5): listado de ventas
+/// REALES del billetero de la sesión (GET api/mobile/ventas) con filtro
+/// por tipo en overlay. Estados: cargando (overlay), vacío, error con
+/// reintento por re-entrada (patrón Depósitos).
 /// </summary>
 public partial class TicketsVentaViewModel : BaseViewModel
 {
@@ -18,6 +20,9 @@ public partial class TicketsVentaViewModel : BaseViewModel
 
     /// <summary>Movimientos visibles (con filtro aplicado).</summary>
     public ObservableCollection<MovimientoVenta> Movimientos { get; } = [];
+
+    /// <summary>Historial completo cargado del backend (para re-filtrar sin re-consultar).</summary>
+    private List<MovimientoVenta> _historial = [];
 
     /// <summary>Opciones del filtro (null = Todos).</summary>
     public IReadOnlyList<TipoVenta?> Filtros { get; } =
@@ -30,6 +35,24 @@ public partial class TicketsVentaViewModel : BaseViewModel
     /// <summary>Overlay del filtro abierto/cerrado.</summary>
     [ObservableProperty]
     private bool filtroVisible;
+
+    /// <summary>True mientras corre el GET del historial (overlay).</summary>
+    [ObservableProperty]
+    private bool cargando;
+
+    /// <summary>Mensaje de error de la carga (reintentar re-entrando).</summary>
+    [ObservableProperty]
+    private string mensajeError = string.Empty;
+
+    /// <summary>True cuando hay mensaje de error (muestra el aviso rojo).</summary>
+    public bool HayError => !string.IsNullOrEmpty(MensajeError);
+
+    /// <summary>True cuando la carga terminó sin ventas (estado vacío).</summary>
+    public bool EstaVacio => !Cargando && !HayError && Movimientos.Count == 0;
+
+    /// <summary>Mensaje del estado vacío.</summary>
+    [ObservableProperty]
+    private string mensajeVacio = "No hay ventas registradas";
 
     /// <summary>
     /// Timestamp del momento en que se abrió el overlay (protección
@@ -67,17 +90,57 @@ public partial class TicketsVentaViewModel : BaseViewModel
         Title = "Ventas";
     }
 
-    /// <summary>Carga la lista al aparecer (respeta el filtro activo).</summary>
-    public void AlAparecer()
+    /// <summary>Carga el historial real al entrar (y al volver del detalle).</summary>
+    public async Task AlAparecerAsync()
     {
-        Recargar();
+        if (Cargando)
+        {
+            return;
+        }
+
+        Cargando = true;
+        MensajeError = string.Empty;
+        try
+        {
+            try
+            {
+                List<VentaHistorialApi> items = await _servicio.CargarVentasAsync();
+                _historial = items.Select(MovimientoVenta.DesdeHistorial).ToList();
+                AplicarFiltro();
+            }
+            catch (TaskCanceledException)
+            {
+                MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            }
+            catch (OperationCanceledException)
+            {
+                MensajeError = "Consulta cancelada";
+            }
+            catch (Exception ex) when (ex is HttpRequestException or IOException)
+            {
+                MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            }
+            catch (ApiException ex)
+            {
+                MensajeError = $"No se pudieron cargar las ventas: {ex.Message}";
+            }
+        }
+        finally
+        {
+            Cargando = false;
+            // Derivadas notificadas al FINAL (con Cargando ya en false) —
+            // notificarlas dentro del try dejaba EstaVacio siempre en
+            // false (patrón Depósitos/Recibos).
+            OnPropertyChanged(nameof(HayError));
+            OnPropertyChanged(nameof(EstaVacio));
+        }
     }
 
-    /// <summary>Aplica el filtro y refresca la lista.</summary>
-    private void Recargar()
+    /// <summary>Aplica el filtro activo sobre el historial cargado.</summary>
+    private void AplicarFiltro()
     {
         Movimientos.Clear();
-        foreach (MovimientoVenta m in _servicio.Movimientos()
+        foreach (MovimientoVenta m in _historial
                      .Where(m => FiltroTipo is null || m.Tipo == FiltroTipo))
         {
             Movimientos.Add(m);
@@ -118,7 +181,7 @@ public partial class TicketsVentaViewModel : BaseViewModel
             ? null
             : Enum.TryParse<TipoVenta>(tipo, out TipoVenta t) ? t : null;
         FiltroVisible = false;
-        Recargar();
+        AplicarFiltro();
         OnPropertyChanged(nameof(FiltroText));
         OnPropertyChanged(nameof(FiltroActivo));
         OnPropertyChanged(nameof(EsTodos));
@@ -127,7 +190,7 @@ public partial class TicketsVentaViewModel : BaseViewModel
         OnPropertyChanged(nameof(EsTa));
     }
 
-    /// <summary>Abre el detalle del movimiento seleccionado.</summary>
+    /// <summary>Abre el detalle de la venta seleccionada (navega por id_venta).</summary>
     [RelayCommand]
     private async Task AbrirDetalleAsync(MovimientoVenta movimiento)
     {
@@ -140,7 +203,7 @@ public partial class TicketsVentaViewModel : BaseViewModel
         try
         {
             await Shell.Current.GoToAsync(
-                $"{nameof(Views.DetalleVentaPage)}?folio={movimiento.Folio}");
+                $"{nameof(Views.DetalleVentaPage)}?id={movimiento.IdVenta}");
         }
         finally
         {

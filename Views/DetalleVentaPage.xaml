@@ -54,6 +54,20 @@
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Spacing="12" Padding="14,16,14,8">
 
+                <!-- Error de carga (404 ajena / sin conexión; patrón Depósitos) -->
+                <Border
+                    IsVisible="{Binding HayError}"
+                    StrokeThickness="0"
+                    BackgroundColor="#FDE8E8"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="12,10">
+                    <Label
+                        Text="{Binding MensajeError}"
+                        TextColor="#B3261E"
+                        FontSize="13"
+                        HorizontalOptions="FillAndExpand" />
+                </Border>
+
                 <!-- Tarjeta cliente + importe (mockup 5.1) -->
                 <Border
                     StrokeThickness="0"

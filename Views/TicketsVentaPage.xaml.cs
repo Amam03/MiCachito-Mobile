@@ -3,9 +3,8 @@ using MiCachito.Mobile.ViewModels;
 namespace MiCachito.Mobile.Views;
 
 /// <summary>
-/// Pantalla "Ventas" (mockup 5 de Gestión): listado de ventas de Vender
-/// (LOTENAL, Sorteos Tec, Tiempo Aire) con filtro por tipo. Fase SOLO
-/// INTERFAZ — movimientos temporales en memoria.
+/// Pantalla "Ventas" (mockup 5 de Gestión): listado de ventas REALES del
+/// billetero de la sesión (GET api/mobile/ventas) con filtro por tipo.
 /// </summary>
 public partial class TicketsVentaPage : ContentPage
 {
@@ -17,9 +16,9 @@ public partial class TicketsVentaPage : ContentPage
         BindingContext = _vm = vm;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        _vm.AlAparecer();
+        await _vm.AlAparecerAsync();
     }
 }
