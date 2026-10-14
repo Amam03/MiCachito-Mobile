@@ -1,16 +1,23 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
+using MiCachito.Mobile.Models.Responses;
 using MiCachito.Mobile.Services;
 
 namespace MiCachito.Mobile.ViewModels;
 
 /// <summary>
 /// ViewModel del detalle de un movimiento (mockups 3.1/3.2): header con
-/// folio y fecha, resumen 3 columnas, pestanas Premios / Reintegros
-/// con sorteos expandibles y tabla Billete | Signo | Vig. | Valor.
+/// folio y fecha, resumen 3 columnas, pestañas Premios / Reintegros con
+/// sorteos expandibles y tabla Billete | Signo | Vig. | Valor.
+///
+/// Conectado al backend (2026-10-13): carga el detalle AGRUPADO POR
+/// SORTEO (D2) con GET api/mobile/premios-reintegros/{id} en
+/// AlAparecerAsync; el folio del header es el del servidor (PYR-..., D3).
+/// Movimiento ajeno → 404: se muestra el aviso, sin datos.
 /// </summary>
-[QueryProperty(nameof(FolioQuery), "folio")]
+[QueryProperty(nameof(IdQuery), "id")]
 public partial class DetallePremiosReintegrosViewModel : BaseViewModel
 {
     private readonly PremiosReintegrosService _servicio;
@@ -23,8 +30,8 @@ public partial class DetallePremiosReintegrosViewModel : BaseViewModel
         Title = "Premios y Reintegros";
     }
 
-    /// <summary>Folio recibido por navegacion (string del query param).</summary>
-    public string FolioQuery { get; set; } = string.Empty;
+    /// <summary>Id de movimiento recibido por navegación (string del query param).</summary>
+    public string? IdQuery { get; set; }
 
     public MovimientoPremiosReintegros? Movimiento { get; private set; }
 
@@ -43,6 +50,16 @@ public partial class DetallePremiosReintegrosViewModel : BaseViewModel
 
     [ObservableProperty]
     private string totalText = "$0.00";
+
+    /// <summary>True mientras corre el GET del detalle (overlay).</summary>
+    [ObservableProperty]
+    private bool cargando;
+
+    /// <summary>Mensaje de error de la carga (404 ajeno / sin conexión).</summary>
+    [ObservableProperty]
+    private string mensajeError = string.Empty;
+
+    public bool HayError => !string.IsNullOrEmpty(MensajeError);
 
     /// <summary>True = pestana Premios visible; False = Reintegros (default).</summary>
     public bool PestanaPremios
@@ -81,23 +98,77 @@ public partial class DetallePremiosReintegrosViewModel : BaseViewModel
 
     public string ColorTextoPestanaReintegros => PestanaPremios ? "#4125F4" : "#FFFFFF";
 
-    /// <summary>Se llama al aparecer la pagina (patron del proyecto).</summary>
-    public void AlAparecer()
+    /// <summary>Carga el detalle real (D2) al aparecer la página.</summary>
+    public async Task AlAparecerAsync()
     {
-        int folio = int.TryParse(FolioQuery, out int f) ? f : 0;
-        Movimiento = _servicio.Movimientos.FirstOrDefault(m => m.Folio == folio);
-
-        if (Movimiento is null)
+        if (Cargando)
         {
             return;
         }
 
-        TituloHeader = $"Premios y Reintegros-{Movimiento.Folio}";
-        Fecha = Movimiento.Fecha;
-        PremiosText = $"${Movimiento.TotalPremios:0.00}";
-        ReintegrosText = $"${Movimiento.TotalReintegros:0.00}";
-        TotalText = $"${Movimiento.Total:0.00}";
-        OnPropertyChanged(nameof(Sorteos));
+        Cargando = true;
+        MensajeError = string.Empty;
+        try
+        {
+            try
+            {
+                if (!int.TryParse(IdQuery, out int id) || id <= 0)
+                {
+                    MensajeError = "Movimiento no válido";
+                    return;
+                }
+
+                DetallePyRApi detalle = await _servicio.CargarDetalleAsync(id);
+                var movimiento = new MovimientoPremiosReintegros
+                {
+                    IdMovimiento = detalle.IdMovimiento,
+                    FolioTexto = detalle.Folio,
+                    Fecha = FechaFormatoMockup(detalle.FechaMovimiento),
+                    TotalPremiosApi = detalle.TotalPremios,
+                    TotalReintegrosApi = detalle.TotalReintegros,
+                };
+                movimiento.CargarDetalle(detalle);
+                Movimiento = movimiento;
+
+                TituloHeader = $"Premios y Reintegros-{detalle.Folio}";
+                Fecha = movimiento.Fecha;
+                PremiosText = $"${detalle.TotalPremios:0.00}";
+                ReintegrosText = $"${detalle.TotalReintegros:0.00}";
+                TotalText = $"${detalle.TotalGeneral:0.00}";
+                OnPropertyChanged(nameof(Sorteos));
+            }
+            catch (TaskCanceledException)
+            {
+                MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            }
+            catch (OperationCanceledException)
+            {
+                MensajeError = "Consulta cancelada";
+            }
+            catch (Exception ex) when (ex is HttpRequestException or IOException)
+            {
+                MensajeError = "Sin conexión al servidor. Verifica la conexión e intenta de nuevo";
+            }
+            catch (ApiException ex)
+            {
+                MensajeError = $"No se pudo cargar el movimiento: {ex.Message}";
+            }
+        }
+        finally
+        {
+            Cargando = false;
+            OnPropertyChanged(nameof(HayError));
+        }
+    }
+
+    /// <summary>"yyyy-MM-dd HH:mm:ss" del backend → "DD-mes-AAAA" del mockup.</summary>
+    private static string FechaFormatoMockup(string? cruda)
+    {
+        if (Helpers.FormatosFecha.TryParseFechaBackend(cruda, out DateOnly fecha))
+        {
+            return Helpers.FormatosFecha.FechaLarga(fecha);
+        }
+        return cruda ?? string.Empty;
     }
 
     /// <summary>Cambia de pestana (tap en el encabezado de Premios o Reintegros).</summary>

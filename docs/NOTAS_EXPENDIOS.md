@@ -1,7 +1,15 @@
 # Módulo Expendios — Notas de interfaz y reglas (mockups 1-6)
 
-Fase: **SOLO INTERFAZ** (2026-09-11). Sin backend, sin endpoints, sin BD —
-todo dato vive en `Data/ExpendiosDemoData.cs` (en memoria, se pierde al
+**Actualización (2026-10-13):** la fase SOLO INTERFAZ terminó —
+Administración y el form de Permisos de Venta son REALES contra
+`GET api/mobile/expendios` + `PUT api/mobile/expendios/{id}/permisos`
+(demo data eliminado en `8cf12e1`). PENDIENTE: la pestaña Consulta de
+registros sigue simulada (`Task.Delay(1500)` + estado "Sin Registros";
+contrato backend por definir) y la impresión está pendiente de
+definición. Estado completo en `docs/backend-integracion.md` §9.
+
+Fase original: **SOLO INTERFAZ** (2026-09-11). Sin backend, sin endpoints, sin BD —
+todo dato vivía en `Data/ExpendiosDemoData.cs` (en memoria, se perdía al
 reiniciar la app, sustituible por el servicio real sin tocar Views/VMs).
 
 Archivos del módulo:

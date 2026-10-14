@@ -13,11 +13,11 @@ public partial class PremiosReintegrosPage : ContentPage
         BindingContext = viewModel;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        // Refresca totales agregados al volver de captura/detalle (patron
-        // del proyecto: las propiedades derivadas no se recalculan solas).
-        _viewModel.AlAparecer();
+        // Carga el histórico real del backend (y refresca totales al
+        // volver de captura/detalle — patrón Depósitos/Tickets).
+        await _viewModel.AlAparecerAsync();
     }
 }

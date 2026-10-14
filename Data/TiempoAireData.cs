@@ -118,7 +118,7 @@ public static class TiempoAireData
                 TextColor = Colors.White,
                 LogoWidth = 90,
                 LogoHeight = 28,
-                Montos = [10m, 20m, 30m, 0m, 50m, 60m, 70m, 80m, 100m, 120m, 140m, 150m, 200m, 250m, 300m, 500m],
+                Montos = [10m, 20m, 30m, 40m, 50m, 60m, 70m, 80m, 100m, 120m, 140m, 150m, 200m, 250m, 300m, 500m],
             },
             // 7 — Bait
             new()
@@ -204,11 +204,11 @@ public static class TiempoAireData
                 LogoHeight = 32,
                 Montos = [35m, 85m, 105m, 155m, 160m, 180m, 220m, 275m, 325m, 425m, 510m, 520m, 755m],
             },
-            // 13 — Virquin Mobile
+            // 13 — Virgin Mobile
             new()
             {
                 Id = 13,
-                NombreProveedor = "Virquin Mobile",
+                NombreProveedor = "Virgin Mobile",
                 Subproducto = null,
                 ColorTarjeta = Color.FromArgb("#FF0000"),
                 LogoIcon = "logo_virquin_mobile",
@@ -243,11 +243,11 @@ public static class TiempoAireData
                 LogoHeight = 32,
                 Montos = [30m, 50m, 100m, 130m, 150m, 250m],
             },
-            // 16 — DIRY Móvil
+            // 16 — Diri Móvil
             new()
             {
                 Id = 16,
-                NombreProveedor = "DIRY Móvil",
+                NombreProveedor = "Diri Móvil",
                 Subproducto = null,
                 ColorTarjeta = Color.FromArgb("#022D5A"),
                 LogoIcon = "logo_diry_movil",

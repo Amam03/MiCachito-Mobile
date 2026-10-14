@@ -1,49 +1,45 @@
 using System.Collections.ObjectModel;
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
+using MiCachito.Mobile.Models.Responses;
 
 namespace MiCachito.Mobile.Services;
 
 /// <summary>
-/// Estado local del flujo Premios y Reintegros (fase solo-interfaz, SIN
-/// backend ni persistencia): la lista de movimientos y la captura en curso
-/// viven en memoria durante la sesion.
+/// Estado del flujo Premios y Reintegros (Gestión, mockups 3.x) contra la
+/// API real: histórico (GET api/mobile/premios-reintegros), guardado de la
+/// captura (POST, folio servidor PYR-YYYYMMDD-NNNN — D3) y detalle agrupado
+/// por sorteo (GET /{id} — D2).
 ///
-/// - Lista: se siembra con UN unico movimiento de ejemplo (mockups 3/3.1/
-///   3.2: folio 1, 02-abril-2025, 2 reintegros "Mayor - 3966" de $30.00)
-///   solo para comprobar la navegacion; NO es un dato real.
-/// - Captura: los boletos escaneados se acumulan aqui y SOLO se descartan
-///   con Cancelar (mantener presionado) o se materializan en un movimiento
-///   nuevo con Guardar (folio incremental) — regla del usuario: el escaneo
-///   es continuo hasta una de esas dos acciones.
+/// Reglas D1-D3 (aprobadas 2026-10-13):
+///   - D1: SOLO premios y reintegros ACEPTADOS se registran; "NO TIENE
+///     PREMIO" no se acumula (la captura lo descarta al ACEPTAR).
+///   - D2: el detalle se persiste por boleto en el backend y la vista
+///     agrupada por sorteo se reconstruye desde él.
+///   - D3: folio del backend (PYR-YYYYMMDD-NNNN), nunca local.
+///
+/// La CAPTURA en curso sigue en memoria (BoletoCapturado) porque es el
+/// estado vivo del escáner continuo; al Guardar se envía al backend y el
+/// histórico se recarga del GET. El escáner en sí (POST
+/// api/mobile/premios/consultar via ConsultaPremiosService) NO cambia.
+///
+/// ANTES: lista sembrada con 1 movimiento de ejemplo + folio incremental
+/// local (fase solo-interfaz). El movimiento de ejemplo fue ELIMINADO.
 /// </summary>
 public sealed class PremiosReintegrosService
 {
-    /// <summary>Valor visual del reintegro de los mockups (referencia temporal).</summary>
-    public const decimal ValorReintegroEjemplo = 30.00m;
+    private readonly IApiClient _api;
 
-    private static readonly string[] Meses =
+    public PremiosReintegrosService(IApiClient api)
     {
-        "enero", "febrero", "marzo", "abril", "mayo", "junio",
-        "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
-    };
+        _api = api;
+    }
 
+    /// <summary>Movimientos del histórico (se recargan del backend).</summary>
     public ObservableCollection<MovimientoPremiosReintegros> Movimientos { get; } = new();
 
+    /// <summary>Captura en curso (estado vivo del escáner continuo).</summary>
     public ObservableCollection<BoletoCapturado> CapturaActual { get; } = new();
-
-    public PremiosReintegrosService()
-    {
-        // Movimiento de ejemplo (folio 1) — unica referencia visual fija,
-        // solo para comprobar el flujo. El resto nace de capturas reales
-        // del usuario en la sesion.
-        var sorteoMayor = new SorteoPremiosReintegros { NombreSorteo = "Mayor - 3966" };
-        sorteoMayor.Boletos.Add(new BoletoPremioReintegro { NumeroBillete = "47727", Valor = ValorReintegroEjemplo });
-        sorteoMayor.Boletos.Add(new BoletoPremioReintegro { NumeroBillete = "16171", Valor = ValorReintegroEjemplo });
-
-        var ejemplo = new MovimientoPremiosReintegros { Folio = 1, Fecha = "02-abril-2025" };
-        ejemplo.SorteosReintegros.Add(sorteoMayor);
-        Movimientos.Add(ejemplo);
-    }
 
     // ================= Resumen de la lista (agregado de movimientos) =================
 
@@ -63,9 +59,6 @@ public sealed class PremiosReintegrosService
 
     public decimal MontoReintegros => CapturaActual.Where(b => b.Tipo == TipoCapturaBoleto.Reintegro).Sum(b => b.Valor);
 
-    /// <summary>Folio que tomara el movimiento al Guardar (incremental).</summary>
-    public int FolioSiguiente => Movimientos.Count == 0 ? 1 : Movimientos.Max(m => m.Folio) + 1;
-
     /// <summary>Dedupe: el mismo codigo no se cuenta dos veces en la captura.</summary>
     public bool YaCapturado(string codigoCompleto) =>
         CapturaActual.Any(b => b.CodigoCompleto == codigoCompleto);
@@ -77,45 +70,85 @@ public sealed class PremiosReintegrosService
     }
 
     /// <summary>
-    /// Guardar: convierte la captura en un movimiento nuevo (agrupado por
-    /// pestaña y sorteo, tabla Billete/Signo/Vig./Valor), lo agrega a la
-    /// lista con folio incremental y limpia la captura.
+    /// Carga el histórico real del billetero (GET). Devuelve true si OK.
+    /// Los errores se propagan como ApiException/HttpRequestException al VM.
     /// </summary>
-    public MovimientoPremiosReintegros GuardarCaptura()
+    public async Task<bool> CargarMovimientosAsync(CancellationToken cancellationToken = default)
     {
-        var movimiento = new MovimientoPremiosReintegros
+        List<MovimientoPyRApi>? items = await _api
+            .GetAsync<List<MovimientoPyRApi>>(ApiEndpoints.MobilePremiosReintegros.Historial, cancellationToken)
+            .ConfigureAwait(false);
+
+        Movimientos.Clear();
+        foreach (MovimientoPyRApi item in items ?? new List<MovimientoPyRApi>())
         {
-            Folio = FolioSiguiente,
-            Fecha = FechaDeHoy(),
-        };
+            Movimientos.Add(Mapear(item));
+        }
+        return true;
+    }
 
-        foreach (var porTipo in CapturaActual.GroupBy(b => b.Tipo))
+    /// <summary>
+    /// Guardar (D3): envía la captura al backend (POST), que asigna el
+    /// folio PYR-YYYYMMDD-NNNN y los totales; limpia la captura y agrega
+    /// el movimiento nuevo al histórico local. Sin conexión NO se limpia
+    /// la captura (el billetero puede reintentar).
+    /// </summary>
+    public async Task<MovimientoPremiosReintegros> GuardarCapturaAsync(CancellationToken cancellationToken = default)
+    {
+        var boletos = CapturaActual.Select(b => new
         {
-            var destino = porTipo.Key == TipoCapturaBoleto.Premio
-                ? movimiento.SorteosPremios
-                : movimiento.SorteosReintegros;
+            tipo = b.Tipo == TipoCapturaBoleto.Premio ? "premio" : "reintegro",
+            codigo_barras = b.CodigoCompleto,
+            numero_billete = b.NumeroBillete,
+            serie = b.Tipo == TipoCapturaBoleto.Premio || b.SignoOSerie != "-" ? b.SignoOSerie : null,
+            signo = null as string,
+            fraccion = int.TryParse(b.Vig, out int fr) ? fr : (int?)null,
+            nombre_sorteo = b.NombreSorteo,
+            id_sorteo = (int?)null,
+            valor = b.Valor,
+        }).ToList();
 
-            foreach (var porSorteo in porTipo.GroupBy(b => b.NombreSorteo))
-            {
-                var sorteo = new SorteoPremiosReintegros { NombreSorteo = porSorteo.Key };
-                foreach (BoletoCapturado b in porSorteo)
-                {
-                    sorteo.Boletos.Add(new BoletoPremioReintegro
-                    {
-                        NumeroBillete = b.NumeroBillete,
-                        Signo = b.SignoOSerie,
-                        Vig = b.Vig,
-                        Valor = b.Valor,
-                    });
-                }
+        var body = new { boletos };
 
-                destino.Add(sorteo);
-            }
+        MovimientoCreadoPyRApi? creado = await _api
+            .PostAsync<MovimientoCreadoPyRApi>(ApiEndpoints.MobilePremiosReintegros.Guardar, body, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (creado is null)
+        {
+            throw new ApiException(
+                System.Net.HttpStatusCode.OK,
+                "El servidor no devolvió el movimiento guardado");
         }
 
-        Movimientos.Add(movimiento);
+        var movimiento = new MovimientoPremiosReintegros
+        {
+            IdMovimiento = creado.IdMovimiento,
+            FolioTexto = creado.Folio,
+            Fecha = FechaFormatoMockup(creado.FechaMovimiento),
+            TotalPremiosApi = creado.TotalPremios,
+            TotalReintegrosApi = creado.TotalReintegros,
+        };
+
+        Movimientos.Insert(0, movimiento);
         CapturaActual.Clear();
         return movimiento;
+    }
+
+    /// <summary>
+    /// Detalle agrupado por sorteo (D2) de un movimiento (GET /{id}).
+    /// </summary>
+    public async Task<DetallePyRApi> CargarDetalleAsync(int idMovimiento, CancellationToken cancellationToken = default)
+    {
+        DetallePyRApi? detalle = await _api
+            .GetAsync<DetallePyRApi>(
+                string.Format(System.Globalization.CultureInfo.InvariantCulture, ApiEndpoints.MobilePremiosReintegros.Detalle, idMovimiento),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return detalle ?? throw new ApiException(
+            System.Net.HttpStatusCode.OK,
+            "El servidor no devolvió el detalle del movimiento");
     }
 
     /// <summary>Cancelar (mantener presionado): descarta la captura en curso.</summary>
@@ -124,9 +157,28 @@ public sealed class PremiosReintegrosService
         CapturaActual.Clear();
     }
 
-    private static string FechaDeHoy()
+    // ================= Mapeos =================
+
+    /// <summary>Fila del histórico → entidad de la lista.</summary>
+    private static MovimientoPremiosReintegros Mapear(MovimientoPyRApi item)
     {
-        DateTime hoy = DateTime.Now;
-        return $"{hoy.Day:00}-{Meses[hoy.Month - 1]}-{hoy.Year:0000}";
+        return new MovimientoPremiosReintegros
+        {
+            IdMovimiento = item.IdMovimiento,
+            FolioTexto = item.Folio,
+            Fecha = FechaFormatoMockup(item.FechaMovimiento),
+            TotalPremiosApi = item.TotalPremios,
+            TotalReintegrosApi = item.TotalReintegros,
+        };
+    }
+
+    /// <summary>"yyyy-MM-dd HH:mm:ss" del backend → "DD-mes-AAAA" del mockup.</summary>
+    private static string FechaFormatoMockup(string? cruda)
+    {
+        if (Helpers.FormatosFecha.TryParseFechaBackend(cruda, out DateOnly fecha))
+        {
+            return Helpers.FormatosFecha.FechaLarga(fecha);
+        }
+        return cruda ?? string.Empty;
     }
 }

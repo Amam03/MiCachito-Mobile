@@ -95,6 +95,40 @@
             </Grid>
         </Border>
 
+        <!-- ============ Error de carga (patrón Depósitos/Tickets) ============ -->
+        <Border
+            Grid.Row="2"
+            IsVisible="{Binding HayError}"
+            StrokeThickness="0"
+            BackgroundColor="#FDE8E8"
+            StrokeShape="RoundRectangle 8"
+            Padding="12,10"
+            Margin="16,14,16,0"
+            VerticalOptions="Start">
+            <Label
+                Text="{Binding MensajeError}"
+                TextColor="#B3261E"
+                FontSize="13"
+                HorizontalOptions="FillAndExpand" />
+        </Border>
+
+        <!-- ============ Estado vacío (sin movimientos) ============ -->
+        <Border
+            Grid.Row="2"
+            IsVisible="{Binding EstaVacio}"
+            StrokeThickness="0"
+            BackgroundColor="White"
+            StrokeShape="RoundRectangle 10"
+            Padding="12,16"
+            Margin="16,14,16,0"
+            VerticalOptions="Start">
+            <Label
+                Text="{Binding MensajeVacio}"
+                TextColor="{StaticResource McGrayText}"
+                FontSize="13"
+                HorizontalOptions="Center" />
+        </Border>
+
         <!-- ============ LISTADO de movimientos ============ -->
         <CollectionView
             Grid.Row="2"
@@ -169,6 +203,28 @@
                 TextColor="{StaticResource White}"
                 HorizontalOptions="Center"
                 VerticalOptions="Center" />
+        </Border>
+
+        <!-- ============ Overlay "Cargando..." (patrón Depósitos/Tickets) ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="3"
+            IsVisible="{Binding Cargando}"
+            BackgroundColor="#80000000"
+            StrokeThickness="0"
+            Padding="0"
+            InputTransparent="False">
+            <VerticalStackLayout
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Spacing="14">
+                <ActivityIndicator IsRunning="True" Color="White" WidthRequest="40" HeightRequest="40" />
+                <Label
+                    Text="Cargando..."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
         </Border>
 
     </Grid>

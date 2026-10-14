@@ -155,6 +155,20 @@
                 BindableLayout.ItemsSource="{Binding Sorteos}"
                 Padding="16,8,16,20" Spacing="10">
 
+                <!-- Error de carga (404 ajeno / sin conexión; patrón Depósitos/Tickets) -->
+                <Border
+                    IsVisible="{Binding HayError}"
+                    StrokeThickness="0"
+                    BackgroundColor="#FDE8E8"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="12,10">
+                    <Label
+                        Text="{Binding MensajeError}"
+                        TextColor="#B3261E"
+                        FontSize="13"
+                        HorizontalOptions="FillAndExpand" />
+                </Border>
+
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="entities:SorteoPremiosReintegros">
                         <Border
@@ -245,6 +259,28 @@
 
             </VerticalStackLayout>
         </ScrollView>
+
+        <!-- ============ Overlay "Cargando..." (patrón Depósitos/Tickets) ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="4"
+            IsVisible="{Binding Cargando}"
+            BackgroundColor="#80000000"
+            StrokeThickness="0"
+            Padding="0"
+            InputTransparent="False">
+            <VerticalStackLayout
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Spacing="14">
+                <ActivityIndicator IsRunning="True" Color="White" WidthRequest="40" HeightRequest="40" />
+                <Label
+                    Text="Cargando..."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Border>
 
     </Grid>
 </ContentPage>

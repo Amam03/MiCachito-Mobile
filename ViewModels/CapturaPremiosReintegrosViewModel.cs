@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Models.Entities;
 using MiCachito.Mobile.Services;
 
@@ -38,8 +39,12 @@ public partial class CapturaPremiosReintegrosViewModel : BaseViewModel
         Aviso = string.Empty;
     }
 
-    /// <summary>Folio que tomara el movimiento al Guardar (ej. "Folio: 3").</summary>
-    public string FolioText => $"Folio: {_servicio.FolioSiguiente}";
+    /// <summary>
+    /// Folio en pantalla (mockup 3.3 "Folio: 3"): con la integración el
+    /// folio PYR-YYYYMMDD-NNNN lo asigna el BACKEND al Guardar (D3), así
+    /// que la captura muestra la cantidad de boletos pendientes de guardar.
+    /// </summary>
+    public string FolioText => $"Boletos: {_servicio.CapturaActual.Count:00}";
 
     public string MontoPremiosText => $"${_servicio.MontoPremios:0.00}";
 
@@ -69,29 +74,55 @@ public partial class CapturaPremiosReintegrosViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// Guardar (tap): materializa la captura en un movimiento nuevo con
-    /// folio incremental, limpia la captura y regresa a la lista.
+    /// Guardar (D3): envía la captura al backend (POST), que asigna el
+    /// folio PYR-YYYYMMDD-NNNN y los totales; limpia la captura SOLO si
+    /// el guardado fue exitoso (sin conexión queda intacta para
+    /// reintentar) y regresa a la lista.
     /// </summary>
     [RelayCommand]
-    private Task GuardarAsync()
+    private async Task GuardarAsync()
     {
-        if (Shell.Current is null)
+        if (IsBusy || Shell.Current is null)
         {
-            return Task.CompletedTask;
+            return;
         }
 
         if (_servicio.CapturaActual.Count == 0)
         {
             Aviso = "No hay boletos capturados en el movimiento.";
-            return Task.CompletedTask;
+            return;
         }
 
-        _servicio.GuardarCaptura();
-        // Regresar a la LISTA de movimientos (un pop): ahi se ve el folio
-        // recien guardado y el FAB sigue accesible. Navegacion RELATIVA —
-        // "//GestionPage" CRASHEA: la pestana Gestion es un ShellContent con
-        // DataTemplate (ruta implicita, no global registrada).
-        return Shell.Current.GoToAsync("..");
+        IsBusy = true;
+        Aviso = "Guardando...";
+        try
+        {
+            try
+            {
+                await _servicio.GuardarCapturaAsync();
+            }
+            catch (Exception ex) when (ex is HttpRequestException or IOException or TaskCanceledException)
+            {
+                Aviso = "Sin conexión al servidor. La captura quedó intacta: intenta de nuevo.";
+                return;
+            }
+            catch (ApiException ex)
+            {
+                Aviso = $"No se pudo guardar el movimiento: {ex.Message}";
+                return;
+            }
+
+            // Guardado OK: la captura ya se limpió en el servicio. Regresar
+            // a la LISTA (un pop): ahi se ve el folio PYR- recien guardado
+            // y el FAB sigue accesible. Navegacion RELATIVA —
+            // "//GestionPage" CRASHEA: la pestana Gestion es un ShellContent
+            // con DataTemplate (ruta implicita, no global registrada).
+            await Shell.Current.GoToAsync("..");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     /// <summary>Tap simple en Cancelar: solo avisa (no descarta nada).</summary>

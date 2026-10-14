@@ -3,6 +3,15 @@
 > Documento para futura integración con backend (flujo mockups 3, 3.1,
 > 3.2, 3.3). Fase actual: SOLO INTERFAZ con estado local en memoria —
 > **no modificar el backend**. Documentación de referencia únicamente.
+>
+> **Actualización (2026-10-13):** sigue igual — la consulta POR BOLETO
+> es real (`POST api/mobile/premios/consultar` en el escaneo) pero los
+> movimientos de captura viven SOLO en memoria con folio incremental
+> local. Pendiente de backend: persistencia/historial de movimientos
+> PyR (estructura abajo); la tabla candidata a evaluar en el análisis
+> puntual es `captura_premios_instantanea` (+detalle) — decidir tabla
+> y contrato antes de implementar. Estado completo en
+> `docs/backend-integracion.md` §9.
 
 ## Pantallas implementadas (2026-09-08)
 

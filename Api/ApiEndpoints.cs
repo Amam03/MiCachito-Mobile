@@ -47,4 +47,22 @@ public static class ApiEndpoints
         /// <summary>GET: detalle de una venta. {0} = id_venta.</summary>
         public const string Detalle = "api/mobile/ventas/{0}";
     }
+
+    /// <summary>
+    /// Premios y Reintegros MOBILE (Gestión, mockups 3.x): histórico y
+    /// detalle de los boletos ACEPTADOS por escaneo (D1: sin "NO TIENE
+    /// PREMIO"), folio servidor PYR-YYYYMMDD-NNNN (D3), detalle agrupado
+    /// por sorteo (D2). Scope siempre al id_billetero de la sesión.
+    /// </summary>
+    public static class MobilePremiosReintegros
+    {
+        /// <summary>GET: histórico de movimientos (fecha descendente).</summary>
+        public const string Historial = "api/mobile/premios-reintegros";
+
+        /// <summary>POST: guardar la captura en curso (folio del backend).</summary>
+        public const string Guardar = "api/mobile/premios-reintegros";
+
+        /// <summary>GET: detalle agrupado por sorteo. {0} = id_movimiento.</summary>
+        public const string Detalle = "api/mobile/premios-reintegros/{0}";
+    }
 }
