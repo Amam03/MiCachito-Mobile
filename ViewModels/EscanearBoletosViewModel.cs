@@ -58,6 +58,9 @@ public partial class EscanearBoletosViewModel : BaseViewModel
     /// <summary>Detalle del boleto en espera de ACEPTAR (null = sin dialogo).</summary>
     private BoletoCapturado? _boletoPendiente;
 
+    /// <summary>True si el boleto pendiente es registrable (GANADOR o REINTEGRO). D1: NO TIENE PREMIO no se acumula.</summary>
+    private bool _boletoPendienteRegistrable;
+
     /// <summary>Ignora el toque del scrim ~600 ms tras abrir (tap fantasma).</summary>
     private long _dialogoAbiertoEnUtcMs;
 
@@ -162,6 +165,8 @@ public partial class EscanearBoletosViewModel : BaseViewModel
                 : 0m,
         };
 
+        _boletoPendienteRegistrable = r.Resultado == "GANADOR" || r.Resultado == "REINTEGRO";
+
         (MensajeDialogo, ColorAceptar) = r.Resultado switch
         {
             "GANADOR" => ("EL CACHITO TIENE PREMIO", "#4CB050"),
@@ -209,18 +214,20 @@ public partial class EscanearBoletosViewModel : BaseViewModel
     }
 
     /// <summary>
-    /// ACEPTAR del dialogo: agrega el boleto al acumulado y REGRESA AL
-    /// ESCANER (escaneo continuo, regla del usuario).
+    /// ACEPTAR del dialogo: agrega el boleto al acumulado solo si es registrable
+    /// (GANADOR o REINTEGRO) y REGRESA AL ESCANER (escaneo continuo, regla del usuario).
+    /// D1: "NO TIENE PREMIO" no se acumula.
     /// </summary>
     [RelayCommand]
     private void Aceptar()
     {
-        if (_boletoPendiente is not null)
+        if (_boletoPendiente is not null && _boletoPendienteRegistrable)
         {
             _premiosService.AgregarBoleto(_boletoPendiente);
         }
 
         _boletoPendiente = null;
+        _boletoPendienteRegistrable = false;
         DialogoVisible = false;
         OnPropertyChanged(nameof(AcumuladoText));
     }

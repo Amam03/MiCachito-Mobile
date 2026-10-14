@@ -1,17 +1,6 @@
 # Notas de Negocio — Premios y Reintegros (Gestión)
 
-> Documento para futura integración con backend (flujo mockups 3, 3.1,
-> 3.2, 3.3). Fase actual: SOLO INTERFAZ con estado local en memoria —
-> **no modificar el backend**. Documentación de referencia únicamente.
->
-> **Actualización (2026-10-13):** sigue igual — la consulta POR BOLETO
-> es real (`POST api/mobile/premios/consultar` en el escaneo) pero los
-> movimientos de captura viven SOLO en memoria con folio incremental
-> local. Pendiente de backend: persistencia/historial de movimientos
-> PyR (estructura abajo); la tabla candidata a evaluar en el análisis
-> puntual es `captura_premios_instantanea` (+detalle) — decidir tabla
-> y contrato antes de implementar. Estado completo en
-> `docs/backend-integracion.md` §9.
+> **Integración completada (2026-10-14):** Conectado al backend. Historico (GET), guardado (POST, folio PYR-YYYYMMDD-NNNN) y detalle agrupado por sorteo (GET /{id}). D1: SOLO premios/reintegros aceptados; NO TIENE PREMIO no se acumula. La consulta POR BOLETO sigue en `POST api/mobile/premios/consultar` (no se toca). El escáner conserva su funcionalidad.
 
 ## Pantallas implementadas (2026-09-08)
 
@@ -54,22 +43,9 @@ MovimientoPremiosReintegros
 Estas reglas nacen de los mockups y del flujo acordado; requieren
 confirmación de negocio y endpoints del backend:
 
-1. **Folio**: en la app es incremental local (FolioSiguiente = max+1).
-   El folio real lo debe asignar el backend al Guardar (persistencia).
-   El mockup 3.3 muestra "Folio: 3" — consistente con folio generado
-   según el movimiento en curso.
-2. **Monto por boleto**: la UI local usa $30.00 por reintegro como
-   referencia visual (ValorReintegroEjemplo). El monto REAL de premio
-   o reintegro debe venir del backend al consultar cada boleto
-   (endpoint de consulta de premios por código de barras/QR) — la
-   sábana de premios del sorteo define qué boletos son ganadores y
-   con cuánto (premio vs reintegro del precio del cachito).
-3. **Clasificación Premio vs Reintegro**: hoy usa ConsultaPremiosService
-   (mock con 3 boletos demo). En integración: el backend responde el
-   tipo (premio mayor / reintegro / sin premio) por boleto consultado;
-   "NO TIENE PREMIO" también se agrega? — REGLA PENDIENTE DE NEGOCIO:
-   en la UI actual NO TIENE PREMIO NO se acumula (diálogo informativo
-   y al ACEPTAR simplemente se descarta sin agregar al movimiento).
+1. **Folio**: asignado por el backend al Guardar → `PYR-YYYYMMDD-NNNN` (D3).
+2. **Monto por boleto**: viene de `POST api/mobile/premios/consultar` (premio_cachito/reintegro).
+3. **Clasificación Premio vs Reintegro**: según respuesta del backend; **NO TIENE PREMIO NO se acumula** (D1).
 4. **Agrupación al Guardar**: boletos agrupados por (tipo, sorteo);
    cada grupo es un encabezado expandible en el detalle.
 5. **Dedupe**: el mismo código no se acumula dos veces en el mismo
