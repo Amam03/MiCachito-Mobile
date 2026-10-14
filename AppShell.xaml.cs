@@ -42,7 +42,8 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(ReportesPage), typeof(ReportesPage));
         Routing.RegisterRoute(nameof(DetallePagoPage), typeof(DetallePagoPage));
         Routing.RegisterRoute(nameof(ExpendioFormPage), typeof(ExpendioFormPage));
-        Routing.RegisterRoute(nameof(NotificacionesPage), typeof(NotificacionesPage));
+        // Notificaciones oculta en Cuenta (2026-10-14): ruta desregistrada, página conservada.
+        // Routing.RegisterRoute(nameof(NotificacionesPage), typeof(NotificacionesPage));
         Routing.RegisterRoute(nameof(DispositivosEnlazadosPage), typeof(DispositivosEnlazadosPage));
         // F6: selección/prueba de impresora Bluetooth (venta/devolución LOTENAL).
         Routing.RegisterRoute(nameof(ImpresoraPage), typeof(ImpresoraPage));

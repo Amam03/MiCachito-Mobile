@@ -12,12 +12,18 @@ Pestaña final del menú principal. Implementada 2026-09-11, fase SOLO INTERFAZ
   + versión REAL `v{VersionTracking.CurrentVersion}` (= "v1.0" del csproj, no inventada).
 - Usuario autenticado REAL: `ISessionService.CurrentSession?.Usuario.Username`
   (= "billetero" en emulador).
-- Card blanca con 3 filas (icono + label 15 + chevron; colores MEDIDOS del mockup 1):
-  - **Notificaciones** (`icon_campana_azul.svg` #5DB7F3 azul claro) → navega a NotificacionesPage.
+- Card blanca con filas visibles (icono + label 15 + chevron; colores MEDIDOS del mockup 1):
+  - **Notificaciones** (`icon_campana_azul.svg` #5DB7F3 azul claro) → OCULTA desde 2026-10-14:
+    renglón y divisor con `IsVisible="False"` y ruta `NotificacionesPage` desregistrada.
+    Código/página/VM/DI conservados (sin acceso, no eliminados).
   - **Impresora** (`icon_impresora_gris.svg` #A9A9A9, desplegable; chevron ▼/› conmuta).
   - **Cerrar Sesión** (`icon_power_rojo.svg` #D7493D) → modal de confirmación.
 
 ## 2. Notificaciones (mockup 3)
+
+> OCULTA desde 2026-10-14: el renglón en Cuenta tiene `IsVisible="False"` y la ruta
+> `NotificacionesPage` quedó desregistrada. La pantalla se conserva pero ya no es
+> accesible desde la app.
 
 - `Views/NotificacionesPage.xaml` + VM — página pusheada (ruta relativa `NotificacionesPage`).
 - Header morado + flecha atrás (patrón DetalleVenta/Tickets) + título blanco.
@@ -82,7 +88,8 @@ Pestaña final del menú principal. Implementada 2026-09-11, fase SOLO INTERFAZ
 
 ## 8. Wiring
 
-- `AppShell.xaml.cs`: RegisterRoute NotificacionesPage, DispositivosEnlazadosPage.
+- `AppShell.xaml.cs`: RegisterRoute DispositivosEnlazadosPage (NotificacionesPage
+  desregistrada el 2026-10-14 al ocultarse el renglón en Cuenta).
 - `MauiProgram.cs`: DI Transient (CuentaViewModel+CuentaPage, NotificacionesVM+Page,
   DispositivosEnlazadosVM+Page). CuentaPage ya era ShellContent tab.
 - 7 SVGs en Resources/Images (campana azul #5DB7F3, impresora gris #A9A9A9, power rojo

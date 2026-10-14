@@ -84,8 +84,9 @@
 
                     <VerticalStackLayout>
 
-                        <!-- Fila Notificaciones -->
+                        <!-- Fila Notificaciones (OCULTA 2026-10-14: sin acceso, código conservado) -->
                         <Grid
+                            IsVisible="False"
                             ColumnDefinitions="Auto,*,Auto"
                             ColumnSpacing="12"
                             Padding="0,14">
@@ -110,7 +111,8 @@
                                 VerticalOptions="Center" />
                         </Grid>
 
-                        <BoxView Color="{StaticResource McDivider}" HeightRequest="1" HorizontalOptions="Fill" />
+                        <!-- Divisor de Notificaciones (OCULTO 2026-10-14) -->
+                        <BoxView IsVisible="False" Color="{StaticResource McDivider}" HeightRequest="1" HorizontalOptions="Fill" />
 
                         <!-- Fila Impresora (desplegable) -->
                         <Grid
