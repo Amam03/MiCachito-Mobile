@@ -42,6 +42,25 @@
             TextColor="{StaticResource McTextDark}"
             HorizontalOptions="Center" />
 
+        <!-- Datos reales de la venta (backend): mismo patrón que la
+             pantalla de éxito de Lotería Nacional. El importe lo calcula
+             el servidor; aquí solo se pinta. -->
+        <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+            <Label
+                Text="{Binding Folio}"
+                FontSize="16"
+                FontAttributes="Bold"
+                TextColor="{StaticResource McPrimaryMorado}"
+                HorizontalOptions="Center" />
+            <Label
+                Text="{Binding TotalTexto}"
+                FontSize="20"
+                FontAttributes="Bold"
+                FontFamily="OpenSansSemibold"
+                TextColor="{StaticResource McTextDark}"
+                HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
         <!-- Botón Continuar -->
         <Border
             StrokeThickness="0"

@@ -5,16 +5,33 @@ namespace MiCachito.Mobile.ViewModels;
 
 /// <summary>
 /// ViewModel de la pantalla "Venta Exitosa" (tras Confirmar Venta de
-/// Sorteos Tec). No existe mockup: propuesta simple aprobada por el
-/// usuario (círculo verde con check, "Venta Exitosa", botón Continuar
-/// que regresa al Home) — el usuario la ajustará al inspeccionarla.
+/// Sorteos Tec). Muestra el FOLIO y el TOTAL REALES devueltos por el
+/// backend (POST api/mobile/ventas/crear), con el mismo patrón de
+/// QueryProperty que la pantalla de éxito de Lotería Nacional.
+///
+/// No existe mockup: propuesta simple aprobada por el usuario (círculo
+/// verde con check, "Venta Exitosa", datos de la venta, botón Continuar
+/// que regresa al Home).
 /// </summary>
+[QueryProperty(nameof(Folio), "folio")]
+[QueryProperty(nameof(TotalTexto), "total")]
 public partial class VentaExitosaTecViewModel : BaseViewModel
 {
     public VentaExitosaTecViewModel()
     {
         Title = "Venta Exitosa";
     }
+
+    /// <summary>Folio real de la venta, devuelto por el backend.</summary>
+    [ObservableProperty]
+    private string folio = string.Empty;
+
+    /// <summary>
+    /// Total real formateado ("$140.00"). Lo calcula el backend y lo
+    /// formatea la pantalla anterior al navegar; Mobile no recalcula nada.
+    /// </summary>
+    [ObservableProperty]
+    private string totalTexto = string.Empty;
 
     /// <summary>
     /// Botón "Continuar": regresa a la pestaña Vender (Home).
