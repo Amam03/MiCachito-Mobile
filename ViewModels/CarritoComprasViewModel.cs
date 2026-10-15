@@ -182,11 +182,11 @@ public partial class CarritoComprasViewModel : BaseViewModel
     /// (sesión), precio (sorteos.precio_fraccion) y totales; marca los
     /// billetes 'vendido' conservando id_billetero_actual.
     ///
-    /// Éxito: descuenta localmente (TotalDisponible baja), limpia la
-    /// sesión de venta y navega a VentaExitosaLotenal con folio/total
-    /// reales. Error (409 ya vendido, 403 ajeno, red): aviso rojo con
-    /// el mensaje del backend + botón Reintentar; el carrito se
-    /// CONSERVA para reintentar.
+    /// Éxito: marca los id_billete vendidos en la sesión (MarcarVendidas:
+    /// no se reutilizan en una segunda venta) y limpia la selección; navega
+    /// a VentaExitosaLotenal con folio/total reales. Error (409 ya vendido,
+    /// 403 ajeno, red): aviso rojo con el mensaje del backend; el carrito
+    /// se CONSERVA para reintentar y NADA se marca como vendido.
     /// </summary>
     [RelayCommand]
     private async Task VenderAsync()
@@ -196,9 +196,13 @@ public partial class CarritoComprasViewModel : BaseViewModel
             return;
         }
 
-        // id_billete exactos: las primeras N fracciones libres de cada
-        // serie (N = seleccionadas de esa serie).
+        // id_billete exactos: las primeras N fracciones VENDIBLES de cada
+        // serie (N = seleccionadas de esa serie), excluyendo las ya vendidas
+        // en la sesión (evita reenviar ids vendidos) . Guard: si la
+        // disponibilidad ya no alcanza para la cantidad seleccionada NO se
+        // envía una venta parcial en silencio — se aborta con aviso claro.
         var idsBilletes = new List<int>();
+        var vendidosPorSerie = new Dictionary<int, List<int>>();
         foreach (var registro in Registros)
         {
             var serie = SesionVentaLotenal.Series
@@ -209,9 +213,17 @@ public partial class CarritoComprasViewModel : BaseViewModel
                 continue;
             }
 
-            idsBilletes.AddRange(serie.FraccionesLibres
-                .Take(serie.Seleccionadas)
-                .Select(f => f.IdBillete));
+            var libres = serie.FraccionesVendibles.ToList();
+            if (registro.Cantidad > libres.Count)
+            {
+                MensajeError = $"La disponibilidad cambió: solo hay {libres.Count} billete(s) en {serie.DisplayName}. Vuelve a seleccionar la cantidad.";
+                OnPropertyChanged(nameof(HayError));
+                return;
+            }
+
+            var ids = libres.Take(registro.Cantidad).Select(f => f.IdBillete).ToList();
+            idsBilletes.AddRange(ids);
+            vendidosPorSerie[registro.IdSerie] = ids;
         }
 
         if (idsBilletes.Count == 0)
@@ -230,7 +242,10 @@ public partial class CarritoComprasViewModel : BaseViewModel
         {
             VentaCreadaApi venta = await _servicio.CrearVentaAsync(idsBilletes).ConfigureAwait(true);
 
-            // Éxito: descuento local + limpieza + navegación con datos reales.
+            // Éxito CONFIRMADO por el backend: marca los id_billete
+            // vendidos en la sesión (no se reutilizan en una segunda
+            // venta) y limpia la selección. MarcarVendidas recalcula
+            // TotalDisponible a partir de las fracciones aún vendibles.
             foreach (var registro in Registros.ToList())
             {
                 var serie = SesionVentaLotenal.Series
@@ -238,7 +253,11 @@ public partial class CarritoComprasViewModel : BaseViewModel
 
                 if (serie is not null)
                 {
-                    serie.TotalDisponible = Math.Max(0, serie.TotalDisponible - registro.Cantidad);
+                    if (vendidosPorSerie.TryGetValue(registro.IdSerie, out var idsVendidos))
+                    {
+                        serie.MarcarVendidas(idsVendidos);
+                    }
+
                     serie.Seleccionadas = 0;
                 }
             }

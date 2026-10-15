@@ -400,6 +400,19 @@
                                     Margin="12,0,0,0" />
                             </Grid>
 
+                            <!-- Aviso de cantidad: aparece cuando lo
+                                 capturado excede los disponibles o la
+                                 serie ya no tiene material. Indica el
+                                 máximo; no se aplica una cantidad
+                                 distinta en silencio. -->
+                            <Label
+                                IsVisible="{Binding HayMensajeCantidad}"
+                                Text="{Binding MensajeCantidad}"
+                                FontSize="12"
+                                TextColor="{StaticResource McRedCancel}"
+                                HorizontalTextAlignment="Center"
+                                Margin="16,12,16,0" />
+
                             <!-- Cancelar (borde blanco, texto rojo) /
                                  Aceptar (verde, texto blanco) -->
                             <Grid

@@ -34,8 +34,10 @@ namespace MiCachito.Mobile.ViewModels;
 /// PANTALLA 10.x (Cantidad de Cachitos): overlay con diálogo + teclado
 /// numérico (mismo flujo que el mock): Aceptar aplica la cantidad a la
 /// fila; los "disponibles" del diálogo derivan de TotalDisponible de la
-/// SERIE seleccionada. La selección es ESTADO LOCAL (la venta real F3
-/// valida contra el backend).
+/// SERIE seleccionada. La cantidad se valida contra esa disponibilidad
+/// REAL (aviso rojo inline con el máximo; nunca se trunca en silencio).
+/// La selección es ESTADO LOCAL (la venta real F3 valida contra el
+/// backend).
 ///
 /// ESTADO COMPARTIDO: las series viven en SesionVentaLotenal (mismas
 /// instancias entre 9.x y el carrito 11): mutar Seleccionadas se
@@ -125,6 +127,19 @@ public partial class AgregarBoletosViewModel : BaseViewModel
     [ObservableProperty]
     private int _cantidadConfirmada;
 
+    /// <summary>
+    /// Aviso de validación de la cantidad del diálogo 10.x (p. ej. "Solo
+    /// hay 16 disponibles. Ajusta la cantidad."). Vacío = sin aviso.
+    /// </summary>
+    [ObservableProperty]
+    private string _mensajeCantidad = string.Empty;
+
+    /// <summary>True cuando hay un aviso de cantidad visible.</summary>
+    public bool HayMensajeCantidad => !string.IsNullOrEmpty(MensajeCantidad);
+
+    partial void OnMensajeCantidadChanged(string value) =>
+        OnPropertyChanged(nameof(HayMensajeCantidad));
+
     /// <summary>Momento (UTC) en que se abrió el overlay 10.x.</summary>
     private DateTime _abiertoEnUtc = DateTime.MinValue;
 
@@ -161,6 +176,38 @@ public partial class AgregarBoletosViewModel : BaseViewModel
     public string DisponiblesTexto => TiendaSeleccionada is null
         ? string.Empty
         : TiendaSeleccionada.TotalDisponible.ToString();
+
+    /// <summary>
+    /// Disponibles vigentes de la serie en contexto (0 sin selección).
+    /// Es el tope REAL para la cantidad capturada.
+    /// </summary>
+    private int DisponiblesSerie => TiendaSeleccionada?.TotalDisponible ?? 0;
+
+    /// <summary>
+    /// Valida la cantidad capturada (siempre &gt; 0) contra la
+    /// disponibilidad REAL de la serie en contexto. Devuelve false con un
+    /// aviso claro —que incluye el máximo disponible— cuando excede o no
+    /// hay material. NUNCA trunca la cantidad en silencio.
+    /// </summary>
+    private bool ValidarCantidad(int cantidad, out string aviso)
+    {
+        int disponibles = DisponiblesSerie;
+
+        if (disponibles <= 0)
+        {
+            aviso = "No hay billetes disponibles en esta serie.";
+            return false;
+        }
+
+        if (cantidad > disponibles)
+        {
+            aviso = $"Solo hay {disponibles} disponibles. Ajusta la cantidad.";
+            return false;
+        }
+
+        aviso = string.Empty;
+        return true;
+    }
 
     /// <summary>
     /// Línea 1 del toast (mockup 10.2): "AQUÍ ELEGIRÁS {n} DE {disp}",
@@ -407,6 +454,9 @@ public partial class AgregarBoletosViewModel : BaseViewModel
         TiendaSeleccionada = tienda;
         CantidadTexto = string.Empty;
         CantidadConfirmada = 0;
+        MensajeCantidad = tienda.TotalDisponible <= 0
+            ? "No hay billetes disponibles en esta serie."
+            : string.Empty;
         TecladoVisible = true;
         ToastCantidadVisible = false;
         _abiertoEnUtc = DateTime.UtcNow;
@@ -431,6 +481,17 @@ public partial class AgregarBoletosViewModel : BaseViewModel
         }
 
         CantidadTexto = CantidadTexto == "0" ? digito : CantidadTexto + digito;
+
+        // Aviso inmediato si el número ya excede lo disponible; NO se
+        // descarta el dígito (el usuario decide corregir con Borrar).
+        if (int.TryParse(CantidadTexto, out var capturada) && !ValidarCantidad(capturada, out var aviso))
+        {
+            MensajeCantidad = aviso;
+        }
+        else
+        {
+            MensajeCantidad = string.Empty;
+        }
     }
 
     /// <summary>
@@ -447,6 +508,18 @@ public partial class AgregarBoletosViewModel : BaseViewModel
         if (CantidadTexto.Length > 0)
         {
             CantidadTexto = CantidadTexto[..^1];
+        }
+
+        // Reevalúa el aviso tras borrar (pudo volver al rango válido).
+        if (!string.IsNullOrEmpty(CantidadTexto)
+            && int.TryParse(CantidadTexto, out var capturada)
+            && !ValidarCantidad(capturada, out var aviso))
+        {
+            MensajeCantidad = aviso;
+        }
+        else
+        {
+            MensajeCantidad = string.Empty;
         }
     }
 
@@ -467,7 +540,16 @@ public partial class AgregarBoletosViewModel : BaseViewModel
             return;
         }
 
+        // No se muestra el toast (ni se confirma) si excede lo disponible:
+        // el aviso queda a la vista para corregir.
+        if (!ValidarCantidad(cantidad, out var aviso))
+        {
+            MensajeCantidad = aviso;
+            return;
+        }
+
         CantidadConfirmada = cantidad;
+        MensajeCantidad = string.Empty;
         TecladoVisible = false;
         ToastCantidadVisible = true;
         NotificarDerivadasCantidad();
@@ -487,6 +569,14 @@ public partial class AgregarBoletosViewModel : BaseViewModel
 
         if (TiendaSeleccionada is not null && cantidad > 0)
         {
+            if (!ValidarCantidad(cantidad, out var aviso))
+            {
+                // No se aplica ni se cierra: el aviso queda a la vista
+                // para que el usuario corrija (sin truncar en silencio).
+                MensajeCantidad = aviso;
+                return;
+            }
+
             TiendaSeleccionada.Seleccionadas = cantidad;
         }
 
@@ -518,6 +608,7 @@ public partial class AgregarBoletosViewModel : BaseViewModel
         TecladoVisible = false;
         ToastCantidadVisible = false;
         CantidadConfirmada = 0;
+        MensajeCantidad = string.Empty;
         TiendaSeleccionada = null;
         NotificarDerivadasCantidad();
     }

@@ -18,6 +18,11 @@ namespace MiCachito.Mobile.Models.Entities;
 /// la venta (F3) será por id_billete. NO es inventario paralelo —
 /// billetes_loteria vía backend es la fuente de verdad LIVE y la app
 /// reconsulta al entrar a la dotación.
+///
+/// VENDIDAS EN SESIÓN: tras vender, MarcarVendidas registra los
+/// id_billete confirmados por el backend; FraccionesVendibles los
+/// excluye para que una segunda venta (p. ej. al volver al carrito sin
+/// recargar la dotación) NUNCA reenvíe ids ya vendidos (evita el 409).
 /// </summary>
 public class SerieDisponible : ObservableObject
 {
@@ -39,8 +44,47 @@ public class SerieDisponible : ObservableObject
     /// </summary>
     public string? Signo { get; init; }
 
-    /// <summary>Fracciones libres de la serie (id_billete exacto, venta F3).</summary>
+    /// <summary>
+    /// Fracciones libres de la serie tal como las devolvió el backend al
+    /// cargar la dotación (id_billete exacto). NO se muta al vender: la
+    /// impresión F6 (ComprobanteLotenalFactory) lee esta lista para armar
+    /// el desglose; las fracciones ya vendidas en la sesión se excluyen
+    /// vía <see cref="FraccionesVendibles"/>.
+    /// </summary>
     public IReadOnlyList<FraccionLibre> FraccionesLibres { get; init; } = [];
+
+    /// <summary>
+    /// id_billete ya vendidos EN ESTA SESIÓN de dotación (confirmados por
+    /// el backend). Se vacía solo al recargar la dotación (nueva lista).
+    /// </summary>
+    private readonly HashSet<int> _vendidas = [];
+
+    /// <summary>
+    /// Fracciones aún vendibles: las libres menos las vendidas en la
+    /// sesión. Es la fuente de la venta (nunca reutiliza ids vendidos).
+    /// </summary>
+    public IEnumerable<FraccionLibre> FraccionesVendibles =>
+        FraccionesLibres.Where(f => !_vendidas.Contains(f.IdBillete));
+
+    /// <summary>
+    /// Marca fracciones como VENDIDAS (llamar SOLO tras confirmación del
+    /// backend) y recalcula <see cref="TotalDisponible"/> a partir de las
+    /// fracciones vendibles reales. Idempotente: repetir los mismos ids
+    /// no altera nada.
+    /// </summary>
+    public void MarcarVendidas(IEnumerable<int> idsBillete)
+    {
+        bool cambio = false;
+        foreach (int id in idsBillete)
+        {
+            cambio |= _vendidas.Add(id);
+        }
+
+        if (cambio)
+        {
+            TotalDisponible = FraccionesVendibles.Count();
+        }
+    }
 
     /// <summary>Precio por cachito de la dotación (backend).</summary>
     public decimal PrecioFraccion { get; init; }
