@@ -64,6 +64,19 @@
                 Spacing="10"
                 VerticalOptions="Start">
 
+                <!-- Error de carga (sin conexión / HTTP); no borra lo ya cargado -->
+                <Border
+                    StrokeShape="RoundRectangle 10"
+                    BackgroundColor="White"
+                    StrokeThickness="0"
+                    Padding="14,12"
+                    IsVisible="{Binding HayError}">
+                    <Label
+                        Text="{Binding MensajeError}"
+                        FontSize="13"
+                        TextColor="#EE534F" />
+                </Border>
+
                 <!-- Estado vacio (mockup 6) -->
                 <Label
                     IsVisible="{Binding SinRegistros}"
@@ -143,6 +156,28 @@
                 TextColor="{StaticResource White}"
                 HorizontalOptions="Center"
                 VerticalOptions="Center" />
+        </Border>
+
+        <!-- ============ Overlay "Cargando..." (patrón Depósitos/Recibos) ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="2"
+            IsVisible="{Binding Cargando}"
+            BackgroundColor="#80000000"
+            StrokeThickness="0"
+            Padding="0"
+            InputTransparent="False">
+            <VerticalStackLayout
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Spacing="14">
+                <ActivityIndicator IsRunning="True" Color="White" WidthRequest="40" HeightRequest="40" />
+                <Label
+                    Text="Cargando..."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
         </Border>
 
     </Grid>

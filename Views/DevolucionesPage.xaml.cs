@@ -3,8 +3,8 @@ using MiCachito.Mobile.ViewModels;
 namespace MiCachito.Mobile.Views;
 
 /// <summary>
-/// Pantalla "Devoluciones" (mockup 6): listado en memoria + FAB "+".
-/// Fase solo-interfaz.
+/// Pantalla "Devoluciones" (mockup 6): historial persistente del
+/// billetero (GET api/mobile/devoluciones) + FAB "+".
 /// </summary>
 public partial class DevolucionesPage : ContentPage
 {
@@ -16,9 +16,9 @@ public partial class DevolucionesPage : ContentPage
         BindingContext = _vm = vm;
     }
 
-    protected override void OnAppearing()
+    protected override async void OnAppearing()
     {
         base.OnAppearing();
-        _vm.AlAparecer();
+        await _vm.AlAparecerAsync();
     }
 }

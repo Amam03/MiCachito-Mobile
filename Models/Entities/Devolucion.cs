@@ -65,7 +65,9 @@ public sealed class FilaDesglose
 
 /// <summary>
 /// Devolución registrada (lista mockup 6): folio, sorteo y filas capturadas.
-/// Fase solo-interfaz: vive en memoria en DevolucionService (ningún seed).
+/// Con historial persistente (6.x real): las filas de sesiones anteriores
+/// NO se reconstruyen — la lista muestra el total de cachitos del
+/// movimiento; el desglose por modo vive solo en la sesión de captura.
 /// </summary>
 public sealed class Devolucion
 {
@@ -91,13 +93,31 @@ public sealed class Devolucion
     /// <summary>Fecha de celebración del sorteo (texto) para el registro.</summary>
     public string FechaSorteo { get; init; } = string.Empty;
 
+    /// <summary>
+    /// Fecha del registro: la del MOVIMIENTO en filas del historial
+    /// (fecha_movimiento del backend), UtcNow solo en fase UI-only.
+    /// </summary>
     public DateTime RegistradaEnUtc { get; init; } = DateTime.UtcNow;
 
-    /// <summary>Resumen corto para la fila de la lista: "C: 3 · T: 1 · S: 0".</summary>
+    /// <summary>
+    /// Cachitos totales del movimiento (COUNT del detalle). Lleno en
+    /// filas del historial; en captura local = filas capturadas.
+    /// </summary>
+    public int TotalCachitos { get; init; }
+
+    /// <summary>
+    /// Resumen corto para la fila de la lista. Con filas (captura de
+    /// esta sesión): "C: 3 · T: 1 · S: 0" por modo; desde historial:
+    /// "Cachitos: N".
+    /// </summary>
     public string ResumenText
     {
         get
         {
+            if (Filas.Count == 0)
+            {
+                return TotalCachitos > 0 ? $"Cachitos: {TotalCachitos}" : "Cachitos: 0";
+            }
             int c = Filas.Count(f => f.Modo == ModoCapturaDevolucion.Cachitos);
             int t = Filas.Count(f => f.Modo == ModoCapturaDevolucion.Tiras);
             int s = Filas.Count(f => f.Modo == ModoCapturaDevolucion.Series);

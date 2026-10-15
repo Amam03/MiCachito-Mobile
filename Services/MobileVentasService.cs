@@ -243,6 +243,29 @@ public class MobileVentasService
 
     private const string RutaDevolver = "api/mobile/ventas/devolver";
 
+    /// <summary>
+    /// Historial PERSISTENTE de devoluciones del billetero de la sesión
+    /// (Gestión > Devolución 6.x): GET api/mobile/devoluciones. Incluye
+    /// las registradas desde Mobile (POST ventas/devolver) y desde
+    /// Escritorio a nombre del mismo billetero; fecha descendente.
+    /// </summary>
+    private const string RutaDevolucionesHistorial = "api/mobile/devoluciones";
+
+    /// <summary>
+    /// Carga el historial de devoluciones del billetero de la sesión.
+    /// Los decimales de MySQL viajan como string; TotalCachitos/total
+    /// se parsean aquí (InvariantCulture), no en el VM.
+    /// </summary>
+    public async Task<IReadOnlyList<DevolucionHistorialApi>> CargarDevolucionesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        List<DevolucionHistorialApi>? items = await _api
+            .GetAsync<List<DevolucionHistorialApi>>(RutaDevolucionesHistorial, cancellationToken)
+            .ConfigureAwait(false);
+
+        return items ?? new List<DevolucionHistorialApi>();
+    }
+
     // ── Sorteos TEC ─────────────────────────────────────────────────────────
     // Rutas propias (NO las de LN): TEC no se fracciona, se vende por BOLETO
     // COMPLETO y su precio vive en sorteos.precio_billete_completo

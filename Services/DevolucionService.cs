@@ -55,6 +55,71 @@ public class DevolucionService
     /// <summary>Devoluciones registradas (GUARDAR), más reciente primero.</summary>
     public IReadOnlyList<Devolucion> Devoluciones => _devoluciones;
 
+    /// <summary>
+    /// Carga el historial PERSISTENTE del backend (GET
+    /// api/mobile/devoluciones, fecha descendente) y lo fusiona con los
+    /// registros en memoria: los guardados en esta sesión (que el backend
+    /// ya tiene) se sustituyen por la fila del servidor (misma fuente de
+    /// verdad), y cualquier otra devolución del billetero —incluidas las
+    /// de sesiones o días anteriores y las registradas desde
+    /// Escritorio— se reconstruye. Sin duplicados por id_movimiento.
+    ///
+    /// Requiere red: la lista en memoria se CONSERVA si la carga falla
+    /// (la pantalla muestra el error y el reintento re-entra).
+    /// </summary>
+    public async Task CargarHistorialAsync(CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList<DevolucionHistorialApi> historial =
+            await _ventas.CargarDevolucionesAsync(cancellationToken).ConfigureAwait(true);
+
+        // El backend es la fuente de verdad: reemplaza la lista local.
+        // Los registros locales recién guardados tienen IdMovimiento
+        // real (devuelto por POST ventas/devolver), así que la fusión por
+        // id no duplica nada.
+        _devoluciones.Clear();
+        foreach (DevolucionHistorialApi h in historial)
+        {
+            _devoluciones.Add(Mapear(h));
+        }
+    }
+
+    /// <summary>Fila del historial → registro de la lista (mockup 6).</summary>
+    private static Devolucion Mapear(DevolucionHistorialApi h)
+    {
+        // Fecha de celebración del sorteo en texto corto es-MX ("24 sep").
+        string fechaSorteo = "-";
+        if (DateOnly.TryParse(
+                h.FechaSorteo,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None,
+                out DateOnly fs))
+        {
+            fechaSorteo = fs.ToString("dd MMM", new System.Globalization.CultureInfo("es-MX"));
+        }
+
+        return new Devolucion
+        {
+            Folio = h.IdMovimiento,
+            FolioTexto = h.Folio,
+            IdSorteo = h.IdSorteo,
+            NombreSorteo = string.IsNullOrEmpty(h.Dotacion)
+                ? (h.NombreProducto ?? h.Sorteo ?? "-")
+                : $"{h.NombreProducto ?? "-"} {h.Dotacion}",
+            FechaSorteo = fechaSorteo,
+            Estatus = h.Estatus,
+            // Fecha del movimiento (no la de "ahora"): la fila del listado
+            // muestra cuándo se registró la devolución.
+            RegistradaEnUtc = DateOnly.TryParse(
+                h.FechaMovimiento,
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None,
+                out DateOnly fm)
+                ? fm.ToDateTime(TimeOnly.MinValue)
+                : DateTime.UtcNow,
+            TotalCachitos = h.TotalCachitos,
+        };
+    }
+
     /// <summary>Filas capturadas de la devolución en curso.</summary>
     public IReadOnlyList<FilaDesglose> FilasEnCurso => _enCurso;
 
