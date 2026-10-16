@@ -127,7 +127,8 @@ public partial class ExpendiosViewModel : BaseViewModel
                 var actual = _sessionService.CurrentSession?.Billetero;
                 if (actual is null
                     || actual.TieneProdDigitales != respuesta.Billetero.TieneProdDigitales
-                    || actual.TieneTiempoAire != respuesta.Billetero.TieneTiempoAire)
+                    || actual.TieneTiempoAire != respuesta.Billetero.TieneTiempoAire
+                    || actual.TieneLotenal != respuesta.Billetero.TieneLotenal)
                 {
                     await _sessionService.UpdateBilleteroAsync(respuesta.Billetero);
                 }

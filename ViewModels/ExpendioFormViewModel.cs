@@ -14,13 +14,11 @@ namespace MiCachito.Mobile.ViewModels;
 /// aquí se muestra en SOLO LECTURA. No hay modo Crear desde Mobile.
 ///
 /// Los permisos son COMPARTIDOS a nivel billetero (billeteros.
-/// tiene_prod_digitales / tiene_tiempo_aire): el formulario muestra el
-/// estado del conjunto y Guardar lo envía por PUT
+/// tiene_prod_digitales / tiene_tiempo_aire / tiene_lotenal): el formulario
+/// muestra el estado del conjunto y Guardar lo envía por PUT
 /// api/mobile/expendios/{id}/permisos; la respuesta actualiza la sesión y
 /// la pestaña Vender refleja los botones al volver (OnAppearing).
-///
-/// Lotería Nacional NO tiene checkbox: sin flag backend, siempre visible
-/// en Vender (decisión 2026-09-14, sin tocar Lotenal).
+/// Lotería Nacional tiene su checkbox (tiene_lotenal) desde 2026-09-16.
 /// </summary>
 [QueryProperty(nameof(ExpendioIdStr), "expendioId")]
 [QueryProperty(nameof(ModoStr), "modo")]
@@ -28,6 +26,16 @@ public partial class ExpendioFormViewModel : BaseViewModel
 {
     /// <summary>Expendio (credencial) en edición, del conjunto de la sesión.</summary>
     private ExpendioItem? _expendio;
+
+    /// <summary>
+    /// Valores de los permisos leídos al abrir el formulario. Se envían como
+    /// "original" para el compare-and-swap del backend: si en BD cambiaron
+    /// (p. ej. desde Escritorio) entre abrir y guardar, el PUT responde 409 en
+    /// vez de sobreescribir con datos viejos.
+    /// </summary>
+    private int _origSorteosTec;
+    private int _origTiempoAire;
+    private int _origLotenal;
 
     private readonly IExpendiosService _expendiosService;
     private readonly ISessionService _sessionService;
@@ -136,6 +144,11 @@ public partial class ExpendioFormViewModel : BaseViewModel
         TiempoAire = billetero?.TieneTiempoAire == 1;
         Lotenal = billetero?.TieneLotenal == 1;
 
+        // Snapshot para el compare-and-swap (valores leídos del servidor).
+        _origSorteosTec = SorteosTec ? 1 : 0;
+        _origTiempoAire = TiempoAire ? 1 : 0;
+        _origLotenal = Lotenal ? 1 : 0;
+
         Usuario = _expendio?.Usuario ?? string.Empty;
         Titular = _expendio?.Titular ?? string.Empty;
         Domicilio = _expendio?.Domicilio ?? string.Empty;
@@ -186,7 +199,10 @@ public partial class ExpendioFormViewModel : BaseViewModel
                 _expendio.IdExpendio,
                 SorteosTec ? 1 : 0,
                 TiempoAire ? 1 : 0,
-                Lotenal ? 1 : 0);
+                Lotenal ? 1 : 0,
+                _origSorteosTec,
+                _origTiempoAire,
+                _origLotenal);
 
             if (respuesta?.Billetero is not null)
             {
@@ -204,6 +220,15 @@ public partial class ExpendioFormViewModel : BaseViewModel
             {
                 await _sessionService.ClearAsync();
                 await _navigationService.NavigateToLoginAsync();
+                return;
+            }
+            if (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                // Compare-and-swap falló: otro usuario (Escritorio/otra sesión)
+                // cambió los permisos. Se recarga el estado actual y se pide
+                // reintentar, sin perder lo que el usuario pueda re-aplicar.
+                await RefrescarEstadoDesdeServidorAsync();
+                await AlertarAsync(ex.ServerMessage ?? "Los permisos fueron actualizados por otro usuario. Se recargó el estado actual.");
                 return;
             }
             await AlertarAsync(ex.ServerMessage ?? "No fue posible actualizar los permisos.");
@@ -235,5 +260,29 @@ public partial class ExpendioFormViewModel : BaseViewModel
         {
             await Application.Current.Windows[0].Page!.DisplayAlertAsync("Expendios", mensaje, "OK");
         }
+    }
+
+    /// <summary>
+    /// Reconsulta el conjunto (GET api/mobile/expendios), refresca el billetero
+    /// de la sesión y recompone el formulario con el estado más reciente del
+    /// servidor. Se usa tras un 409 (compare-and-swap falló) para que el
+    /// usuario vea los valores actuales antes de reintentar.
+    /// </summary>
+    private async Task RefrescarEstadoDesdeServidorAsync()
+    {
+        try
+        {
+            var respuesta = await _expendiosService.ObtenerAsync();
+            if (respuesta?.Billetero is not null)
+            {
+                await _sessionService.UpdateBilleteroAsync(respuesta.Billetero);
+            }
+        }
+        catch (Exception)
+        {
+            // Sin conexión: se conserva la sesión cacheada y lo capturado.
+        }
+
+        AlAparecer();
     }
 }

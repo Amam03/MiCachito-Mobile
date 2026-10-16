@@ -20,11 +20,17 @@ public interface IExpendiosService
     /// PUT api/mobile/expendios/{idExpendio}/permisos: actualiza los flags
     /// del PROPIO billetero (el idExpendio debe pertenecer al conjunto).
     /// Devuelve el billetero actualizado para refrescar la sesión.
+    /// Los parámetros *Original son los valores leídos al abrir el formulario:
+    /// el backend los usa para el compare-and-swap y responde 409 si el estado
+    /// cambió (p. ej. desde Escritorio) para no sobreescribir datos viejos.
     /// </summary>
     Task<MobilePermisosResponse?> ActualizarPermisosAsync(
         int idExpendio,
         int tieneProdDigitales,
         int tieneTiempoAire,
         int tieneLotenal,
+        int prodDigitalesOriginal,
+        int tiempoAireOriginal,
+        int lotenalOriginal,
         CancellationToken cancellationToken = default);
 }

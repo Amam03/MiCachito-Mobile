@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MiCachito.Mobile.Api;
 using MiCachito.Mobile.Navigation;
 using MiCachito.Mobile.Services;
 
@@ -66,6 +67,13 @@ public partial class HomeViewModel : BaseViewModel
 
     public async Task LoadAsync()
     {
+        // Refrescar la sesión contra el backend en cada visita a Vender para
+        // que los cambios de Permisos de Venta hechos desde Escritorio se
+        // reflejen SIN cerrar sesión (GET api/mobile/auth/verify ya trae el
+        // billetero actualizado). Si falla por red, se conserva la sesión
+        // cacheada; si el token expiró (401) se va a Login.
+        await RefrescarSesionDesdeServidorAsync();
+
         var session = _sessionService.CurrentSession ?? await _sessionService.LoadAsync();
         var expendio = session?.Expendio;
         var billetero = session?.Billetero;
@@ -80,6 +88,33 @@ public partial class HomeViewModel : BaseViewModel
         Sede = $"Expendio: {expendio.Usuario}";
 
         CargarPermisosVenta();
+    }
+
+    /// <summary>
+    /// Revalida el token (GET api/mobile/auth/verify) y actualiza la sesión
+    /// persistida con el expendio/billetero más recientes. Es el mecanismo que
+    /// sincroniza Escritorio → Mobile sin logout: los Permisos de Venta son
+    /// compartidos a nivel billetero y se editan también desde Desktop.
+    /// </summary>
+    private async Task RefrescarSesionDesdeServidorAsync()
+    {
+        try
+        {
+            var verify = await _authService.VerifyAsync();
+            if (verify is not null)
+            {
+                await _sessionService.UpdateAsync(verify);
+            }
+        }
+        catch (ApiException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            await _sessionService.ClearAsync();
+            await _navigationService.NavigateToLoginAsync();
+        }
+        catch (Exception)
+        {
+            // Sin conexión: se conserva la sesión cacheada.
+        }
     }
 
     /// <summary>

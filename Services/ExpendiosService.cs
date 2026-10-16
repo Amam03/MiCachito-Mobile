@@ -27,9 +27,23 @@ public class ExpendiosService : IExpendiosService
         int tieneProdDigitales,
         int tieneTiempoAire,
         int tieneLotenal,
+        int prodDigitalesOriginal,
+        int tiempoAireOriginal,
+        int lotenalOriginal,
         CancellationToken cancellationToken = default)
         => _apiClient.PutAsync<MobilePermisosResponse>(
             string.Format(ApiEndpoints.MobileExpendios.Permisos, idExpendio),
-            new { tiene_prod_digitales = tieneProdDigitales, tiene_tiempo_aire = tieneTiempoAire, tiene_lotenal = tieneLotenal },
+            new
+            {
+                tiene_prod_digitales = tieneProdDigitales,
+                tiene_tiempo_aire = tieneTiempoAire,
+                tiene_lotenal = tieneLotenal,
+                original = new
+                {
+                    tiene_prod_digitales = prodDigitalesOriginal,
+                    tiene_tiempo_aire = tiempoAireOriginal,
+                    tiene_lotenal = lotenalOriginal,
+                },
+            },
             cancellationToken);
 }
