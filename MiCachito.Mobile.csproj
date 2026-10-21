@@ -54,10 +54,18 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<!-- App Icon -->
-<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#00C851" />
+	<!-- App Icon -->
+	<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#00C851" />
 
-        <!-- Splash Screen -->
+	      <!-- FIX build (preexistente, hallado en M-06 2026-10-21): el commit 778cae7
+	           (M-07) agregó tests/MiCachito.Mobile.Tests/ al repo y el csproj de la
+	           app (EnableDefaultCompileItems default) lo arrastra todo (xunit sin
+	           PackageReference + obj/ del proyecto de tests duplicando atributos).
+	           El proyecto de tests compila SOLO logica pura por su propio csproj;
+	           aqui se excluye del globo de la app. -->
+	      <Compile Remove="tests\**\*.cs" />
+
+	      <!-- Splash Screen -->
         <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#00C851" BaseSize="128,128" />
 
         <!-- Images -->

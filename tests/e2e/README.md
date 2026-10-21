@@ -53,6 +53,7 @@ E2E_TIMEOUT_S=30 python3 tests/e2e/e2e_mobile_sorteos_dotaciones.py
 | `e2e_mobile_depositos.py` | Depósitos (GET/POST, folio servidor DEP-) | SÍ (depósito pendiente) |
 | `e2e_mobile_pagos.py` | Recibos de Pago (GET) | NO (requiere semillas) |
 | `e2e_mobile_reportes.py` | Reportes EC/FA/FAC (GET, params reales) | NO |
+| `e2e_mobile_sesiones.py` | Sesiones Activas M-06 (GET sesiones + revocar, aislamiento b1↔b11, actual viva tras revocar secundaria) | SÍ (revoca solo sesiones E2E creadas por el script) |
 | `e2e_tec_cliente.py` | Venta Sorteos Tec con datos de cliente + reporte Desktop | SÍ (venta TEC de prueba) |
 
 **Scripts NO migrados (a propósito):**

@@ -46,6 +46,8 @@ public partial class AppShell : Shell
         // la ruta queda registrada para conservar la funcionalidad completa.
         Routing.RegisterRoute(nameof(NotificacionesPage), typeof(NotificacionesPage));
         Routing.RegisterRoute(nameof(DispositivosEnlazadosPage), typeof(DispositivosEnlazadosPage));
+        // M-06: sesiones activas del expendio (consulta/revocación por dispositivo).
+        Routing.RegisterRoute(nameof(SesionesActivasPage), typeof(SesionesActivasPage));
         // F6: selección/prueba de impresora Bluetooth (venta/devolución LOTENAL).
         Routing.RegisterRoute(nameof(ImpresoraPage), typeof(ImpresoraPage));
     }
