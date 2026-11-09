@@ -166,6 +166,8 @@ public class MobileVentasService
             PrecioFraccion = ParsearPrecio(s.PrecioFraccion),
             FraccionesDisponibles = s.FraccionesDisponibles,
             FechaCelebracion = fecha,
+            FechaEsDeDotacion = s.FechaDeDotacion,
+            SubcodigoSorteo = string.IsNullOrWhiteSpace(s.SubcodigoSorteo) ? null : s.SubcodigoSorteo.Trim(),
             Linea1 = tipo?.Linea1 ?? "SORTEO",
             Linea2 = tipo?.Linea2 ?? nombre,
             ColorHex = tipo?.ColorHex ?? "#4125F4",
@@ -242,6 +244,31 @@ public class MobileVentasService
     }
 
     private const string RutaDevolver = "api/mobile/ventas/devolver";
+
+    private const string RutaEnCaptura = "api/mobile/devoluciones/en-captura";
+    private const string RutaEnCapturaCancelar = "api/mobile/devoluciones/en-captura/cancelar";
+
+    /// <summary>
+    /// Ticket 2-22: latido "captura en curso" para el Monitor de Escritorio
+    /// (amarillo EN CAPTURA). El billetero lo fija el backend por la sesión.
+    /// No es una devolución: no toca billetes ni inventario.
+    /// </summary>
+    public async Task ReportarCapturaEnCursoAsync(
+        int idSorteo, int cachitos, string? numeroSorteo = null, CancellationToken cancellationToken = default)
+    {
+        var req = new Models.Requests.CapturaEnCursoRequest { IdSorteo = idSorteo, Cachitos = cachitos, NumeroSorteo = string.IsNullOrWhiteSpace(numeroSorteo) ? null : numeroSorteo.Trim() };
+        await _api.PostAsync<CapturaEnCursoApi>(RutaEnCaptura, req, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    /// <summary>Ticket 2-22: borra el borrador (se salió de la captura sin guardar).</summary>
+    public async Task CancelarCapturaEnCursoAsync(
+        int? idSorteo, string? numeroSorteo = null, CancellationToken cancellationToken = default)
+    {
+        var req = new Models.Requests.CancelarCapturaEnCursoRequest { IdSorteo = idSorteo, NumeroSorteo = string.IsNullOrWhiteSpace(numeroSorteo) ? null : numeroSorteo.Trim() };
+        await _api.PostAsync<CapturaEnCursoCanceladaApi>(RutaEnCapturaCancelar, req, cancellationToken)
+            .ConfigureAwait(false);
+    }
 
     /// <summary>
     /// Historial PERSISTENTE de devoluciones del billetero de la sesión

@@ -37,6 +37,10 @@ public sealed class DotacionApi
     [JsonPropertyName("fecha_sorteo")]
     public string? FechaSorteo { get; set; }
 
+    /// <summary>True si la fecha es la de la dotación; false = respaldo del maestro del sorteo.</summary>
+    [JsonPropertyName("fecha_de_dotacion")]
+    public bool FechaDeDotacion { get; set; }
+
     /// <summary>Tipo de sorteo (enum sorteos.tipo_sorteo).</summary>
     [JsonPropertyName("tipo_sorteo")]
     public string? TipoSorteo { get; set; }

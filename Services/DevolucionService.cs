@@ -13,9 +13,10 @@ namespace MiCachito.Mobile.Services;
 /// numero_billete+serie+fraccion se repite entre dotaciones 4024/4025).
 ///
 /// El backend valida pertenencia al billetero de la sesión, estado
-/// 'asignado', guard de dotación cerrada y crea el movimiento
-/// 'pendiente' con estado LIVE inmediato; la liquidación administrativa
-/// queda en el flujo Desktop (docs/NOTAS_DEVOLUCION.md, P9).
+/// 'asignado' y guard de dotación cerrada, y crea la captura 'pendiente'
+/// SIN efecto en inventario: los billetes siguen 'asignado' hasta que
+/// Escritorio la procesa (Entrega a Billeteros > Devolución > Billetero).
+/// Un billete con captura pendiente no puede venderse (409).
 /// </summary>
 public class DevolucionService
 {
@@ -104,7 +105,7 @@ public class DevolucionService
             IdSorteo = h.IdSorteo,
             NombreSorteo = string.IsNullOrEmpty(h.Dotacion)
                 ? (h.NombreProducto ?? h.Sorteo ?? "-")
-                : $"{h.NombreProducto ?? "-"} {h.Dotacion}",
+                : $"{h.Dotacion} - {h.NombreProducto ?? "-"}",
             FechaSorteo = fechaSorteo,
             Estatus = h.Estatus,
             // Fecha del movimiento (no la de "ahora"): la fila del listado
@@ -135,9 +136,138 @@ public class DevolucionService
     /// <summary>Inicia una devolución sobre la dotación elegida (6.1 real).</summary>
     public void Iniciar(DotacionDisponible sorteo)
     {
+        // Si ya había un latido de OTRO sorteo, se cierra (y se limpia en el backend).
+        if (Volatile.Read(ref _latidoActivo) == 1 && _idSorteoLatido != sorteo.IdSorteo)
+        {
+            DetenerEnCaptura();
+        }
+
         SorteoEnCurso = sorteo;
         FolioEnCurso = _devoluciones.Count + 1;
         _enCurso.Clear();
+        Volatile.Write(ref _filasEnCursoSnapshot, 0);
+
+        // Ticket 2-22: desde aquí el billetero está "en captura" (amarillo en el
+        // Monitor de Escritorio) hasta que guarde, cancele o salga del flujo.
+        IniciarLatido(sorteo.IdSorteo, sorteo.NumeroSorteo);
+    }
+
+    // ── Ticket 2-22: latido "captura en curso" (Monitor de Escritorio) ──────
+    //
+    // Mientras hay una devolución sin guardar se avisa al backend cada ~20 s
+    // (y tras cada boleto capturado). El servidor caduca el aviso a los 60 s,
+    // así que si la app se cierra o pierde red el amarillo se apaga solo. Todo
+    // es MEJOR ESFUERZO: jamás bloquea el escaneo ni muestra errores al usuario.
+    // La lista de filas solo se toca en el hilo de UI: el temporizador lee un
+    // contador (snapshot) para no recorrerla desde otro hilo.
+
+    private const int LatidoIntervaloSegundos = 20;
+    private const int LatidoInactividadMaximaMinutos = 5;
+
+    private System.Threading.Timer? _latidoTimer;
+    private int _latidoActivo;
+    private int _latidoEnVuelo;
+    private int _idSorteoLatido;
+    private string? _dotacionLatido;
+    private int _filasEnCursoSnapshot;
+    private long _ultimaActividadTicks = DateTime.UtcNow.Ticks;
+
+    /// <summary>
+    /// Marca actividad en el flujo (las pantallas de captura la llaman al
+    /// aparecer). Sin actividad durante 5 min el latido se detiene solo: evita
+    /// un amarillo falso si el billetero salió del flujo sin volver al listado.
+    /// </summary>
+    public void RegistrarActividad() =>
+        Interlocked.Exchange(ref _ultimaActividadTicks, DateTime.UtcNow.Ticks);
+
+    private void IniciarLatido(int idSorteo, string? numeroSorteo = null)
+    {
+        _latidoTimer?.Dispose();
+        _idSorteoLatido = idSorteo;
+        _dotacionLatido = numeroSorteo;
+        Volatile.Write(ref _latidoActivo, 1);
+        RegistrarActividad();
+        _latidoTimer = new System.Threading.Timer(
+            _ => _ = TickLatidoAsync(),
+            null,
+            TimeSpan.Zero,
+            TimeSpan.FromSeconds(LatidoIntervaloSegundos));
+    }
+
+    private async Task TickLatidoAsync()
+    {
+        if (Volatile.Read(ref _latidoActivo) == 0)
+        {
+            return;
+        }
+
+        var inactivo = TimeSpan.FromTicks(
+            DateTime.UtcNow.Ticks - Interlocked.Read(ref _ultimaActividadTicks));
+        if (inactivo > TimeSpan.FromMinutes(LatidoInactividadMaximaMinutos))
+        {
+            DetenerEnCaptura();
+            return;
+        }
+
+        await EnviarLatidoAsync().ConfigureAwait(false);
+    }
+
+    private async Task EnviarLatidoAsync()
+    {
+        if (Volatile.Read(ref _latidoActivo) == 0
+            || Interlocked.Exchange(ref _latidoEnVuelo, 1) == 1)
+        {
+            return;
+        }
+
+        try
+        {
+            await _ventas.ReportarCapturaEnCursoAsync(
+                _idSorteoLatido, Volatile.Read(ref _filasEnCursoSnapshot), _dotacionLatido).ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            // Mejor esfuerzo: sin red o backend antiguo (404) no pasa nada.
+        }
+        finally
+        {
+            Volatile.Write(ref _latidoEnVuelo, 0);
+        }
+    }
+
+    private void PausarLatido()
+    {
+        Volatile.Write(ref _latidoActivo, 0);
+        _latidoTimer?.Dispose();
+        _latidoTimer = null;
+    }
+
+    private async Task CancelarBorradorAsync(int idSorteo, string? numeroSorteo = null)
+    {
+        try
+        {
+            await _ventas.CancelarCapturaEnCursoAsync(idSorteo, numeroSorteo).ConfigureAwait(false);
+        }
+        catch (Exception)
+        {
+            // Mejor esfuerzo: si falla, el aviso caduca solo (TTL del servidor).
+        }
+    }
+
+    /// <summary>
+    /// Detiene el latido y borra el borrador en el backend (Monitor sin amarillo).
+    /// Se llama al cancelar, al volver al listado de sorteos sin guardar o al
+    /// agotarse la inactividad. Sin latido activo no hace nada.
+    /// </summary>
+    public void DetenerEnCaptura()
+    {
+        bool estabaActivo = Interlocked.Exchange(ref _latidoActivo, 0) == 1;
+        _latidoTimer?.Dispose();
+        _latidoTimer = null;
+        if (estabaActivo)
+        {
+            _ = CancelarBorradorAsync(_idSorteoLatido, _dotacionLatido);
+        }
     }
 
     /// <summary>Sorteo en curso para el header "Nueva Devolución - N".</summary>
@@ -173,10 +303,26 @@ public class DevolucionService
             return (false, "Ese boleto ya fue capturado en esta devolución.");
         }
 
-        // Validación de fecha del mockup 6.2 "Escanear series": la fecha del
-        // cachito debe corresponder con la de la dotación elegida.
+        // Subcódigo: el boleto debe ser del sorteo elegido. Sin subcódigo
+        // configurado en el sorteo no se valida (mismo criterio permisivo que
+        // Desktop). Es la identificación confiable del sorteo del boleto.
+        if (!string.IsNullOrEmpty(SorteoEnCurso.SubcodigoSorteo)
+            && !string.IsNullOrEmpty(p.SubCodigo)
+            && p.SubCodigo != SorteoEnCurso.SubcodigoSorteo)
+        {
+            return (false, "El boleto no corresponde al sorteo seleccionado");
+        }
+
+        // Validación de fecha del mockup 6.2 "Escanear series": distingue
+        // dotaciones del mismo producto (billete+serie+fracción se repiten
+        // entre 4024/4025). Solo se aplica cuando la fecha es la de la
+        // DOTACIÓN (recepción); la fecha del maestro del sorteo no es de la
+        // edición (Gordito: maestro 2025-12-25, boleto 24/12/2026) y NO debe
+        // rechazar un boleto válido. La pertenencia al billetero, el estatus
+        // y la dotación los valida además el backend.
         string? fechaDotacion = SorteoEnCurso.FechaCelebracion?.ToString("yyyy-MM-dd");
-        if (!string.IsNullOrEmpty(p.FechaSorteo)
+        if (SorteoEnCurso.FechaEsDeDotacion
+            && !string.IsNullOrEmpty(p.FechaSorteo)
             && !string.IsNullOrEmpty(fechaDotacion)
             && p.FechaSorteo != fechaDotacion)
         {
@@ -206,6 +352,11 @@ public class DevolucionService
             IdSorteo = SorteoEnCurso.IdSorteo,
         });
 
+        // Ticket 2-22: boleto nuevo => actividad y latido inmediato (Monitor).
+        Volatile.Write(ref _filasEnCursoSnapshot, _enCurso.Count);
+        RegistrarActividad();
+        _ = EnviarLatidoAsync();
+
         return (true, string.Empty);
     }
 
@@ -232,7 +383,27 @@ public class DevolucionService
             NumeroSorteo = f.NumeroSorteo,
         }).ToList();
 
-        DevolucionCreadaApi dev = await _ventas.DevolverAsync(items).ConfigureAwait(true);
+        // Ticket 2-22: durante el guardado se pausa el latido (un latido tardío
+        // recrearía el amarillo tras guardar). Si el guardado falla, se reanuda:
+        // la captura se conserva para corregir y reintentar.
+        PausarLatido();
+        DevolucionCreadaApi dev;
+        try
+        {
+            dev = await _ventas.DevolverAsync(items).ConfigureAwait(true);
+        }
+        catch
+        {
+            if (SorteoEnCurso is not null)
+            {
+                IniciarLatido(sorteo.IdSorteo, sorteo.NumeroSorteo);
+            }
+            throw;
+        }
+
+        // Guardada: el backend ya borró el borrador; se limpia por si un latido en
+        // vuelo lo recreó (la devolución guardada pasa a CAPTURADA/rojo).
+        _ = CancelarBorradorAsync(sorteo.IdSorteo, sorteo.NumeroSorteo);
 
         var registro = new Devolucion
         {
@@ -241,7 +412,7 @@ public class DevolucionService
             IdSorteo = sorteo.IdSorteo,
             NombreSorteo = string.IsNullOrEmpty(sorteo.NumeroSorteo)
                 ? sorteo.NombreProducto
-                : $"{sorteo.NombreProducto} {sorteo.NumeroSorteo}",
+                : $"{sorteo.NumeroSorteo} - {sorteo.NombreProducto}",
             FechaSorteo = sorteo.FechaSorteoTexto ?? "-",
             Estatus = dev.Estatus,
         };
@@ -255,7 +426,9 @@ public class DevolucionService
     /// <summary>CANCELAR (mantener presionado): descarta las filas en curso.</summary>
     public void Cancelar()
     {
+        DetenerEnCaptura();
         _enCurso.Clear();
         SorteoEnCurso = null;
+        Volatile.Write(ref _filasEnCursoSnapshot, 0);
     }
 }

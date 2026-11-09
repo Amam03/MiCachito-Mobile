@@ -43,6 +43,20 @@ public class DotacionDisponible
     /// <summary>Fecha de celebración (null = sin fecha).</summary>
     public DateOnly? FechaCelebracion { get; init; }
 
+    /// <summary>
+    /// True si <see cref="FechaCelebracion"/> es la fecha de la DOTACIÓN
+    /// (recepción de paquetería); false = respaldo con la fecha del maestro
+    /// del sorteo, que puede estar desactualizada (ej. Gordito Navideño) y
+    /// por eso NO se usa para rechazar boletos.
+    /// </summary>
+    public bool FechaEsDeDotacion { get; init; }
+
+    /// <summary>
+    /// Subcódigo de 3 dígitos del barcode del sorteo (sorteos.subcodigo_sorteo);
+    /// null = sin subcódigo configurado (no se valida).
+    /// </summary>
+    public string? SubcodigoSorteo { get; init; }
+
     // ── Presentación (pantalla 7.x: mismo diseño del mock) ──
 
     /// <summary>Primera línea del nombre (tipografía pequeña).</summary>

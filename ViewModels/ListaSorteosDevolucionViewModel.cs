@@ -59,6 +59,10 @@ public partial class ListaSorteosDevolucionViewModel : BaseViewModel
     [RelayCommand]
     public async Task AlAparecerAsync()
     {
+        // Ticket 2-22: volver al listado = salir de la captura sin guardar (o ya
+        // guardada): se apaga el amarillo del Monitor. Sin captura en curso no hace nada.
+        _devoluciones.DetenerEnCaptura();
+
         if (Cargando)
         {
             return;

@@ -88,6 +88,7 @@ public partial class NuevaDevolucionViewModel : BaseViewModel
     /// <summary>Carga el sorteo en curso al aparecer.</summary>
     public void AlAparecer()
     {
+        _devoluciones.RegistrarActividad(); // Ticket 2-22: sigue en captura
         NombreSorteo = _devoluciones.SorteoEnCurso is null
             ? string.Empty
             : string.IsNullOrEmpty(_devoluciones.SorteoEnCurso.NumeroSorteo)

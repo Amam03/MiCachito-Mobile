@@ -71,6 +71,7 @@ public partial class EscanearSeriesViewModel : BaseViewModel
     /// <summary>Permisos al APARECER (antes de crear el control de cámara).</summary>
     public async Task AlAparecerAsync()
     {
+        _devoluciones.RegistrarActividad(); // Ticket 2-22: sigue en captura
         try
         {
             PermissionStatus permiso = await Permissions.CheckStatusAsync<Permissions.Camera>();
