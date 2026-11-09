@@ -178,6 +178,35 @@
                             HeightRequest="1"
                             HorizontalOptions="Fill" />
 
+                        <!-- Fila Sesiones Activas (M-06): sesiones autenticadas del
+                             expendio en el backend; NO los Bluetooth vinculados -->
+                        <Grid
+                            ColumnDefinitions="Auto,*,Auto"
+                            ColumnSpacing="12"
+                            Padding="0,14">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding AbrirSesionesActivasCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Image
+                                Grid.Column="0"
+                                Source="icon_dispositivo_azul.svg"
+                                WidthRequest="22" HeightRequest="22"
+                                VerticalOptions="Center" />
+                            <Label
+                                Grid.Column="1"
+                                Text="Sesiones Activas"
+                                FontSize="15"
+                                TextColor="{StaticResource McTextDark}"
+                                VerticalOptions="Center" />
+                            <Image
+                                Grid.Column="2"
+                                Source="icon_chevron_derecha_gris.svg"
+                                WidthRequest="18" HeightRequest="18"
+                                VerticalOptions="Center" />
+                        </Grid>
+
+                        <BoxView Color="{StaticResource McDivider}" HeightRequest="1" HorizontalOptions="Fill" />
+
                         <!-- Fila Cerrar Sesión -->
                         <Grid
                             ColumnDefinitions="Auto,*,Auto"

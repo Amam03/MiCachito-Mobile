@@ -112,3 +112,33 @@ Pestaña final del menú principal. Implementada 2026-09-11, fase SOLO INTERFAZ
 - Diálogo Atención: solo sale con adaptador sin vínculos (emulador). En
   físico con impresora vinculada no debe aparecer (spec punto 4).
 - Saldo: $0.00 estático como las demás pestañas (llegará con backend).
+
+## 11. Sesiones Activas (M-06, auditoría 2026-10-20 — implementado 2026-10-21)
+
+- Fila nueva "Sesiones Activas" en la card de opciones (icono
+  icon_dispositivo_azul.svg #1A3688, entre Impresora y Cerrar Sesión):
+  dispositivos con sesión AUTENTICADA en el backend; NO los Bluetooth
+  vinculados de Impresora (DispositivosEnlazadosViewModel queda intacto).
+- `Views/SesionesActivasPage.xaml` (+VM `SesionesActivasViewModel`):
+  GET api/mobile/auth/sesiones (lista real, fecha descendente) con
+  estados cargando/error/vacío (patrón Depósitos/Tickets) y revocación
+  por fila: POST api/mobile/auth/sesiones/revocar con confirmación modal
+  (patrón Cerrar Sesión). Servicios reutilizados SIN cambios:
+  IAuthService.SesionesAsync/RevocarSesionAsync (Fase 1, sin consumidor
+  hasta ahora — hallazgo M-06).
+- La sesión ACTUAL (actual=true) NUNCA se revoca aquí: fila con etiqueta
+  "Este dispositivo" SIN botón (InverseBoolConverter, segundo converter
+  del proyecto tras StringNotEmptyConverter) + guard defensivo en el VM; para
+  cerrar la propia está Cerrar Sesión. El backend además acota siempre
+  al id_expendio del token (sesión ajena → 404).
+- Nulls del backend: dispositivo/ultimo_acceso null → "Sin nombre"/"—"
+  (TargetNullValue; sesiones viejas con ultimo_acceso null verificado).
+- Pruebas: tests/e2e/e2e_mobile_sesiones.py 22/22 (aislamiento b1↔b11,
+  revocar secundaria no mata la actual, token revocado 401, id 0/negativo
+  422, ajena 404 sin efecto, sin token 401) + verificación en emulador:
+  lista real, modal, revocación en vivo de una sesión secundaria y la
+  propia sigue viva.
+- FIX colateral (preexistente): commit 778cae7 (M-07) dejó el build de la
+  app ROTO — tests/**/*.cs arrastrados al csproj de la app (xunit sin
+  PackageReference + obj/ duplicando atributos). Exclusión añadida:
+  `<Compile Remove="tests\**\*.cs" />` (MiCachito.Mobile.csproj).

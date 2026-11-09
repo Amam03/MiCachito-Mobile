@@ -145,6 +145,17 @@ public partial class CuentaViewModel : BaseViewModel
         await Shell.Current.GoToAsync(nameof(Views.DispositivosEnlazadosPage));
     }
 
+    /// <summary>
+    /// Abre Sesiones Activas (M-06): dispositivos con sesión autenticada en
+    /// el backend (distinto de los Bluetooth vinculados de Impresora).
+    /// Ruta relativa registrada en AppShell.xaml.cs.
+    /// </summary>
+    [RelayCommand]
+    private async Task AbrirSesionesActivasAsync()
+    {
+        await Shell.Current.GoToAsync(nameof(Views.SesionesActivasPage));
+    }
+
     /// <summary>Notificaciones (mockup 3): pantalla propia, estado vacío.</summary>
     [RelayCommand]
     private async Task AbrirNotificacionesAsync()

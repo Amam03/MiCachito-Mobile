@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:vm="clr-namespace:MiCachito.Mobile.ViewModels"
+    xmlns:responses="clr-namespace:MiCachito.Mobile.Models.Responses"
+    xmlns:helpers="clr-namespace:MiCachito.Mobile.Helpers"
+    x:Class="MiCachito.Mobile.Views.SesionesActivasPage"
+    x:DataType="vm:SesionesActivasViewModel"
+    Title="Sesiones Activas"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="{StaticResource McPageBg}">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <!-- Inversor para el botón Revocar: visible SOLO en sesiones
+                 distintas a la actual (esta pantalla no cierra la sesión
+                 con la que se consulta). Patrón StringNotEmptyConverter. -->
+            <helpers:InverseBoolConverter x:Key="InverseBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*" RowSpacing="0">
+
+        <!-- ============ Header morado con flecha atrás (patrón DispositivosEnlazados) ============ -->
+        <Border
+            Grid.Row="0"
+            StrokeThickness="0"
+            BackgroundColor="{StaticResource McLotenalHeader}"
+            Padding="12,16"
+            StrokeShape="RoundRectangle 0,0,12,12">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+
+                <Border
+                    Grid.Column="0"
+                    StrokeThickness="0"
+                    BackgroundColor="Transparent"
+                    StrokeShape="RoundRectangle 18"
+                    WidthRequest="36" HeightRequest="36">
+                    <Grid>
+                        <Label
+                            Text="&#x2190;"
+                            TextColor="White"
+                            FontSize="20"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center" />
+                        <Button
+                            BackgroundColor="Transparent"
+                            Padding="0"
+                            Command="{Binding VolverCommand}" />
+                    </Grid>
+                </Border>
+
+                <Label
+                    Grid.Column="1"
+                    Text="Sesiones Activas"
+                    TextColor="White"
+                    FontSize="20"
+                    FontAttributes="Bold"
+                    FontFamily="OpenSansSemibold"
+                    VerticalOptions="Center" />
+
+            </Grid>
+        </Border>
+
+        <!-- ============ Cuerpo ============ -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Spacing="0" Padding="0,8,0,24">
+
+                <!-- Error de carga (patrón Depósitos/Tickets) -->
+                <Border
+                    IsVisible="{Binding HayError}"
+                    StrokeThickness="0"
+                    BackgroundColor="#FDE8E8"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="12,10"
+                    Margin="16,14,16,0"
+                    VerticalOptions="Start">
+                    <Label
+                        Text="{Binding MensajeError}"
+                        TextColor="#B3261E"
+                        FontSize="13"
+                        HorizontalOptions="FillAndExpand" />
+                </Border>
+
+                <!-- Error de revocación (no aborta la lista) -->
+                <Border
+                    IsVisible="{Binding HayMensajeRevocacion}"
+                    StrokeThickness="0"
+                    BackgroundColor="#FDE8E8"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="12,10"
+                    Margin="16,14,16,0"
+                    VerticalOptions="Start">
+                    <Label
+                        Text="{Binding MensajeRevocacion}"
+                        TextColor="#B3261E"
+                        FontSize="13"
+                        HorizontalOptions="FillAndExpand" />
+                </Border>
+
+                <!-- Estado vacío -->
+                <Border
+                    IsVisible="{Binding EstaVacio}"
+                    StrokeThickness="0"
+                    BackgroundColor="White"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="12,16"
+                    Margin="16,14,16,0"
+                    VerticalOptions="Start">
+                    <Label
+                        Text="{Binding MensajeVacio}"
+                        TextColor="{StaticResource McGrayText}"
+                        FontSize="13"
+                        HorizontalOptions="Center" />
+                </Border>
+
+                <!-- Lista de sesiones activas (GET api/mobile/auth/sesiones) -->
+                <StackLayout BindableLayout.ItemsSource="{Binding Sesiones}" Spacing="0" Margin="0,8,0,0">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="responses:SesionDispositivo">
+                            <Grid
+                                ColumnDefinitions="*,Auto"
+                                Padding="16,14"
+                                BackgroundColor="White">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ConfirmarRevocacionCommand}"
+                                        CommandParameter="{Binding .}" />
+                                </Grid.GestureRecognizers>
+                                <StackLayout Grid.Column="0" Spacing="3">
+                                    <StackLayout Orientation="Horizontal" Spacing="6">
+                                        <Label
+                                            Text="{Binding Dispositivo, TargetNullValue='Sin nombre'}"
+                                            FontSize="15"
+                                            FontAttributes="Bold"
+                                            FontFamily="OpenSansSemibold"
+                                            TextColor="{StaticResource McTextDark}"
+                                            VerticalOptions="Center" />
+                                        <!-- Etiqueta de la sesión actual -->
+                                        <Border
+                                            IsVisible="{Binding Actual}"
+                                            StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 8"
+                                            BackgroundColor="#E8F0FE"
+                                            Padding="8,2">
+                                            <Label
+                                                Text="Este dispositivo"
+                                                FontSize="11"
+                                                TextColor="#1A3688"
+                                                VerticalOptions="Center" />
+                                        </Border>
+                                    </StackLayout>
+                                    <StackLayout Orientation="Horizontal" Spacing="4">
+                                        <Label
+                                            Text="Último acceso:"
+                                            FontSize="12"
+                                            TextColor="{StaticResource McGrayText}"
+                                            VerticalOptions="Center" />
+                                        <Label
+                                            Text="{Binding UltimoAcceso, TargetNullValue='—'}"
+                                            FontSize="12"
+                                            TextColor="{StaticResource McGrayText}"
+                                            VerticalOptions="Center" />
+                                    </StackLayout>
+                                </StackLayout>
+                                <!-- Botón Revocar: SOLO sesiones distintas a la actual.
+                                     La sesión actual no muestra botón (se cierra desde
+                                     Cerrar Sesión) — guard también en el VM. -->
+                                <Border
+                                    Grid.Column="1"
+                                    IsVisible="{Binding Actual, Converter={StaticResource InverseBoolConverter}}"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 18"
+                                    BackgroundColor="#EE534F"
+                                    WidthRequest="96" HeightRequest="32"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="End">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ConfirmarRevocacionCommand}"
+                                            CommandParameter="{Binding .}" />
+                                    </Border.GestureRecognizers>
+                                    <Label
+                                        Text="Revocar"
+                                        TextColor="White"
+                                        FontSize="13"
+                                        FontAttributes="Bold"
+                                        HorizontalOptions="Center"
+                                        VerticalOptions="Center" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </StackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ============ Modal confirmación de revocación (patrón Cerrar Sesión) ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="2"
+            IsVisible="{Binding ModalRevocacionVisible}"
+            BackgroundColor="{StaticResource McScrimBlack55}"
+            StrokeThickness="0"
+            Padding="0">
+            <Border.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding CancelarRevocacionCommand}" />
+            </Border.GestureRecognizers>
+            <Border
+                StrokeShape="RoundRectangle 12"
+                BackgroundColor="White"
+                StrokeThickness="0"
+                WidthRequest="300"
+                VerticalOptions="Center"
+                HorizontalOptions="Center"
+                Padding="20,18">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="CardModal_Tapped" />
+                </Border.GestureRecognizers>
+                <VerticalStackLayout Spacing="14">
+                    <Label
+                        Text="Revocar sesión"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="#FF5455"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="¿Revocar el acceso de este dispositivo? Tendrá que iniciar sesión de nuevo en él."
+                        FontSize="14"
+                        TextColor="{StaticResource McTextDark}"
+                        HorizontalTextAlignment="Center"
+                        HorizontalOptions="Center" />
+                    <Label
+                        Text="{Binding SesionPorRevocarDispositivo}"
+                        FontSize="13"
+                        TextColor="{StaticResource McGrayText}"
+                        HorizontalTextAlignment="Center"
+                        HorizontalOptions="Center" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,4,0,0">
+                        <Label
+                            Grid.Column="0"
+                            Text="Cancelar"
+                            FontSize="14"
+                            TextColor="{StaticResource McGrayText}"
+                            HorizontalOptions="Center"
+                            VerticalOptions="Center">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CancelarRevocacionCommand}" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                        <Border
+                            Grid.Column="1"
+                            StrokeShape="RoundRectangle 20"
+                            BackgroundColor="#FF5455"
+                            StrokeThickness="0"
+                            HeightRequest="36"
+                            WidthRequest="110"
+                            HorizontalOptions="Center">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding AceptarRevocacionCommand}" />
+                            </Border.GestureRecognizers>
+                            <Label
+                                Text="Aceptar"
+                                TextColor="White"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </Border>
+
+        <!-- ============ Overlay "Cargando..." (patrón Depósitos/Tickets) ============ -->
+        <Border
+            Grid.Row="0" Grid.RowSpan="2"
+            IsVisible="{Binding Cargando}"
+            BackgroundColor="{StaticResource McScrimBlack55}"
+            StrokeThickness="0"
+            Padding="0">
+            <VerticalStackLayout
+                VerticalOptions="Center"
+                Spacing="14">
+                <ActivityIndicator IsRunning="True" Color="White" WidthRequest="40" HeightRequest="40" />
+                <Label
+                    Text="Cargando..."
+                    TextColor="White"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center" />
+            </VerticalStackLayout>
+        </Border>
+
+    </Grid>
+
+</ContentPage>

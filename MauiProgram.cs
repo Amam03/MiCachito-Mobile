@@ -153,6 +153,9 @@ namespace MiCachito.Mobile
             builder.Services.AddTransient<Views.NotificacionesPage>();
             builder.Services.AddTransient<ViewModels.DispositivosEnlazadosViewModel>();
             builder.Services.AddTransient<Views.DispositivosEnlazadosPage>();
+            // M-06: sesiones activas del expendio (consulta/revocación).
+            builder.Services.AddTransient<ViewModels.SesionesActivasViewModel>();
+            builder.Services.AddTransient<Views.SesionesActivasPage>();
 
 #if ANDROID
             builder.ConfigureMauiHandlers(handlers =>
