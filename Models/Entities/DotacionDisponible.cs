@@ -76,6 +76,14 @@ public class DotacionDisponible
         ? string.Empty
         : $"No. {NumeroSorteo}";
 
+    /// <summary>
+    /// Identificación combinada reutilizando la presentación de Venta → LOTENAL:
+    /// "4033 - SORTEO MAYOR" (con dotación) o "SORTEO MAYOR" (sin dotación).
+    /// </summary>
+    public string DisplayIdentificacion => NumeroSorteo is null
+        ? $"{Linea1} {Linea2}".Trim()
+        : $"{NumeroSorteo} - {Linea1} {Linea2}".Trim();
+
     /// <summary>Fecha corta es-MX ("24 sep"); vacía sin fecha.</summary>
     public string FechaSorteoTexto => FechaCelebracion is null
         ? string.Empty

@@ -106,12 +106,7 @@
                                 <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
                                     <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
                                         <Label
-                                            Text="{Binding Linea1}"
-                                            FontSize="14"
-                                            FontAttributes="Bold"
-                                            TextColor="{StaticResource White}" />
-                                        <Label
-                                            Text="{Binding Linea2}"
+                                            Text="{Binding DisplayIdentificacion}"
                                             FontSize="20"
                                             FontAttributes="Bold"
                                             FontFamily="OpenSansSemibold"
